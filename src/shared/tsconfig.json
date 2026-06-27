@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "nodenext",
+    "module": "ESNext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "moduleResolution": "nodenext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": true,
@@ -12,6 +13,8 @@
     "jsx": "react-jsx",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
     "noEmit": true
   },
   "include": ["src/**/*"],

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Set-Location \"C:\\\\Users\\\\mmuehlhe\\\\git\\\\github\\\\defikarte.ch\\\\src\\\\shared\"; npx tsc --noEmit; \"EXIT: $LASTEXITCODE\")"
+    ]
+  }
+}

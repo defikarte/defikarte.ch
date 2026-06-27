@@ -1,6 +1,6 @@
-import axios, { AxiosInstance } from 'axios';
-import { FeatureCollection } from 'geojson';
-import { ApiConfiguration, RequestOptions } from '../model/common';
+import axios, { type AxiosInstance } from 'axios';
+import type { FeatureCollection } from 'geojson';
+import type { ApiConfiguration, RequestOptions } from '../model/common';
 
 export class ApiClient {
   private axiosInstance: AxiosInstance;

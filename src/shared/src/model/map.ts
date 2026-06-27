@@ -6,26 +6,29 @@ import {
   type SourceSpecification,
 } from 'maplibre-gl';
 
-export enum FilterType {
-  'alwaysAvailable',
-  'withOpeningHours',
-  'byAvailability',
-}
+export const FilterType = {
+  alwaysAvailable: 0,
+  withOpeningHours: 1,
+  byAvailability: 2,
+} as const;
+export type FilterType = (typeof FilterType)[keyof typeof FilterType];
 
-export enum OverlayType {
-  'aedAll' = 'aedAll',
-  'aedAlwaysAvailable' = 'aedAlwaysAvailable',
-  'aedWithOpeningHours' = 'aedWithOpeningHours',
-  'aedByCurrentAvailability' = 'aedByCurrentAvailability',
-  'userLocation' = 'userLocation',
-  'aedCreate' = 'aedCreate',
-}
+export const OverlayType = {
+  aedAll: 'aedAll',
+  aedAlwaysAvailable: 'aedAlwaysAvailable',
+  aedWithOpeningHours: 'aedWithOpeningHours',
+  aedByCurrentAvailability: 'aedByCurrentAvailability',
+  userLocation: 'userLocation',
+  aedCreate: 'aedCreate',
+} as const;
+export type OverlayType = (typeof OverlayType)[keyof typeof OverlayType];
 
-export enum CreateMode {
-  'none',
-  'position',
-  'form',
-}
+export const CreateMode = {
+  none: 0,
+  position: 1,
+  form: 2,
+} as const;
+export type CreateMode = (typeof CreateMode)[keyof typeof CreateMode];
 
 export interface InteractionLayer {
   on(layerIds: string[]): void;
