@@ -14,6 +14,7 @@ import imageDefikartePartnerResqpro from '../../assets/landingpages/unterstuetzu
 import imageDefikartePartnerSinoma from '../../assets/landingpages/unterstuetzung/defikarte-partner-sinoma.jpg';
 import imageDefikartePartnerSirmed from '../../assets/landingpages/unterstuetzung/defikarte-partner-sirmed.svg';
 import imageDefikartePartnerSusv from '../../assets/landingpages/unterstuetzung/defikarte-partner-susv.svg';
+import imageDefikartePartnerAkkupoint from '../../assets/landingpages/unterstuetzung/defikarte-partner-akkupoint.jpg';
 import imageDefikarteUnterstuetzungSackmesser from '../../assets/landingpages/unterstuetzung/defikarte-unterstuetzung-sackmesser.jpg';
 import imageDefikarteUnterstuetzungTeaser from '../../assets/landingpages/unterstuetzung/defikarte-unterstuetzung-teaser.jpg';
 import { Button } from '../../components/ui/button/Button';
@@ -156,6 +157,11 @@ export const Sponsors = () => {
           <SponsorCard
             src={imageDefikartePartnerSusv}
             href="https://www.susv.ch/"
+            className="h-[94px]"
+          />
+                    <SponsorCard
+            src={imageDefikartePartnerAkkupoint}
+            href="https://www.akkupoint.ch/"
             className="h-[94px]"
           />
         </div>
