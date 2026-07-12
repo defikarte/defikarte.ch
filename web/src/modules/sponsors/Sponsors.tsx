@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import iconArrowDownWhite from '../../assets/landingpages/icon-arrow-down-white.svg';
 import iconEmailWhite from '../../assets/landingpages/icon-email-white.svg';
 import iconExternalLinkWhite from '../../assets/landingpages/icon-external-link-white.svg';
+import imageDefikartePartnerAkkupoint from '../../assets/landingpages/unterstuetzung/defikarte-partner-akkupoint.jpg';
 import imageDefikartePartnerByteworks from '../../assets/landingpages/unterstuetzung/defikarte-partner-byteworks.svg';
 import imageDefikartePartnerFirstResponder from '../../assets/landingpages/unterstuetzung/defikarte-partner-first-responder.jpg';
 import imageDefikartePartnerFurrer from '../../assets/landingpages/unterstuetzung/defikarte-partner-furrer.jpg';
@@ -157,6 +158,11 @@ export const Sponsors = () => {
             src={imageDefikartePartnerSusv}
             href="https://www.susv.ch/"
             className="h-[94px]"
+          />
+          <SponsorCard
+            src={imageDefikartePartnerAkkupoint}
+            href="https://www.akkupoint.ch/"
+            className="h-[94px] w-min"
           />
         </div>
       </ContentWrapper>
