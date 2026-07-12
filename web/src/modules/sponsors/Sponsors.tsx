@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import iconArrowDownWhite from '../../assets/landingpages/icon-arrow-down-white.svg';
 import iconEmailWhite from '../../assets/landingpages/icon-email-white.svg';
 import iconExternalLinkWhite from '../../assets/landingpages/icon-external-link-white.svg';
+import imageDefikartePartnerAkkupoint from '../../assets/landingpages/unterstuetzung/defikarte-partner-akkupoint.jpg';
 import imageDefikartePartnerByteworks from '../../assets/landingpages/unterstuetzung/defikarte-partner-byteworks.svg';
 import imageDefikartePartnerFirstResponder from '../../assets/landingpages/unterstuetzung/defikarte-partner-first-responder.jpg';
 import imageDefikartePartnerFurrer from '../../assets/landingpages/unterstuetzung/defikarte-partner-furrer.jpg';
@@ -14,7 +15,6 @@ import imageDefikartePartnerResqpro from '../../assets/landingpages/unterstuetzu
 import imageDefikartePartnerSinoma from '../../assets/landingpages/unterstuetzung/defikarte-partner-sinoma.jpg';
 import imageDefikartePartnerSirmed from '../../assets/landingpages/unterstuetzung/defikarte-partner-sirmed.svg';
 import imageDefikartePartnerSusv from '../../assets/landingpages/unterstuetzung/defikarte-partner-susv.svg';
-import imageDefikartePartnerAkkupoint from '../../assets/landingpages/unterstuetzung/defikarte-partner-akkupoint.jpg';
 import imageDefikarteUnterstuetzungSackmesser from '../../assets/landingpages/unterstuetzung/defikarte-unterstuetzung-sackmesser.jpg';
 import imageDefikarteUnterstuetzungTeaser from '../../assets/landingpages/unterstuetzung/defikarte-unterstuetzung-teaser.jpg';
 import { Button } from '../../components/ui/button/Button';
@@ -159,10 +159,10 @@ export const Sponsors = () => {
             href="https://www.susv.ch/"
             className="h-[94px]"
           />
-                    <SponsorCard
+          <SponsorCard
             src={imageDefikartePartnerAkkupoint}
             href="https://www.akkupoint.ch/"
-            className="h-[94px]"
+            className="h-[94px] w-min"
           />
         </div>
       </ContentWrapper>
