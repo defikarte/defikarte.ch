@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import iconArrowDownWhite from '../../assets/landingpages/icon-arrow-down-white.svg';
 import iconEmailWhite from '../../assets/landingpages/icon-email-white.svg';
 import iconExternalLinkWhite from '../../assets/landingpages/icon-external-link-white.svg';
+import imageDefikartePartnerAkkupoint from '../../assets/landingpages/unterstuetzung/defikarte-partner-akkupoint.jpg';
 import imageDefikartePartnerByteworks from '../../assets/landingpages/unterstuetzung/defikarte-partner-byteworks.svg';
 import imageDefikartePartnerFirstResponder from '../../assets/landingpages/unterstuetzung/defikarte-partner-first-responder.jpg';
 import imageDefikartePartnerFurrer from '../../assets/landingpages/unterstuetzung/defikarte-partner-furrer.jpg';
@@ -143,20 +144,17 @@ export const Sponsors = () => {
           {t('SectionSponsorsSilver')}
         </Text>
         <div className="flex gap-5 md:gap-9 justify-center flex-wrap">
-          <SponsorCard
-            src={imageDefikartePartnerOctave}
-            href="https://www.octave.com/"
-            className="h-[94px]"
-          />
+          <SponsorCard src={imageDefikartePartnerOctave} href="https://www.octave.com/" compact />
           <SponsorCard
             src={imageDefikartePartnerHostpoint}
             href="https://www.hostpoint.ch/"
-            className="h-[94px]"
+            compact
           />
+          <SponsorCard src={imageDefikartePartnerSusv} href="https://www.susv.ch/" compact />
           <SponsorCard
-            src={imageDefikartePartnerSusv}
-            href="https://www.susv.ch/"
-            className="h-[94px]"
+            src={imageDefikartePartnerAkkupoint}
+            href="https://www.akkupoint.ch/"
+            compact
           />
         </div>
       </ContentWrapper>
