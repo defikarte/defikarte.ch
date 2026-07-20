@@ -1,8 +1,8 @@
-import { FilterType } from '@defikarte/shared';
 import { useTranslation } from 'react-i18next';
-import iconDefiGreen from './../../../../../assets/icons/icon-defi-circle-green.svg';
-import iconDefiOrange from './../../../../../assets/icons/icon-defi-circle-orange.svg';
-import iconOpeningHours from './../../../../../assets/icons/icon-opening-times-circle-green.svg';
+import { FilterType } from '../../../../model/map';
+import iconDefiGreen from './../../../../assets/icons/icon-defi-circle-green.svg';
+import iconDefiOrange from './../../../../assets/icons/icon-defi-circle-orange.svg';
+import iconOpeningHours from './../../../../assets/icons/icon-opening-times-circle-green.svg';
 import { FilterItem } from './filter-item/FilterItem';
 
 interface FilterControlProps {

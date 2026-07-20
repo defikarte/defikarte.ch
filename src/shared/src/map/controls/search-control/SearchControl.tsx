@@ -1,4 +1,3 @@
-import { type FilterType, type MapEvent, type MapInstance, searchAed } from '@defikarte/shared';
 import className from 'classnames';
 import {
   type Feature,
@@ -17,20 +16,24 @@ import {
   useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import backend from '../../../../api/backend';
-import { MapIconButton } from '../../../../components/ui/map-icon-button/MapIconButton';
-import { useOnOutsideKeyDown } from '../../../../hooks/useOnOutsideKeyDown';
-import { useOnOutsidePointerDown } from '../../../../hooks/useOnOutsidePointerDown';
-import iconClose from './../../../../assets/icons/icon-close-dark-green.svg';
-import iconFilter from './../../../../assets/icons/icon-filter-dark-green.svg';
-import iconGpsOff from './../../../../assets/icons/icon-gps-off-circle-green.svg';
-import iconGpsOn from './../../../../assets/icons/icon-gps-on-circle-green.svg';
-import iconSearch from './../../../../assets/icons/icon-search-dark-green.svg';
+import { type ApiClient } from '../../../api/api-client';
+import { type FilterType, type MapEvent } from '../../../model/map';
+import { searchAed } from '../../../services/aed-search.service';
+import { type MapInstance } from '../../map-instance/map-instance';
+import { MapIconButton } from '../../../components/ui/map-icon-button/MapIconButton';
+import { useOnOutsideKeyDown } from '../../../hooks/useOnOutsideKeyDown';
+import { useOnOutsidePointerDown } from '../../../hooks/useOnOutsidePointerDown';
+import iconClose from './../../../assets/icons/icon-close-dark-green.svg';
+import iconFilter from './../../../assets/icons/icon-filter-dark-green.svg';
+import iconGpsOff from './../../../assets/icons/icon-gps-off-circle-green.svg';
+import iconGpsOn from './../../../assets/icons/icon-gps-on-circle-green.svg';
+import iconSearch from './../../../assets/icons/icon-search-dark-green.svg';
 import { FilterControl } from './filter-control/FilterControl';
 import { SearchResults } from './search-results/SearchResults';
 
 interface Props {
   map: MapInstance | null;
+  apiClient: ApiClient;
   isGpsActive: boolean;
   setIsGpsActive: Dispatch<SetStateAction<boolean>>;
   onFeatureSelect: (event: MapEvent) => void;
@@ -40,6 +43,7 @@ interface Props {
 
 export const SearchControl = ({
   map,
+  apiClient,
   isGpsActive,
   setIsGpsActive,
   onFeatureSelect,
@@ -68,7 +72,7 @@ export const SearchControl = ({
         const signal = abortControllerRef.current.signal;
 
         try {
-          const results = await backend.searchAddress(searchText, { signal });
+          const results = await apiClient.searchAddress(searchText, { signal });
           const mapResults =
             (map && (await searchAed(searchText, map.getActiveOverlaySourceIds(), map))) ?? [];
 
@@ -104,7 +108,7 @@ export const SearchControl = ({
         abortControllerRef.current.abort();
       }
     };
-  }, [searchText, map]);
+  }, [searchText, map, apiClient]);
 
   const onSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;

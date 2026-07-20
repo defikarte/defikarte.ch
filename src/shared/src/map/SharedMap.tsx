@@ -31,6 +31,7 @@ import { MapInstance } from './map-instance/map-instance';
 
 export interface SharedMapState {
   mapInstance: MapInstance | null;
+  apiClient: ApiClient;
   isInitialized: boolean;
   activeBaseLayer: string;
   setActiveBaseLayer: (layer: string) => void;
@@ -148,6 +149,7 @@ export const SharedMap = ({
 
   const mapState: SharedMapState = {
     mapInstance,
+    apiClient,
     isInitialized,
     activeBaseLayer,
     setActiveBaseLayer,

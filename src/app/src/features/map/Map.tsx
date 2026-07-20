@@ -1,4 +1,9 @@
-import { AttributionControl, SharedMap, type SharedMapState } from '@defikarte/shared';
+import {
+  AttributionControl,
+  SearchControl,
+  SharedMap,
+  type SharedMapState,
+} from '@defikarte/shared';
 import { useMemo } from 'react';
 import backend from '../../api/backend';
 import AppConfiguration from '../../configuration/app.configuration';
@@ -27,11 +32,51 @@ export const Map = () => {
       persistedBaseLayer={persistedBaseLayer}
       onBaseLayerChange={setPersistedBaseLayer}
     >
-      {(mapState: SharedMapState) => (
-        <>
-          <AttributionControl activeBaseLayer={mapState.activeBaseLayer} />
-        </>
-      )}
+      {(mapState: SharedMapState) => <MapControls mapState={mapState} />}
     </SharedMap>
+  );
+};
+
+interface MapControlsProps {
+  mapState: SharedMapState;
+}
+
+const MapControls = ({ mapState }: MapControlsProps) => {
+  const {
+    mapInstance,
+    apiClient,
+    activeBaseLayer,
+    setActiveBaseLayer,
+    activeOverlays,
+    setActiveOverlays,
+    selectedFeature,
+    editFeature,
+    setEditFeature,
+    createMode,
+    setCreateMode,
+    userLocation,
+    isGpsActive,
+    setIsGpsActive,
+    locationError,
+    handleSelectOrCenterFeatureOnMap,
+    handleEditFeature,
+    handleOnCreateStart,
+    selectFeatureOnMap,
+    deselectAll,
+  } = mapState;
+
+  return (
+    <>
+      <SearchControl
+        map={mapInstance}
+        apiClient={apiClient}
+        isGpsActive={isGpsActive}
+        setIsGpsActive={setIsGpsActive}
+        onFeatureSelect={handleSelectOrCenterFeatureOnMap}
+        activeOverlays={activeOverlays}
+        setActiveOverlays={setActiveOverlays}
+      />
+      <AttributionControl activeBaseLayer={activeBaseLayer} />
+    </>
   );
 };

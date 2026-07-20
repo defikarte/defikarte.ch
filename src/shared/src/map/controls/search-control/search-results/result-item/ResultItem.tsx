@@ -1,8 +1,8 @@
 import cn from 'classnames';
 import { type Feature, type GeoJsonProperties, type Geometry } from 'geojson';
-import iconDefiGreen from './../../../../../../assets/icons/icon-defi-circle-green.svg';
-import iconDefiOrange from './../../../../../../assets/icons/icon-defi-circle-orange.svg';
-import iconAddress from './../../../../../../assets/icons/icon-marker-circle-green-m.svg';
+import iconDefiGreen from './../../../../../assets/icons/icon-defi-circle-green.svg';
+import iconDefiOrange from './../../../../../assets/icons/icon-defi-circle-orange.svg';
+import iconAddress from './../../../../../assets/icons/icon-marker-circle-green-m.svg';
 
 interface Props {
   isActive: boolean;

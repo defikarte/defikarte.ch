@@ -129,6 +129,9 @@ importers:
       axios:
         specifier: ^1.13.2
         version: 1.13.4
+      classnames:
+        specifier: ^2.5.1
+        version: 2.5.1
       geojson:
         specifier: ^0.5.0
         version: 0.5.0
@@ -137,10 +140,13 @@ importers:
         version: 4.7.1
       opening_hours:
         specifier: ^3.8.0
-        version: 3.12.0(typescript@5.6.3)
+        version: 3.12.0(typescript@6.0.3)
       react:
         specifier: '>=18.0.0'
         version: 19.2.4
+      react-i18next:
+        specifier: ^15.4.0
+        version: 15.7.4(i18next@25.10.10(typescript@6.0.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@6.0.3)
     devDependencies:
       '@types/geojson':
         specifier: ^7946.0.16
@@ -149,8 +155,8 @@ importers:
         specifier: ^19.0.0
         version: 19.2.10
       typescript:
-        specifier: ~5.6.2
-        version: 5.6.3
+        specifier: ~6.0.3
+        version: 6.0.3
 
 packages:
 
@@ -2473,13 +2479,13 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: '>=4.8.4 <6.0.0'
 
-  typescript@5.6.3:
-    resolution: {integrity: sha512-hjcS1mhfuyi4WW8IWtjP7brDrG2cuDZukyrYrSauoXGNgx0S7zceP07adYkJycEr56BOUTNPzbInooiN3fn1qw==}
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
-  typescript@5.9.3:
-    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+  typescript@6.0.3:
+    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -3510,7 +3516,7 @@ snapshots:
   '@testing-library/dom@10.4.1':
     dependencies:
       '@babel/code-frame': 7.28.6
-      '@babel/runtime': 7.28.6
+      '@babel/runtime': 7.29.2
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
       dom-accessibility-api: 0.5.16
@@ -4429,11 +4435,11 @@ snapshots:
     optionalDependencies:
       typescript: 5.9.3
 
-  i18next@25.10.10(typescript@5.6.3):
+  i18next@25.10.10(typescript@6.0.3):
     dependencies:
       '@babel/runtime': 7.29.2
     optionalDependencies:
-      typescript: 5.6.3
+      typescript: 6.0.3
 
   ieee754@1.2.1: {}
 
@@ -4727,9 +4733,9 @@ snapshots:
       is-docker: 2.2.1
       is-wsl: 2.2.0
 
-  opening_hours@3.12.0(typescript@5.6.3):
+  opening_hours@3.12.0(typescript@6.0.3):
     dependencies:
-      i18next: 25.10.10(typescript@5.6.3)
+      i18next: 25.10.10(typescript@6.0.3)
       suncalc: 1.9.0
     transitivePeerDependencies:
       - typescript
@@ -4845,6 +4851,16 @@ snapshots:
     optionalDependencies:
       react-dom: 19.2.4(react@19.2.4)
       typescript: 5.9.3
+
+  react-i18next@15.7.4(i18next@25.10.10(typescript@6.0.3))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@6.0.3):
+    dependencies:
+      '@babel/runtime': 7.28.6
+      html-parse-stringify: 3.0.1
+      i18next: 25.10.10(typescript@6.0.3)
+      react: 19.2.4
+    optionalDependencies:
+      react-dom: 19.2.4(react@19.2.4)
+      typescript: 6.0.3
 
   react-is@17.0.2: {}
 
@@ -5097,9 +5113,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  typescript@5.6.3: {}
-
   typescript@5.9.3: {}
+
+  typescript@6.0.3: {}
 
   undici-types@7.16.0: {}
 

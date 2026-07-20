@@ -1,5 +1,10 @@
-import { CreateMode, SharedMap, type SharedMapState } from '@defikarte/shared';
-import { AttributionControl } from '@defikarte/shared/src/map/controls/attribution-control/AttributionControl';
+import {
+  AttributionControl,
+  CreateMode,
+  SearchControl,
+  SharedMap,
+  type SharedMapState,
+} from '@defikarte/shared';
 import { type Dispatch, type SetStateAction, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +18,6 @@ import { CreateAedControl } from './controls/create-aed-control/CreateAedControl
 import { CreateButtonControl } from './controls/create-button-control/CreateButtonControl';
 import { DetailView } from './controls/detail-view/DetailView';
 import { MapControl } from './controls/map-control/MapControl';
-import { SearchControl } from './controls/search-control/SearchControl';
 import { SponsorControl } from './controls/sponsor-control/SponsorControl';
 import { usePersistenceState } from './hooks/usePersistenceState';
 
@@ -62,6 +66,7 @@ interface MapControlsProps {
 const MapControls = ({ mapState, setIsFullscreen, t }: MapControlsProps) => {
   const {
     mapInstance,
+    apiClient,
     activeBaseLayer,
     setActiveBaseLayer,
     activeOverlays,
@@ -131,6 +136,7 @@ const MapControls = ({ mapState, setIsFullscreen, t }: MapControlsProps) => {
         <>
           <SearchControl
             map={mapInstance}
+            apiClient={apiClient}
             isGpsActive={isGpsActive}
             setIsGpsActive={setIsGpsActive}
             onFeatureSelect={handleSelectOrCenterFeatureOnMap}

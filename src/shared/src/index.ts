@@ -67,7 +67,13 @@ export { useHandleCreateMode } from './map/hooks/useHandleCreateMode';
 export { useMapEvents } from './map/hooks/useMapEvents';
 export { usePrevious } from './map/hooks/usePrevious';
 export { useUserLocation } from './map/hooks/useUserLocation';
+export { useOnOutsideKeyDown } from './hooks/useOnOutsideKeyDown';
+export { useOnOutsidePointerDown } from './hooks/useOnOutsidePointerDown';
+
+// UI components
+export { MapIconButton } from './components/ui/map-icon-button/MapIconButton';
 
 // SharedMap component
 export { AttributionControl } from './map/controls/attribution-control/AttributionControl';
+export { SearchControl } from './map/controls/search-control/SearchControl';
 export { SharedMap, type SharedMapState } from './map/SharedMap';
