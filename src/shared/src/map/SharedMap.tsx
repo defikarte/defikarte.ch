@@ -1,4 +1,3 @@
-import { type Point } from 'geojson';
 import {
   type Dispatch,
   type ReactNode,
@@ -19,32 +18,16 @@ import {
   OverlayType,
 } from '../model/map';
 import { deselectAllFeatures } from './helper';
+import { useFeatureSelection } from './hooks/useFeatureSelection';
 import { useHandleCreateMode } from './hooks/useHandleCreateMode';
 import { useMapEvents } from './hooks/useMapEvents';
+import { defaultActiveOverlay, useOverlays } from './hooks/useOverlays';
 import { useUserLocation } from './hooks/useUserLocation';
-import { FEATURE_STATE } from './map-instance/configuration/constants';
 import {
   MapConfiguration,
   type MapConfigurationOptions,
 } from './map-instance/configuration/map.configuration';
-import ItemSelectInteraction from './map-instance/interactions/item-select.interaction';
 import { MapInstance } from './map-instance/map-instance';
-
-const createFilterKey = (filter: FilterType | FilterType[]) => {
-  if (Array.isArray(filter)) {
-    return filter.sort().join('');
-  }
-
-  return filter;
-};
-
-const defaultOverlay: FilterType[] = [FilterType.alwaysAvailable, FilterType.withOpeningHours];
-const filterToOverlayMapping = {
-  [createFilterKey(FilterType.alwaysAvailable)]: OverlayType.aedAlwaysAvailable,
-  [createFilterKey(FilterType.withOpeningHours)]: OverlayType.aedWithOpeningHours,
-  [createFilterKey(FilterType.byAvailability)]: OverlayType.aedByCurrentAvailability,
-  [createFilterKey([FilterType.alwaysAvailable, FilterType.withOpeningHours])]: OverlayType.aedAll,
-};
 
 export interface SharedMapState {
   mapInstance: MapInstance | null;
@@ -90,34 +73,33 @@ export const SharedMap = ({
   children,
   splashScreen,
 }: SharedMapProps) => {
-  // Initialize MapConfiguration once
-  const configInitialized = useRef(false);
-  if (!configInitialized.current) {
+  // Initialize MapConfiguration before the map instance is created below.
+  useEffect(() => {
     MapConfiguration.init(config);
-    configInitialized.current = true;
-  }
+  }, [config]);
 
   const defaultBaseLayer = persistedBaseLayer || MapConfiguration.osmBaseMapId;
 
   const mapInstanceRef = useRef<MapInstance | null>(null);
   const mapInstance = mapInstanceRef.current;
+  const mapContainerRef = useRef<HTMLDivElement>(null);
   const { isInitialized, handleMapEvent } = useMapEvents();
   const [activeBaseLayer, setActiveBaseLayerState] = useState<string>(defaultBaseLayer);
-  const [activeOverlays, setActiveOverlays] = useState<FilterType[]>(defaultOverlay);
   const [selectedFeature, setSelectedFeature] = useState<MapInteractionEvent | null>(null);
   const [editFeature, setEditFeature] = useState<MapInteractionEvent | null>(null);
-  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const { activeOverlays, setActiveOverlays } = useOverlays(mapInstance);
   const [createMode, setCreateMode] = useHandleCreateMode({
     map: mapInstance,
     feature: editFeature ?? null,
   });
-  const userLocation = useUserLocation({ map: mapInstance, locationProvider });
   const {
     userLocation: userLocationData,
     isActive: isGpsActive,
     setIsActive: setIsGpsActive,
     error: locationError,
-  } = userLocation;
+  } = useUserLocation({ map: mapInstance, locationProvider });
+  const { handleSelectOrCenterFeatureOnMap, selectFeatureOnMap, handleEditFeature } =
+    useFeatureSelection({ map: mapInstance, setEditFeature, setCreateMode });
 
   const setActiveBaseLayer = useCallback(
     (layer: string) => {
@@ -139,27 +121,13 @@ export const SharedMap = ({
     [handleMapEvent]
   );
 
-  // overlay handling
-  useEffect(() => {
-    const filterKey = createFilterKey(activeOverlays);
-    const activeOverlay = filterToOverlayMapping[filterKey];
-
-    void mapInstance?.applyOverlay(activeOverlay);
-
-    return () => {
-      mapInstance?.removeOverlay(activeOverlay);
-    };
-  }, [mapInstance, activeOverlays]);
-
   // map initialization
   useEffect(() => {
     if (mapContainerRef.current && !mapInstanceRef.current && activeBaseLayer) {
-      const activeOverlay =
-        filterToOverlayMapping[createFilterKey(defaultOverlay)] || OverlayType.aedAll;
       const map = new MapInstance({
         container: mapContainerRef.current,
         baseLayer: activeBaseLayer,
-        overlays: [activeOverlay, OverlayType.userLocation],
+        overlays: [defaultActiveOverlay, OverlayType.userLocation],
         onEvent: onMapEvent,
         hash: isHash,
         apiClient: apiClient,
@@ -168,57 +136,6 @@ export const SharedMap = ({
       return () => mapInstanceRef.current?.remove();
     }
   }, [activeBaseLayer, isHash, onMapEvent, apiClient]);
-
-  const handleSelectOrCenterFeatureOnMap = (event: MapEvent) => {
-    if (event.type !== 'item-select' || !event.data) return;
-
-    const interactionExecuted = selectFeatureOnMap(event);
-    if (!interactionExecuted) {
-      centerFeatureOnMap(event);
-    }
-  };
-
-  const selectFeatureOnMap = (event: MapInteractionEvent): boolean => {
-    if (event.type !== 'item-select' || !event.data) return false;
-
-    let result = false;
-    mapInstance?.getActiveMapInteractions()?.forEach(interaction => {
-      if (
-        interaction instanceof ItemSelectInteraction &&
-        interaction.sourceId === event.data?.source
-      ) {
-        interaction.selectFeature(event.data, null);
-        result = true;
-      }
-    });
-
-    return result;
-  };
-
-  const centerFeatureOnMap = (event: MapInteractionEvent | null) => {
-    if (!event || !event.data) return;
-    const bbox = event.data.geometry.bbox;
-    if (bbox?.length === 4) {
-      mapInstance?.fitBounds([
-        [bbox[0], bbox[1]],
-        [bbox[2], bbox[3]],
-      ]);
-
-      return;
-    }
-    const coordinates = (event.data.geometry as Point).coordinates;
-    mapInstance?.easeTo(coordinates as [number, number], 18);
-  };
-
-  const handleEditFeature = (event: MapInteractionEvent) => {
-    if (!event || !event.data) return;
-    centerFeatureOnMap(event);
-    setEditFeature(event);
-    mapInstance?.setFeatureState(event.source ?? '', event.data.id, {
-      [FEATURE_STATE.EDITING]: true,
-    });
-    setCreateMode(CreateMode.form);
-  };
 
   const handleOnCreateStart = () => {
     setEditFeature(null);
