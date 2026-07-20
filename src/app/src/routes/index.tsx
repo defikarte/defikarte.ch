@@ -6,5 +6,9 @@ export const Route = createFileRoute('/')({
 });
 
 function RouteComponent() {
-  return <Map />;
+  return (
+    <div className="w-full h-full">
+      <Map />
+    </div>
+  );
 }

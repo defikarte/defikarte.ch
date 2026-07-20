@@ -1,4 +1,5 @@
 import { CreateMode, SharedMap, type SharedMapState } from '@defikarte/shared';
+import { AttributionControl } from '@defikarte/shared/src/map/controls/attribution-control/AttributionControl';
 import { type Dispatch, type SetStateAction, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +9,6 @@ import { CustomToast } from '../../components/ui/custom-toast/CustomToast';
 import { SplashScreen } from '../../components/ui/splash-screen/SplashScreen';
 import AppConfiguration from '../../configuration/app.configuration';
 import { GeolocationService } from '../../services/geolocation.service';
-import { AttributionControl } from './controls/attribution-control/AttributionControl';
 import { CreateAedControl } from './controls/create-aed-control/CreateAedControl';
 import { CreateButtonControl } from './controls/create-button-control/CreateButtonControl';
 import { DetailView } from './controls/detail-view/DetailView';

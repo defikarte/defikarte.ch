@@ -69,4 +69,5 @@ export { usePrevious } from './map/hooks/usePrevious';
 export { useUserLocation } from './map/hooks/useUserLocation';
 
 // SharedMap component
+export { AttributionControl } from './map/controls/attribution-control/AttributionControl';
 export { SharedMap, type SharedMapState } from './map/SharedMap';

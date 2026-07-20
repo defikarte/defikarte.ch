@@ -1,4 +1,4 @@
-import { SharedMap, type SharedMapState } from '@defikarte/shared';
+import { AttributionControl, SharedMap, type SharedMapState } from '@defikarte/shared';
 import { useMemo } from 'react';
 import backend from '../../api/backend';
 import AppConfiguration from '../../configuration/app.configuration';
@@ -27,7 +27,11 @@ export const Map = () => {
       persistedBaseLayer={persistedBaseLayer}
       onBaseLayerChange={setPersistedBaseLayer}
     >
-      {(_mapState: SharedMapState) => <>{/* App-specific controls will be added here */}</>}
+      {(mapState: SharedMapState) => (
+        <>
+          <AttributionControl activeBaseLayer={mapState.activeBaseLayer} />
+        </>
+      )}
     </SharedMap>
   );
 };
