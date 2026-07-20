@@ -223,7 +223,7 @@ export const SearchControl = ({
     'flex',
     'items-center',
     'bg-primary-100-white',
-    'mx-4',
+    responsive && 'mx-4',
     responsive && 'md:mx-0',
     'ps-4',
     'pe-2',
@@ -253,7 +253,11 @@ export const SearchControl = ({
         responsive && 'md:top-6'
       )}
     >
-      <div className={className('w-full', compact ? 'max-w-[768px]' : 'md:w-[550px] lg:w-[650px]')}>
+      <div
+        className={className(
+          compact ? 'w-[calc(100%-2rem)] max-w-[768px]' : 'w-full md:w-[550px] lg:w-[650px]'
+        )}
+      >
         <div
           className={mainClasses}
           onKeyDown={handleKeyDown}

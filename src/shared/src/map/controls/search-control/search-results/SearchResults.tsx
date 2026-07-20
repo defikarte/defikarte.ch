@@ -17,7 +17,7 @@ export const SearchResults = ({ ref, compact = false, ...props }: SearchResultsP
     };
 
     return (
-      <div className={cn('mx-4', !compact && 'md:mx-0')} ref={ref}>
+      <div className={cn(!compact && 'mx-4 md:mx-0')} ref={ref}>
         {props.searchResults?.features.map((feature, i) => {
           return (
             <ResultItem

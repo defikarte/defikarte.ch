@@ -40,7 +40,7 @@ export const FilterControl = ({
   };
 
   return (
-    <div className={cn('mx-4', !compact && 'md:mx-0')} ref={ref}>
+    <div className={cn(!compact && 'mx-4 md:mx-0')} ref={ref}>
       <FilterItem
         label={t('247Available')}
         checked={activeOverlays?.includes(FilterType.alwaysAvailable)}
