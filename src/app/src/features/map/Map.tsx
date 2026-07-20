@@ -1,5 +1,6 @@
 import {
   AttributionControl,
+  DetailView,
   SearchControl,
   SharedMap,
   type SharedMapState,
@@ -77,6 +78,15 @@ const MapControls = ({ mapState }: MapControlsProps) => {
         setActiveOverlays={setActiveOverlays}
       />
       <AttributionControl activeBaseLayer={activeBaseLayer} />
+      {selectedFeature && (
+        <DetailView
+          feature={selectedFeature.data}
+          userLocation={userLocation}
+          onCenterFeature={() => handleSelectOrCenterFeatureOnMap(selectedFeature)}
+          onClose={() => deselectAll()}
+          onEdit={() => handleEditFeature(selectedFeature)}
+        />
+      )}
     </>
   );
 };

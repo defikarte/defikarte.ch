@@ -1,5 +1,5 @@
 import iconCloseDarkGreen from '../../../assets/icons/icon-close-dark-green.svg';
-import { IconButton } from '../icon-button/IconButton';
+import { IconButton } from '@defikarte/shared';
 import cn from 'classnames';
 import toast, { type Toast } from 'react-hot-toast';
 

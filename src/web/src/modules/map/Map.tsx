@@ -1,6 +1,7 @@
 import {
   AttributionControl,
   CreateMode,
+  DetailView,
   SearchControl,
   SharedMap,
   type SharedMapState,
@@ -16,7 +17,6 @@ import AppConfiguration from '../../configuration/app.configuration';
 import { GeolocationService } from '../../services/geolocation.service';
 import { CreateAedControl } from './controls/create-aed-control/CreateAedControl';
 import { CreateButtonControl } from './controls/create-button-control/CreateButtonControl';
-import { DetailView } from './controls/detail-view/DetailView';
 import { MapControl } from './controls/map-control/MapControl';
 import { SponsorControl } from './controls/sponsor-control/SponsorControl';
 import { usePersistenceState } from './hooks/usePersistenceState';

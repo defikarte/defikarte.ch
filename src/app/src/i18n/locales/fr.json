@@ -1,1 +1,26 @@
-{}
+{
+  "navigate": "Naviguer",
+  "distanceAway": "{{distance}}{{unit}} éloigné",
+  "public": "Public",
+  "private": "Privé",
+  "outdoor": "Extérieur",
+  "indoor": "Intérieur",
+  "open": "Ouvert",
+  "closed": "Fermé",
+  "openingHours": "Heures d'ouverture",
+  "access": "Accès",
+  "isIndoor": "Est à l'intérieur",
+  "level": "Niveau",
+  "description": "Description",
+  "operator": "Opérateur",
+  "operatorPhone": "Téléphone de l'opérateur",
+  "details": "Détails",
+  "hide": "Cacher",
+  "close": "Fermer",
+  "edit": "Modifier",
+  "node": "Nœud",
+  "yes": "Oui",
+  "no": "Non",
+  "permissive": "Accessibilité limitée",
+  "customers": "accessible uniquement aux clients"
+}

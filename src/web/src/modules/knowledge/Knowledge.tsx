@@ -11,7 +11,7 @@ import imageDefirbillationHoch03 from '../../assets/landingpages/wissen/wissen-d
 import imageDefirbillationQuer01 from '../../assets/landingpages/wissen/wissen-defibrillation-quer-01.jpg';
 import imageDefirbillationQuer02 from '../../assets/landingpages/wissen/wissen-defibrillation-quer-02.jpg';
 import imageDefirbillationQuer03 from '../../assets/landingpages/wissen/wissen-defibrillation-quer-03.jpg';
-import { Button } from '../../components/ui/button/Button';
+import { Button } from '@defikarte/shared';
 import { ContentWrapper } from '../../components/ui/content-wrapper/ContentWrapper';
 import { Hero } from '../../components/ui/hero/Hero';
 import { Text } from '../../components/ui/text/Text';

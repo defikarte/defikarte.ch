@@ -1,7 +1,7 @@
 import { useMediaQuery } from 'react-responsive';
 import iconChevronDownMiddleGreenM from '../../../assets/landingpages/home/icon-chevron-down-middle-green-m.svg';
 import iconChevronDownMiddleGreenS from '../../../assets/landingpages/home/icon-chevron-down-middle-green-s.svg';
-import { IconButton } from '../../../components/ui/icon-button/IconButton';
+import { IconButton } from '@defikarte/shared';
 
 interface MapFooterProps {
   onNextViewClick: () => void;

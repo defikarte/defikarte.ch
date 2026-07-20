@@ -1,22 +1,22 @@
 import classNames from 'classnames';
 import { type Feature } from 'geojson';
 import { useTranslation } from 'react-i18next';
-import iconAccessCircleGreen from '../../../../../assets/icons/icon-access-circle-green.svg';
-import iconAccessCircleGrey from '../../../../../assets/icons/icon-access-circle-grey.svg';
-import iconHouseCircleGreen from '../../../../../assets/icons/icon-house-circle-green.svg';
-import iconHouseCircleGrey from '../../../../../assets/icons/icon-house-circle-grey.svg';
-import iconInfoCircleGreen from '../../../../../assets/icons/icon-info-circle-green-s.svg';
-import iconInfoCircleGrey from '../../../../../assets/icons/icon-info-circle-grey.svg';
-import iconPhoneCircleGreen from '../../../../../assets/icons/icon-phone-circle-green.svg';
-import iconPhoneCircleGrey from '../../../../../assets/icons/icon-phone-circle-grey.svg';
-import iconPinCircleGreen from '../../../../../assets/icons/icon-pin-circle-green.svg';
-import iconPinCircleGrey from '../../../../../assets/icons/icon-pin-circle-grey.svg';
-import iconProfileCircleGreen from '../../../../../assets/icons/icon-profile-circle-green.svg';
-import iconProfileCircleGrey from '../../../../../assets/icons/icon-profile-circle-grey.svg';
-import iconStairsCircleGreen from '../../../../../assets/icons/icon-stairs-circle-green.svg';
-import iconStairsCircleGrey from '../../../../../assets/icons/icon-stairs-circle-grey.svg';
-import iconTimeCircleGreen from '../../../../../assets/icons/icon-time-circle-green.svg';
-import iconTimeCircleGrey from '../../../../../assets/icons/icon-time-circle-grey.svg';
+import iconAccessCircleGreen from '../../../../assets/icons/icon-access-circle-green.svg';
+import iconAccessCircleGrey from '../../../../assets/icons/icon-access-circle-grey.svg';
+import iconHouseCircleGreen from '../../../../assets/icons/icon-house-circle-green.svg';
+import iconHouseCircleGrey from '../../../../assets/icons/icon-house-circle-grey.svg';
+import iconInfoCircleGreen from '../../../../assets/icons/icon-info-circle-green-s.svg';
+import iconInfoCircleGrey from '../../../../assets/icons/icon-info-circle-grey.svg';
+import iconPhoneCircleGreen from '../../../../assets/icons/icon-phone-circle-green.svg';
+import iconPhoneCircleGrey from '../../../../assets/icons/icon-phone-circle-grey.svg';
+import iconPinCircleGreen from '../../../../assets/icons/icon-pin-circle-green.svg';
+import iconPinCircleGrey from '../../../../assets/icons/icon-pin-circle-grey.svg';
+import iconProfileCircleGreen from '../../../../assets/icons/icon-profile-circle-green.svg';
+import iconProfileCircleGrey from '../../../../assets/icons/icon-profile-circle-grey.svg';
+import iconStairsCircleGreen from '../../../../assets/icons/icon-stairs-circle-green.svg';
+import iconStairsCircleGrey from '../../../../assets/icons/icon-stairs-circle-grey.svg';
+import iconTimeCircleGreen from '../../../../assets/icons/icon-time-circle-green.svg';
+import iconTimeCircleGrey from '../../../../assets/icons/icon-time-circle-grey.svg';
 import { ItemProperty } from './item-property/ItemProperty';
 
 interface FeaturePropsListProps {

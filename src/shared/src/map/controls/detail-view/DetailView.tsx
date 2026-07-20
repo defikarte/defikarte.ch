@@ -1,28 +1,30 @@
-import { distanceBetweenPoints, isOpenNow } from '@defikarte/shared';
 import cn from 'classnames';
 import { type Feature, type Point } from 'geojson';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
-import iconAccessDarkGreen from '../../../../assets/icons/icon-access-dark-green.svg';
-import iconAccessGrey from '../../../../assets/icons/icon-access-grey.svg';
-import iconCloseDarkGreen from '../../../../assets/icons/icon-close-dark-green.svg';
-import iconEditDarkGreen from '../../../../assets/icons/icon-edit-dark-green.svg';
-import iconHouseDarkGreen from '../../../../assets/icons/icon-house-dark-green.svg';
-import iconHouseGrey from '../../../../assets/icons/icon-house-grey.svg';
-import iconNavigationDarkGreen from '../../../../assets/icons/icon-navigation-dark-green.svg';
-import iconNavigationGrey from '../../../../assets/icons/icon-navigation-grey.svg';
-import iconNavigationWhite from '../../../../assets/icons/icon-navigation-white.svg';
-import iconTimeWhite from '../../../../assets/icons/icon-time-white.svg';
-import { Button } from '../../../../components/ui/button/Button';
-import { IconButton } from '../../../../components/ui/icon-button/IconButton';
-import { Tag } from '../../../../components/ui/tag/Tag';
-import AppConfiguration from '../../../../configuration/app.configuration';
+import iconAccessDarkGreen from '../../../assets/icons/icon-access-dark-green.svg';
+import iconAccessGrey from '../../../assets/icons/icon-access-grey.svg';
+import iconCloseDarkGreen from '../../../assets/icons/icon-close-dark-green.svg';
+import iconEditDarkGreen from '../../../assets/icons/icon-edit-dark-green.svg';
+import iconHouseDarkGreen from '../../../assets/icons/icon-house-dark-green.svg';
+import iconHouseGrey from '../../../assets/icons/icon-house-grey.svg';
+import iconNavigationDarkGreen from '../../../assets/icons/icon-navigation-dark-green.svg';
+import iconNavigationGrey from '../../../assets/icons/icon-navigation-grey.svg';
+import iconNavigationWhite from '../../../assets/icons/icon-navigation-white.svg';
+import iconTimeWhite from '../../../assets/icons/icon-time-white.svg';
+import { Button } from '../../../components/ui/button/Button';
+import { IconButton } from '../../../components/ui/icon-button/IconButton';
+import { Tag } from '../../../components/ui/tag/Tag';
+import { distanceBetweenPoints } from '../../../services/coordinate-calculation.service';
+import { isOpenNow } from '../../../services/opening-hours.service';
 import { FeaturePropsList } from './property-list/FeaturePropsList';
+
+const GOOGLE_MAPS_DIRECTIONS_URL = 'https://www.google.com/maps/dir/?api=1';
 
 const generateGoogleMapsWalkingLink = (lon: number, lat: number): string => {
   const endCoordinates = encodeURIComponent(`${lat},${lon}`);
-  const directionUrl = `${AppConfiguration.googleMapsDirectionsUrl}&travelmode=walking&destination=${endCoordinates}`;
+  const directionUrl = `${GOOGLE_MAPS_DIRECTIONS_URL}&travelmode=walking&destination=${endCoordinates}`;
   return directionUrl;
 };
 

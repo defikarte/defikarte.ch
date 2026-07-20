@@ -23,6 +23,7 @@
     "classnames": "^2.5.1",
     "geojson": "^0.5.0",
     "maplibre-gl": "^4.7.1",
-    "opening_hours": "^3.8.0"
+    "opening_hours": "^3.8.0",
+    "react-responsive": "^10.0.1"
   }
 }

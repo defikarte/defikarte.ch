@@ -1,4 +1,4 @@
-import React from 'react';
+import { type FC } from 'react';
 
 interface ItemPropertyProps {
   icon: string;
@@ -6,7 +6,7 @@ interface ItemPropertyProps {
   value: string | number;
 }
 
-export const ItemProperty: React.FC<ItemPropertyProps> = ({ icon, title, value }) => {
+export const ItemProperty: FC<ItemPropertyProps> = ({ icon, title, value }) => {
   return (
     <div className="flex items-start gap-2">
       <img src={icon} />

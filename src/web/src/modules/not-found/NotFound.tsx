@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import iconExternalLinkMiddleGreen from '../../assets/icons/icon-external-link-middle-green.svg';
-import { Button } from '../../components/ui/button/Button';
+import { Button } from '@defikarte/shared';
 import { ContentWrapper } from '../../components/ui/content-wrapper/ContentWrapper';
 import { Text } from '../../components/ui/text/Text';
 

@@ -71,9 +71,13 @@ export { useOnOutsideKeyDown } from './hooks/useOnOutsideKeyDown';
 export { useOnOutsidePointerDown } from './hooks/useOnOutsidePointerDown';
 
 // UI components
+export { Button } from './components/ui/button/Button';
+export { IconButton } from './components/ui/icon-button/IconButton';
 export { MapIconButton } from './components/ui/map-icon-button/MapIconButton';
+export { Tag } from './components/ui/tag/Tag';
 
 // SharedMap component
 export { AttributionControl } from './map/controls/attribution-control/AttributionControl';
+export { DetailView } from './map/controls/detail-view/DetailView';
 export { SearchControl } from './map/controls/search-control/SearchControl';
 export { SharedMap, type SharedMapState } from './map/SharedMap';
