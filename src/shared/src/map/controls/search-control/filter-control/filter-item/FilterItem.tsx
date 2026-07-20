@@ -1,3 +1,4 @@
+import cn from 'classnames';
 import { useMemo } from 'react';
 
 interface Props {
@@ -5,15 +6,19 @@ interface Props {
   label: string;
   icon: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  compact?: boolean;
 }
 
-export const FilterItem = ({ checked, label, icon, onChange }: Props) => {
+export const FilterItem = ({ checked, label, icon, onChange, compact = false }: Props) => {
   const id = useMemo(() => Math.random().toString(36).substring(7), []);
 
   return (
     <label
       htmlFor={id}
-      className="bg-primary-100-white flex items-center first:pt-4 last:pb-4 last:rounded-b-[24px] last:md:rounded-b-[32px] py-2 px-5 hover:bg-green-custom cursor-pointer"
+      className={cn(
+        'bg-primary-100-white flex items-center first:pt-4 last:pb-4 last:rounded-b-[24px] py-2 px-5 hover:bg-green-custom cursor-pointer',
+        !compact && 'last:md:rounded-b-[32px]'
+      )}
     >
       <input
         id={id}

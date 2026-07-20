@@ -39,6 +39,7 @@ interface Props {
   onFeatureSelect: (event: MapEvent) => void;
   activeOverlays: FilterType[];
   setActiveOverlays: Dispatch<SetStateAction<FilterType[]>>;
+  compact?: boolean;
 }
 
 export const SearchControl = ({
@@ -49,8 +50,10 @@ export const SearchControl = ({
   onFeatureSelect,
   activeOverlays,
   setActiveOverlays,
+  compact = false,
 }: Props) => {
   const { t } = useTranslation();
+  const responsive = !compact;
   const [searchResultsActiveIndex, setSearchResultsActiveIndex] = useState<number | null>(null);
   const [searchText, setSearchText] = useState<string>('');
   const [searchResults, setSearchResults] = useState<FeatureCollection | null>(null);
@@ -221,31 +224,36 @@ export const SearchControl = ({
     'items-center',
     'bg-primary-100-white',
     'mx-4',
-    'md:mx-0',
+    responsive && 'md:mx-0',
     'ps-4',
     'pe-2',
     'py-4',
-    'md:p-4',
+    responsive && 'md:p-4',
     'gap-2',
-    'md:gap-4',
+    responsive && 'md:gap-4',
     'h-5',
-    'md:h-7',
+    responsive && 'md:h-7',
     'shadow-custom',
     'shadow-green-shadow',
     'box-content',
     {
       'rounded-[26px]': !dropdownOpen,
-      'md:rounded-[30px]': !dropdownOpen,
+      'md:rounded-[30px]': responsive && !dropdownOpen,
       'rounded-t-[26px]': dropdownOpen,
-      'md:rounded-t-[30px]': dropdownOpen,
+      'md:rounded-t-[30px]': responsive && dropdownOpen,
       'border-b': dropdownOpen,
       'border-b-primary-10-green-05': dropdownOpen,
     }
   );
 
   return (
-    <div className="z-5 absolute top-4 md:top-6 m-auto w-full flex flex-col items-center h-0">
-      <div className="w-full md:w-[550px] lg:w-[650px]">
+    <div
+      className={className(
+        'z-5 absolute top-4 m-auto w-full flex flex-col items-center h-0',
+        responsive && 'md:top-6'
+      )}
+    >
+      <div className={className('w-full', compact ? 'max-w-[768px]' : 'md:w-[550px] lg:w-[650px]')}>
         <div
           className={mainClasses}
           onKeyDown={handleKeyDown}
@@ -294,6 +302,7 @@ export const SearchControl = ({
             ref={filterContainerRef}
             activeOverlays={activeOverlays}
             setActiveOverlays={setActiveOverlays}
+            compact={compact}
           />
         )}
         {!showFilter && showSearchResults && (
@@ -303,6 +312,7 @@ export const SearchControl = ({
             onItemSelect={onItemSelect}
             activeIndex={searchResultsActiveIndex}
             setActiveIndex={setSearchResultsActiveIndex}
+            compact={compact}
           />
         )}
       </div>

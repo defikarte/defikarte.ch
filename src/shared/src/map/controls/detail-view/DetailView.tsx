@@ -34,6 +34,7 @@ interface DetailViewProps {
   onCenterFeature: () => void;
   onClose: () => void;
   onEdit: () => void;
+  compact?: boolean;
 }
 
 export const DetailView = ({
@@ -42,9 +43,11 @@ export const DetailView = ({
   onCenterFeature,
   onClose,
   onEdit,
+  compact = false,
 }: DetailViewProps) => {
   const { t } = useTranslation();
-  const isMobile = useMediaQuery({ maxWidth: 768 });
+  const responsiveMobile = useMediaQuery({ maxWidth: 768 });
+  const isMobile = compact || responsiveMobile;
   const [propsVisible, setPropsVisible] = useState(false);
 
   const props = feature?.properties ?? {};
@@ -102,23 +105,28 @@ export const DetailView = ({
     'items-start',
     'bottom-4',
     'top-auto',
-    'md:bottom-16',
-    'md:right-6',
-    'mx-4',
-    'md:mx-0',
-    'inset-x-0',
     'inset-y-0',
-    'md:inset-auto',
-    'md:w-[304px]',
-    'md:h-[500px]',
-    'xl:h-[576px]',
     'max-h-[calc(100vh-143px)]',
-    'md:max-h-[calc(100vh-215px)]',
-    'lg:max-h-[calc(100vh-227px)]',
     'bg-primary-100-white',
     'rounded-2xl',
     'shadow-lg',
-    'shadow-green-shadow-64'
+    'shadow-green-shadow-64',
+    compact
+      ? // forced mobile: full-width with gutters on phones, centered + capped on large screens
+        ['left-1/2', '-translate-x-1/2', 'w-[calc(100%-2rem)]', 'max-w-[768px]']
+      : [
+          'md:bottom-16',
+          'md:right-6',
+          'mx-4',
+          'md:mx-0',
+          'inset-x-0',
+          'md:inset-auto',
+          'md:w-[304px]',
+          'md:h-[500px]',
+          'xl:h-[576px]',
+          'md:max-h-[calc(100vh-215px)]',
+          'lg:max-h-[calc(100vh-227px)]',
+        ]
   );
   return (
     <div className={containerClass}>
@@ -126,7 +134,12 @@ export const DetailView = ({
         className="px-4 py-3 flex justify-between w-full items-start border-b border-primary-05-green-05 cursor-pointer"
         onClick={() => onCenterFeature()}
       >
-        <p className="text-wrap text-sm font-normal leading-[150%] text-primary-100-green-04 w-full md:w-60 break-words self-center">
+        <p
+          className={cn(
+            'text-wrap text-sm font-normal leading-[150%] text-primary-100-green-04 w-full break-words self-center',
+            !compact && 'md:w-60'
+          )}
+        >
           {name}
         </p>
         <IconButton
@@ -186,35 +199,40 @@ export const DetailView = ({
         <FeaturePropsList
           feature={feature}
           isOpen={isOpen}
-          className={cn({ hidden: !propsVisible, 'md:flex': !propsVisible })}
+          className={cn({ hidden: isMobile && !propsVisible })}
         />
-        <IconButton
-          title={t('edit')}
-          icon={iconEditDarkGreen}
-          variant={isOpen ? 'tint' : 'secondary'}
-          onClick={onEdit}
-          className={cn('md:hidden', 'w-full', 'flex', 'justify-end', 'items-end', 'pt-1', {
-            hidden: !propsVisible,
-            'md:flex': !propsVisible,
-          })}
-        />
-      </div>
-      <div className="py-3 2xl:py-4 px-4 flex-shrink flex w-full items-end">
-        <div className="flex justify-between items-center w-full flex-row-reverse h-10">
+        {isMobile && (
           <IconButton
             title={t('edit')}
             icon={iconEditDarkGreen}
             variant={isOpen ? 'tint' : 'secondary'}
-            className="hidden md:visible md:flex"
             onClick={onEdit}
+            className={cn('w-full', 'flex', 'justify-end', 'items-end', 'pt-1', {
+              hidden: !propsVisible,
+            })}
           />
-          <Button
-            className="md:hidden not-md:pe-0"
-            variant="secondary"
-            onClick={() => setPropsVisible(s => !s)}
-          >
-            {propsVisible ? t('hide') : t('details')}
-          </Button>
+        )}
+      </div>
+      <div className={cn('py-3 px-4 flex-shrink flex w-full items-end', !compact && '2xl:py-4')}>
+        <div className="flex justify-between items-center w-full flex-row-reverse h-10">
+          {!isMobile && (
+            <IconButton
+              title={t('edit')}
+              icon={iconEditDarkGreen}
+              variant={isOpen ? 'tint' : 'secondary'}
+              className="flex"
+              onClick={onEdit}
+            />
+          )}
+          {isMobile && (
+            <Button
+              className="pe-0"
+              variant="secondary"
+              onClick={() => setPropsVisible(s => !s)}
+            >
+              {propsVisible ? t('hide') : t('details')}
+            </Button>
+          )}
           {isOpen && (
             <a href={directionsUrl} target="_blank">
               <Button variant="primary" icon={iconNavigationWhite}>

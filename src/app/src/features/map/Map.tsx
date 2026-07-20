@@ -76,6 +76,7 @@ const MapControls = ({ mapState }: MapControlsProps) => {
         onFeatureSelect={handleSelectOrCenterFeatureOnMap}
         activeOverlays={activeOverlays}
         setActiveOverlays={setActiveOverlays}
+        compact
       />
       <AttributionControl activeBaseLayer={activeBaseLayer} />
       {selectedFeature && (
@@ -85,6 +86,7 @@ const MapControls = ({ mapState }: MapControlsProps) => {
           onCenterFeature={() => handleSelectOrCenterFeatureOnMap(selectedFeature)}
           onClose={() => deselectAll()}
           onEdit={() => handleEditFeature(selectedFeature)}
+          compact
         />
       )}
     </>

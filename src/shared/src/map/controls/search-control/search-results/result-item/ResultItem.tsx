@@ -9,10 +9,11 @@ interface Props {
   item: Feature<Geometry, GeoJsonProperties>;
   onClick: (item: Feature<Geometry, GeoJsonProperties>) => void;
   onMouseEnter: () => void;
+  compact?: boolean;
 }
 
 export const ResultItem = (props: Props) => {
-  const { item } = props;
+  const { item, compact = false } = props;
 
   const getLabel = (properties: GeoJsonProperties): string[] => {
     if (properties?.emergency === 'defibrillator') {
@@ -47,19 +48,28 @@ export const ResultItem = (props: Props) => {
         'first:pt-3',
         'last:pb-4',
         'px-3',
-        'md:px-4',
+        !compact && 'md:px-4',
         'items-center',
         'last:rounded-b-[24px]',
-        'last:md:rounded-b-[30px]',
+        !compact && 'last:md:rounded-b-[30px]',
         'cursor-pointer'
       )}
       onClick={() => props.onClick(item)}
       onMouseEnter={props.onMouseEnter}
     >
       <img src={icon} alt="search-result" className="w-6 h-6" />
-      <div className="flex flex-col md:flex-row md:items-center ml-3 md:ml-4 text-nowrap overflow-hidden">
+      <div
+        className={cn(
+          'flex flex-col ml-3 text-nowrap overflow-hidden',
+          !compact && 'md:flex-row md:items-center md:ml-4'
+        )}
+      >
         {values[0] && (
-          <span className="md:mr-3 text-sm font-normal text-primary-100-green-04">{values[0]}</span>
+          <span
+            className={cn('text-sm font-normal text-primary-100-green-04', !compact && 'md:mr-3')}
+          >
+            {values[0]}
+          </span>
         )}
         {values[1] && (
           <span className="text-xs font-normal text-primary-60-green-04">{values[1]}</span>
