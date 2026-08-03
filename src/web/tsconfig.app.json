@@ -24,5 +24,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "src/vite-env.d.ts", "../shared/src/map/controls/attribution-control"]
+  "include": ["src", "src/vite-env.d.ts"]
 }

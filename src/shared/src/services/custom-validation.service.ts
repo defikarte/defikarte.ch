@@ -5,9 +5,12 @@ import {
   validatePhoneNumberLength,
 } from 'libphonenumber-js';
 import opening_hours from 'opening_hours';
-import i18n from '../i18n/i18n';
+import { type Translate } from '../model/common';
 
-export const areOpeningHoursValid = (value: string | undefined): string | boolean => {
+export const areOpeningHoursValid = (
+  value: string | undefined,
+  t: Translate
+): string | boolean => {
   if (value === undefined) {
     return true;
   }
@@ -18,13 +21,13 @@ export const areOpeningHoursValid = (value: string | undefined): string | boolea
     const warnings = oh.getWarnings();
     msg = warnings.join(', ');
   } catch {
-    msg = i18n.t('openingHoursInvalid');
+    msg = t('openingHoursInvalid');
   }
 
   return msg === '' || value === null || value === '' ? true : msg;
 };
 
-export const isPhoneNumberValid = (value: string | undefined): string | boolean => {
+export const isPhoneNumberValid = (value: string | undefined, t: Translate): string | boolean => {
   if (value === undefined) {
     return true;
   }
@@ -34,10 +37,12 @@ export const isPhoneNumberValid = (value: string | undefined): string | boolean 
     isValidPhoneNumber(value) === true &&
     validatePhoneNumberLength(value, 'CH') === undefined;
 
-  return value === null || value === '' || valid || i18n.t('phoneNumberInvalid');
+  return value === null || value === '' || valid || t('phoneNumberInvalid');
 };
 
-export const formatPhoneNumber = (value: string | undefined): {value: string, isValid: boolean} => {
+export const formatPhoneNumber = (
+  value: string | undefined
+): { value: string; isValid: boolean } => {
   if (!value) {
     return { value: '', isValid: false };
   }

@@ -31,14 +31,21 @@ export const useHandleCreateMode = ({
   feature,
 }: UseHandleCreateModeProps): [CreateMode, Dispatch<SetStateAction<CreateMode>>] => {
   const [createMode, setCreateMode] = useState<CreateMode>(CreateMode.none);
-  const prevCreateModeRef = useRef<CreateMode>(CreateMode.none);
+  // Tracks whether a create/edit flow is currently set up on the map (overlay applied, base
+  // interactions switched off). It has to be updated synchronously: the effect can be re-entered
+  // while an earlier run is still awaiting below, and a flag written after an await goes stale and
+  // silently skips the teardown - which strands the create marker and leaves the map interactions
+  // switched off, with no UI left to dismiss it.
+  const isFlowActiveRef = useRef(false);
 
   useEffect(() => {
-    const init = async () => {
-      const prevCreateMode = prevCreateModeRef.current;
+    const wasFlowActive = isFlowActiveRef.current;
+    const isFlowActive = createMode !== CreateMode.none;
+    isFlowActiveRef.current = isFlowActive;
 
+    const init = async () => {
       // case start creating or editing AED
-      if (createMode !== CreateMode.none && prevCreateMode === CreateMode.none) {
+      if (isFlowActive && !wasFlowActive) {
         deselectAllFeatures(map);
         getRelevantInteractions(map?.getActiveMapInteractions())?.forEach(interaction => {
           interaction.off();
@@ -67,14 +74,12 @@ export const useHandleCreateMode = ({
       }
 
       // case edit or create is cancelled / finished
-      if (createMode === CreateMode.none && prevCreateMode !== CreateMode.none) {
+      if (!isFlowActive && wasFlowActive) {
         map?.removeOverlay(OverlayType.aedCreate);
         getRelevantInteractions(map?.getActiveMapInteractions())?.forEach(interaction => {
           interaction.on();
         });
       }
-
-      prevCreateModeRef.current = createMode;
     };
 
     void init();

@@ -19,9 +19,3 @@ export interface AedData {
   source?: string; // Source of the data, e.g., 'local_knowledge, defikarte.ch'
   sourceFeature?: Feature; // original feature with eventually additional data
 }
-
-export interface TooltipData {
-  title: string;
-  content: string;
-  link?: string; // Optional link for more information
-}

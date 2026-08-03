@@ -1,6 +1,6 @@
+import { TextField } from '@defikarte/shared';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { TextField } from './TextField';
 
 describe('TextField', () => {
   it('renders text field', () => {

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import iconExternalLinkMiddleGreen from '../../../assets/icons/icon-external-link-middle-green.svg';
 import iconQuestionGrey from '../../../assets/icons/icon-question-grey.svg';
-import { type TooltipData } from '../../../model/app';
+import { type TooltipData } from '../../../model/common';
 
 interface TooltipProps {
   tooltip?: TooltipData;

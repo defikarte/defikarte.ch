@@ -1,32 +1,41 @@
-import { Button, CreateMode, type MapInstance } from '@defikarte/shared';
+import cn from 'classnames';
 import { type Feature, type FeatureCollection } from 'geojson';
 import { type Dispatch, type SetStateAction } from 'react';
 import { type useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import backend from '../../../../../api/backend';
-import iconCheckCircleGreen from '../../../../../assets/icons/icon-check-circle-green.svg';
-import iconCrossmarkCircleRed from '../../../../../assets/icons/icon-crossmark-circle-red.svg';
-import { CustomToast } from '../../../../../components/ui/custom-toast/CustomToast';
-import { SelectField } from '../../../../../components/ui/select-field/SelectField';
-import { TextField } from '../../../../../components/ui/text-field/TextField';
-import { type AedData } from '../../../../../model/app';
+import { type ApiClient } from '../../../../api/api-client';
+import { Button } from '../../../../components/ui/button/Button';
+import { SelectField } from '../../../../components/ui/select-field/SelectField';
+import { TextField } from '../../../../components/ui/text-field/TextField';
+import { type AedData } from '../../../../model/aed';
+import { type NotificationHandler } from '../../../../model/common';
+import { CreateMode } from '../../../../model/map';
 import {
   areOpeningHoursValid,
   formatPhoneNumber,
   isPhoneNumberValid,
-} from '../../../../../services/custom-validation.service';
-
-const toastId = 'aed-toast';
+} from '../../../../services/custom-validation.service';
+import { type MapInstance } from '../../../map-instance/map-instance';
 
 interface AedFormProps {
   map: MapInstance | null;
+  apiClient: ApiClient;
   form: ReturnType<typeof useForm<AedData>>;
   setCreateMode: Dispatch<SetStateAction<CreateMode>>;
   onSuccess: (feature: Feature) => void;
+  onNotify: NotificationHandler;
+  compact?: boolean;
 }
 
-export const AedForm = ({ map, form, setCreateMode, onSuccess }: AedFormProps) => {
+export const AedForm = ({
+  map,
+  apiClient,
+  form,
+  setCreateMode,
+  onSuccess,
+  onNotify,
+  compact,
+}: AedFormProps) => {
   const { t } = useTranslation();
   const {
     register,
@@ -76,51 +85,64 @@ export const AedForm = ({ map, form, setCreateMode, onSuccess }: AedFormProps) =
         ],
       };
       if (id) {
-        const response = await backend.putAedData(requestData);
+        const response = await apiClient.putAedData(requestData);
         result = response.data;
       } else {
-        const response = await backend.postAedData(requestData);
+        const response = await apiClient.postAedData(requestData);
         result = response.data;
       }
-      toast.custom(
-        toastInstance => (
-          <CustomToast
-            icon={iconCheckCircleGreen}
-            toastInstance={toastInstance}
-            title={id ? t('editAedSuccessTitle') : t('createAedSuccessTitle')}
-            message={id ? t('editAedSuccessMessage') : t('createAedSuccessMessage')}
-          />
-        ),
-        {
-          id: toastId,
-        }
-      );
+      onNotify({
+        type: 'success',
+        title: id ? t('editAedSuccessTitle') : t('createAedSuccessTitle'),
+        message: id ? t('editAedSuccessMessage') : t('createAedSuccessMessage'),
+      });
       await map?.refreshActiveOverlays();
       setCreateMode(CreateMode.none);
       form.reset();
       onSuccess(result.features[0]);
     } catch (error) {
-      toast.custom(
-        toastInstance => (
-          <CustomToast
-            icon={iconCrossmarkCircleRed}
-            toastInstance={toastInstance}
-            title={t('createAedErrorTitle')}
-            message={error instanceof Error ? error.message : t('createAedError')}
-          />
-        ),
-        {
-          id: toastId,
-        }
-      );
+      onNotify({
+        type: 'error',
+        title: t('createAedErrorTitle'),
+        message: error instanceof Error ? error.message : t('createAedErrorMessage'),
+      });
     }
   };
 
   const longitude = watch('longitude');
   const latitude = watch('latitude');
   const title = watch('id') ? t('editAed') : t('createAed');
+
+  const containerClass = cn(
+    'absolute',
+    'z-10',
+    'h-auto',
+    'rounded-2xl',
+    'top-4',
+    'right-4',
+    'left-4',
+    // bottom-16 keeps the sheet clear of the MapButtons row at bottom-5
+    'bottom-16',
+    'bg-primary-100-white',
+    'shadow-custom-lg',
+    'shadow-green-shadow-64',
+    // In compact mode the phone layout is forced, so no breakpoint variants are applied.
+    !compact && [
+      'lg:w-[555px]',
+      'md:max-h-[600px]',
+      'lg:max-h-full',
+      'lg:h-auto',
+      'md:bottom-22',
+      'lg:bottom-6',
+      'md:top-6',
+      'md:right-6',
+      'md:left-6',
+      'lg:left-auto',
+    ]
+  );
+
   return (
-    <div className="absolute z-10 h-auto lg:w-[555px] md:max-h-[600px] lg:max-h-full lg:h-auto rounded-2xl bottom-16 md:bottom-22 top-4 right-4 left-4 lg:bottom-6 md:top-6 md:right-6 md:left-6 lg:left-auto bg-primary-100-white shadow-custom-lg shadow-green-shadow-64">
+    <div className={containerClass}>
       <form
         className="flex flex-col h-[100%] justify-between"
         onSubmit={e => void handleSubmit(onSubmit)(e)}
@@ -225,7 +247,7 @@ export const AedForm = ({ map, form, setCreateMode, onSuccess }: AedFormProps) =
               link: 'https://wiki.openstreetmap.org/wiki/Key:opening_hours',
             }}
             error={errors.openingHours?.message}
-            {...register('openingHours', { validate: areOpeningHoursValid })}
+            {...register('openingHours', { validate: value => areOpeningHoursValid(value, t) })}
             disabled={isSubmitting}
           />
           <TextField
@@ -254,7 +276,7 @@ export const AedForm = ({ map, form, setCreateMode, onSuccess }: AedFormProps) =
             }}
             error={errors.operatorPhone?.message}
             {...register('operatorPhone', {
-              validate: isPhoneNumberValid,
+              validate: value => isPhoneNumberValid(value, t),
               onBlur: handlePhoneNumberBlur,
             })}
             disabled={isSubmitting}
@@ -276,7 +298,7 @@ export const AedForm = ({ map, form, setCreateMode, onSuccess }: AedFormProps) =
             type="submit"
             variant="primary"
             size="large"
-            className="w-full md:w-fit"
+            className={cn('w-full', { 'md:w-fit': !compact })}
             disabled={isSubmitting}
           >
             {t('submit')}

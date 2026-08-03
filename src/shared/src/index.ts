@@ -1,8 +1,17 @@
 // API
 export { ApiClient } from './api/api-client';
-export { type ApiConfiguration, type RequestOptions } from './model/common';
+export {
+  type ApiConfiguration,
+  type Notification,
+  type NotificationHandler,
+  type NotificationType,
+  type RequestOptions,
+  type TooltipData,
+  type Translate,
+} from './model/common';
 
 // Model types
+export { type AedAccess, type AedData, type AedIndoor } from './model/aed';
 export { type LocationProvider } from './model/location-provider';
 export {
   CreateMode,
@@ -24,8 +33,14 @@ export {
 export { requestAedDataByCurrentAvailability } from './services/aed-data.service';
 export { searchAed } from './services/aed-search.service';
 export { distanceBetweenPoints } from './services/coordinate-calculation.service';
+export {
+  areOpeningHoursValid,
+  formatPhoneNumber,
+  isPhoneNumberValid,
+} from './services/custom-validation.service';
 export { requestStyleSpecification } from './services/map-style.service';
 export { isOpeningHourValid, isOpenNow } from './services/opening-hours.service';
+export { isMobileAgent } from './services/user-agent.service';
 
 // Map instance & configuration
 export {
@@ -74,10 +89,14 @@ export { useOnOutsidePointerDown } from './hooks/useOnOutsidePointerDown';
 export { Button } from './components/ui/button/Button';
 export { IconButton } from './components/ui/icon-button/IconButton';
 export { MapIconButton } from './components/ui/map-icon-button/MapIconButton';
+export { SelectField } from './components/ui/select-field/SelectField';
 export { Tag } from './components/ui/tag/Tag';
+export { TextField } from './components/ui/text-field/TextField';
+export { Tooltip } from './components/ui/tooltip/Tooltip';
 
 // SharedMap component
 export { AttributionControl } from './map/controls/attribution-control/AttributionControl';
+export { CreateAedControl } from './map/controls/create-aed-control/CreateAedControl';
 export { DetailView } from './map/controls/detail-view/DetailView';
 export { SearchControl } from './map/controls/search-control/SearchControl';
 export { SharedMap, type SharedMapState } from './map/SharedMap';

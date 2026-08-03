@@ -1,18 +1,17 @@
-import {
-  CreateMode,
-  FEATURE_STATE,
-  MapConfiguration,
-  type MapInstance,
-  type MapInteractionEvent,
-  getActiveAedOverlay,
-} from '@defikarte/shared';
 import { type Feature, type GeoJsonProperties, type Geometry, type Point } from 'geojson';
 import { type MapGeoJSONFeature } from 'maplibre-gl';
 import { type Dispatch, type SetStateAction } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import iconInfoCircleGreenM from '../../../../assets/icons/icon-info-circle-green-m.svg';
-import { type AedAccess, type AedData, type AedIndoor } from '../../../../model/app';
+import { type ApiClient } from '../../../api/api-client';
+import iconInfoCircleGreenM from '../../../assets/icons/icon-info-circle-green-m.svg';
+import { type AedAccess, type AedData, type AedIndoor } from '../../../model/aed';
+import { type NotificationHandler } from '../../../model/common';
+import { CreateMode, type MapInteractionEvent } from '../../../model/map';
+import { getActiveAedOverlay } from '../../helper';
+import { FEATURE_STATE } from '../../map-instance/configuration/constants';
+import { MapConfiguration } from '../../map-instance/configuration/map.configuration';
+import { type MapInstance } from '../../map-instance/map-instance';
 import { AedForm } from './aed-form/AedForm';
 import { MapButtons } from './map-buttons/MapButtons';
 
@@ -56,20 +55,26 @@ const createDefaultValues = (feature: Feature | null): AedData | undefined => {
 
 interface CreateAedControlProps {
   map: MapInstance | null;
+  apiClient: ApiClient;
   createMode: CreateMode;
   feature: MapInteractionEvent | null;
   setEditFeature: Dispatch<SetStateAction<MapInteractionEvent | null>>;
   setCreateMode: Dispatch<SetStateAction<CreateMode>>;
   onFeatureSelect: (event: MapInteractionEvent) => void;
+  onNotify: NotificationHandler;
+  compact?: boolean;
 }
 
 export const CreateAedControl = ({
   map,
+  apiClient,
   createMode,
   feature,
   setEditFeature,
   setCreateMode,
   onFeatureSelect,
+  onNotify,
+  compact,
 }: CreateAedControlProps) => {
   const { t } = useTranslation();
   const form = useForm<AedData>({
@@ -138,6 +143,7 @@ export const CreateAedControl = ({
         handleCancel={handleCancel}
         handleConfirmPosition={() => void handleConfirmPosition()}
         handleChangePosition={handleChangePosition}
+        compact={compact}
       />
       {createMode === CreateMode.position && (
         <div className="absolute top-6 z-5 w-full flex flex-row justify-center items-start h-0">
@@ -148,7 +154,15 @@ export const CreateAedControl = ({
         </div>
       )}
       {createMode === CreateMode.form && (
-        <AedForm map={map} onSuccess={handleOnSuccess} form={form} setCreateMode={setCreateMode} />
+        <AedForm
+          map={map}
+          apiClient={apiClient}
+          form={form}
+          setCreateMode={setCreateMode}
+          onSuccess={handleOnSuccess}
+          onNotify={onNotify}
+          compact={compact}
+        />
       )}
     </>
   );

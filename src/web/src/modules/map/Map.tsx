@@ -1,21 +1,24 @@
 import {
   AttributionControl,
+  CreateAedControl,
   CreateMode,
   DetailView,
+  type Notification,
   SearchControl,
   SharedMap,
   type SharedMapState,
 } from '@defikarte/shared';
-import { type Dispatch, type SetStateAction, useEffect, useMemo } from 'react';
+import { type Dispatch, type SetStateAction, useCallback, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import backend from '../../api/backend';
+import iconCheckCircleGreen from '../../assets/icons/icon-check-circle-green.svg';
+import iconCrossmarkCircleRed from '../../assets/icons/icon-crossmark-circle-red.svg';
 import iconGpsWarningCircleRed from '../../assets/icons/icon-gps-warning-circle-red.svg';
 import { CustomToast } from '../../components/ui/custom-toast/CustomToast';
 import { SplashScreen } from '../../components/ui/splash-screen/SplashScreen';
 import AppConfiguration from '../../configuration/app.configuration';
 import { GeolocationService } from '../../services/geolocation.service';
-import { CreateAedControl } from './controls/create-aed-control/CreateAedControl';
 import { CreateButtonControl } from './controls/create-button-control/CreateButtonControl';
 import { MapControl } from './controls/map-control/MapControl';
 import { SponsorControl } from './controls/sponsor-control/SponsorControl';
@@ -100,6 +103,23 @@ const MapControls = ({ mapState, setIsFullscreen, t }: MapControlsProps) => {
     };
   }, [createMode, setIsFullscreen]);
 
+  // create / edit result handling
+  const notifyAed = useCallback(({ type, title, message }: Notification) => {
+    toast.custom(
+      toastInstance => (
+        <CustomToast
+          toastInstance={toastInstance}
+          icon={type === 'success' ? iconCheckCircleGreen : iconCrossmarkCircleRed}
+          title={title}
+          message={message}
+        />
+      ),
+      {
+        id: 'aed-toast',
+      }
+    );
+  }, []);
+
   // location error handling
   useEffect(() => {
     if (locationError) {
@@ -125,11 +145,13 @@ const MapControls = ({ mapState, setIsFullscreen, t }: MapControlsProps) => {
       {createMode !== CreateMode.none && (
         <CreateAedControl
           map={mapInstance}
+          apiClient={apiClient}
           createMode={createMode}
           feature={editFeature}
           setEditFeature={setEditFeature}
           setCreateMode={setCreateMode}
           onFeatureSelect={selectFeatureOnMap}
+          onNotify={notifyAed}
         />
       )}
       {createMode === CreateMode.none && (

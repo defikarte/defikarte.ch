@@ -1,8 +1,8 @@
 import cn from 'classnames';
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
-import { isMobileAgent } from '../../../services/isMobileAgent';
-import { type TooltipData } from '../../../model/app';
+import { type TooltipData } from '../../../model/common';
+import { isMobileAgent } from '../../../services/user-agent.service';
 import { Tooltip } from '../tooltip/Tooltip';
 
 interface SelectFieldProps extends React.SelectHTMLAttributes<HTMLSelectElement> {

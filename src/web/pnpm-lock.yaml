@@ -35,24 +35,15 @@ importers:
       i18next-browser-languagedetector:
         specifier: ^8.0.4
         version: 8.2.0
-      libphonenumber-js:
-        specifier: ^1.12.9
-        version: 1.12.33
       maplibre-gl:
         specifier: ^4.7.1
         version: 4.7.1
-      opening_hours:
-        specifier: ^3.8.0
-        version: 3.9.0(typescript@5.9.3)
       react:
         specifier: 19.2.3
         version: 19.2.3
       react-dom:
         specifier: 19.2.3
         version: 19.2.3(react@19.2.3)
-      react-hook-form:
-        specifier: ^7.56.4
-        version: 7.69.0(react@19.2.3)
       react-hot-toast:
         specifier: ^2.5.2
         version: 2.6.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -147,6 +138,9 @@ importers:
       geojson:
         specifier: ^0.5.0
         version: 0.5.0
+      libphonenumber-js:
+        specifier: ^1.12.9
+        version: 1.12.33
       maplibre-gl:
         specifier: ^4.7.1
         version: 4.7.1
@@ -156,6 +150,9 @@ importers:
       react:
         specifier: '>=18.0.0'
         version: 19.0.0
+      react-hook-form:
+        specifier: ^7.56.4
+        version: 7.69.0(react@19.0.0)
       react-i18next:
         specifier: ^15.4.0
         version: 15.7.4(i18next@24.2.3(typescript@6.0.3))(react-dom@19.2.3(react@19.2.3))(react@19.0.0)(typescript@6.0.3)
@@ -167,8 +164,8 @@ importers:
         specifier: ^7946.0.16
         version: 7946.0.16
       '@types/react':
-        specifier: ^19.0.0
-        version: 19.0.0
+        specifier: ^19.2.0
+        version: 19.2.9
       typescript:
         specifier: ~6.0.3
         version: 6.0.3
@@ -1079,9 +1076,6 @@ packages:
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
     peerDependencies:
       '@types/react': ^19.2.0
-
-  '@types/react@19.0.0':
-    resolution: {integrity: sha512-MY3oPudxvMYyesqs/kW1Bh8y9VqSmf+tzqw3ae8a9DZW68pUe3zAdHeI1jc6iAysuRdACnVknHP8AhwD4/dxtg==}
 
   '@types/react@19.2.9':
     resolution: {integrity: sha512-Lpo8kgb/igvMIPeNV2rsYKTgaORYdO1XGVZ4Qz3akwOj0ySGYMPlQWa8BaLn0G63D1aSaAQ5ldR06wCpChQCjA==}
@@ -3367,10 +3361,6 @@ snapshots:
     dependencies:
       '@types/react': 19.2.9
 
-  '@types/react@19.0.0':
-    dependencies:
-      csstype: 3.2.3
-
   '@types/react@19.2.9':
     dependencies:
       csstype: 3.2.3
@@ -4377,14 +4367,6 @@ snapshots:
 
   obug@2.1.1: {}
 
-  opening_hours@3.9.0(typescript@5.9.3):
-    dependencies:
-      i18next: 24.2.3(typescript@5.9.3)
-      i18next-browser-languagedetector: 8.2.0
-      suncalc: 1.9.0
-    transitivePeerDependencies:
-      - typescript
-
   opening_hours@3.9.0(typescript@6.0.3):
     dependencies:
       i18next: 24.2.3(typescript@6.0.3)
@@ -4474,9 +4456,9 @@ snapshots:
       react: 19.2.3
       scheduler: 0.27.0
 
-  react-hook-form@7.69.0(react@19.2.3):
+  react-hook-form@7.69.0(react@19.0.0):
     dependencies:
-      react: 19.2.3
+      react: 19.0.0
 
   react-hot-toast@2.6.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:
