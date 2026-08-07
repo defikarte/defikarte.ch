@@ -3,7 +3,6 @@ import { NavLink } from 'react-router';
 import defikarteLogoQuerGruenNegativRgb from '../../assets/logo/defikarte-logo-quer-gruen-negativ-rgb.svg';
 import iconExternalLinkMiddleGreen from '../../assets/navigation/icon-external-link-middle-green.svg';
 import lifetectLogoWhite from '../../assets/navigation/lifetec-logo-white.svg';
-import openbracketsLogoWhite from '../../assets/navigation/openbrackets-logo-white.svg';
 import procamedLogoWhite from '../../assets/navigation/procamed-logo-white.svg';
 import { ContentWrapper } from '../../components/ui/content-wrapper/ContentWrapper';
 import AppConfiguration from '../../configuration/app.configuration';
