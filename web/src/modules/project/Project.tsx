@@ -1,10 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import iconExternalLinkMiddleGreen from '../../assets/icons/icon-external-link-middle-green.svg';
 import iconArrowDownWhite from '../../assets/landingpages/icon-arrow-down-white.svg';
 import imageDefikartePortraitChristian from '../../assets/landingpages/projekt/defikarte-portrait-christian.jpg';
 import iconZitat from '../../assets/landingpages/projekt/icon-zitat.svg';
-import imageOpenBracketLogoWhite from '../../assets/navigation/openbrackets-logo-white.svg';
-import { Button } from '../../components/ui/button/Button';
 import { ContentWrapper } from '../../components/ui/content-wrapper/ContentWrapper';
 import { Hero } from '../../components/ui/hero/Hero';
 import { Text } from '../../components/ui/text/Text';
@@ -109,22 +106,6 @@ export const Project = () => {
             <Text size="small">{t('SectionProjectAppDescriptionTwoContent')}</Text>
           </div>
         </div>
-      </ContentWrapper>
-      <ContentWrapper variant="green-gradient" className="py-16 md:py-[179px] flex-col">
-        <Text variant="tint" size="large" weight="bold" className="pb-8 text-center">
-          {t('SectionProjectOpenbracketsTitle')}
-        </Text>
-        <img src={imageOpenBracketLogoWhite} className="w-[200px] pb-10" />
-        <Text variant="white" size="regular" weight="light" center className="pb-10">
-          {t('SectionProjectOpenbracketsContent')}
-        </Text>
-        <Button
-          variant="white"
-          icon={iconExternalLinkMiddleGreen}
-          onClick={() => open('https://www.openbrackets.ch', '_blank')}
-        >
-          OpenBrackets.ch
-        </Button>
       </ContentWrapper>
     </div>
   );

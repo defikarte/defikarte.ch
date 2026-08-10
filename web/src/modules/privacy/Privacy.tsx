@@ -16,7 +16,7 @@ export const Privacy = () => {
       <Hero
         title={t('SectionImpressumTitle')}
         description={[
-          'Verein OpenBrackets',
+          'Verein defikarte.ch',
           'Christian Nüssli',
           'Grüningerstrasse 149a',
           '8626 Ottikon',

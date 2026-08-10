@@ -3,7 +3,6 @@ import { NavLink } from 'react-router';
 import defikarteLogoQuerGruenNegativRgb from '../../assets/logo/defikarte-logo-quer-gruen-negativ-rgb.svg';
 import iconExternalLinkMiddleGreen from '../../assets/navigation/icon-external-link-middle-green.svg';
 import lifetectLogoWhite from '../../assets/navigation/lifetec-logo-white.svg';
-import openbracketsLogoWhite from '../../assets/navigation/openbrackets-logo-white.svg';
 import procamedLogoWhite from '../../assets/navigation/procamed-logo-white.svg';
 import { ContentWrapper } from '../../components/ui/content-wrapper/ContentWrapper';
 import AppConfiguration from '../../configuration/app.configuration';
@@ -17,16 +16,8 @@ export const Footer = () => {
           <img
             src={defikarteLogoQuerGruenNegativRgb}
             alt="defikarte.ch"
-            className="w-[150px] pb-8"
+            className="w-[150px]"
           />
-          <a href="https://www.openbrackets.ch/" target="_blank" className="cursor-pointer">
-            <div className="border w-fit pt-3 px-4 pb-4 rounded-lg border-primary-10-white">
-              <p className="text-primary-100-green-02 text-xs font-normal leading-[150%] pb-1">
-                {t('projectOf')}
-              </p>
-              <img src={openbracketsLogoWhite} alt="OpenBracktes.ch" />
-            </div>
-          </a>
         </div>
         <div className="w-full md:w-1/2 grid md:grid-cols-3 md:grid-flow-col md:grid-rows-3 gap-3 pt-10 md:pt-0">
           <a
@@ -54,19 +45,11 @@ export const Footer = () => {
             {t('legal')}
           </NavLink>
           <a
-            href="https://github.com/OpenBracketsCH/defikarte.ch"
+            href="https://github.com/defikarte/defikarte.ch"
             target="_blank"
             className="flex text-primary-100-white font-normal leading-[150%] text-sm cursor-pointer h-fit"
           >
             GitHub
-            <img src={iconExternalLinkMiddleGreen} className="ps-1" />
-          </a>
-          <a
-            href="https://www.openbrackets.ch/"
-            target="_blank"
-            className="flex text-primary-100-white font-normal leading-[150%] text-sm cursor-pointer h-fit"
-          >
-            OpenBrackets
             <img src={iconExternalLinkMiddleGreen} className="ps-1" />
           </a>
         </div>
