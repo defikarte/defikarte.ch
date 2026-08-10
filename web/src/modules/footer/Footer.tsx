@@ -16,7 +16,7 @@ export const Footer = () => {
           <img
             src={defikarteLogoQuerGruenNegativRgb}
             alt="defikarte.ch"
-            className="w-[150px] pb-8"
+            className="w-[150px]"
           />
         </div>
         <div className="w-full md:w-1/2 grid md:grid-cols-3 md:grid-flow-col md:grid-rows-3 gap-3 pt-10 md:pt-0">
