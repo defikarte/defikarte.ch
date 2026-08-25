@@ -5,7 +5,6 @@ import iconExternalLinkWhite from '../../assets/landingpages/icon-external-link-
 import imageDefikartePartnerAkkupoint from '../../assets/landingpages/unterstuetzung/defikarte-partner-akkupoint.jpg';
 import imageDefikartePartnerByteworks from '../../assets/landingpages/unterstuetzung/defikarte-partner-byteworks.svg';
 import imageDefikartePartnerFirstResponder from '../../assets/landingpages/unterstuetzung/defikarte-partner-first-responder.jpg';
-import imageDefikartePartnerFurrer from '../../assets/landingpages/unterstuetzung/defikarte-partner-furrer.jpg';
 import imageDefikartePartnerHostpoint from '../../assets/landingpages/unterstuetzung/defikarte-partner-hostpoint.svg';
 import imageDefikartePartnerKtsg from '../../assets/landingpages/unterstuetzung/defikarte-partner-ktsg.svg';
 import imageDefikartePartnerLifetec from '../../assets/landingpages/unterstuetzung/defikarte-partner-lifetec.svg';
@@ -136,7 +135,6 @@ export const Sponsors = () => {
           <SponsorCard src={imageDefikartePartnerSirmed} href="https://www.sirmed.ch/" />
           <SponsorCard src={imageDefikartePartnerResqpro} href="https://www.resqpro.ch/" />
           <SponsorCard src={imageDefikartePartnerByteworks} href="https://www.byteworks.ch/" />
-          <SponsorCard src={imageDefikartePartnerFurrer} href="https://www.furrerit.ch/" />
           <SponsorCard src={imageDefikartePartnerSinoma} href="https://www.sinoma.ch/" />
           <SponsorCard src={imageDefikartePartnerKtsg} href="https://www.sg.ch/" />
         </div>
