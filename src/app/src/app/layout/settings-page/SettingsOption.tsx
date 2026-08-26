@@ -17,21 +17,21 @@ export const SettingsOption = ({ children, leading, onSelect, selected }: Settin
     'border',
     'bg-primary-10-white',
     'text-primary-100-white',
-    'text-xs',
+    'text-base',
     'font-medium',
     'text-start',
-    'p-4',
+    'p-5',
     'rounded-xl',
     'active:bg-primary-20-green-01',
     selected ? 'border-primary-100-green-01' : 'border-primary-20-white'
   );
   return (
     <button type="button" role="radio" aria-checked={selected} onClick={onSelect} className={cn}>
-      <span className="flex flex-1 items-center gap-3">
+      <span className="flex flex-1 items-center gap-4">
         {leading}
         <span className="flex-1">{children}</span>
       </span>
-      {selected && <img src={iconCheckGreen} alt="" className="size-4 shrink-0" />}
+      {selected && <img src={iconCheckGreen} alt="" className="size-6 shrink-0" />}
     </button>
   );
 };

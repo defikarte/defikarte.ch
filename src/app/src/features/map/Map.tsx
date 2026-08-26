@@ -9,7 +9,7 @@ import {
   type SharedMapState,
   usePrevious,
 } from '@defikarte/shared';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useCallback, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import backend from '../../api/backend';
@@ -18,6 +18,7 @@ import iconCrossmarkCircleRed from '../../assets/icons/icon-crossmark-circle-red
 import { CustomToast } from '../../components/ui/custom-toast/CustomToast';
 import AppConfiguration from '../../configuration/app.configuration';
 import { useBaseLayer } from '../../hooks/useBaseLayer';
+import type { MapSearch } from '../../routes/index';
 import { CapacitorGeolocationService } from '../../services/capacitor-geolocation.service';
 
 const mapConfig = {
@@ -27,12 +28,18 @@ const mapConfig = {
 };
 
 interface MapProps {
-  autoStartCreate?: boolean;
+  /** Whether the map is the screen currently shown - false while another route is on top of it. */
+  isActive: boolean;
 }
 
-export const Map = ({ autoStartCreate }: MapProps) => {
+export const Map = ({ isActive }: MapProps) => {
   const locationProvider = useMemo(() => new CapacitorGeolocationService(), []);
   const [persistedBaseLayer, setPersistedBaseLayer] = useBaseLayer();
+  // The map lives in the root layout, outside the "/" route, so the create param is read from the
+  // router state instead of Route.useSearch().
+  const autoStartCreate = useRouterState({
+    select: state => (state.location.search as MapSearch).create,
+  });
 
   return (
     <SharedMap
@@ -44,7 +51,7 @@ export const Map = ({ autoStartCreate }: MapProps) => {
       onBaseLayerChange={setPersistedBaseLayer}
     >
       {(mapState: SharedMapState) => (
-        <MapControls mapState={mapState} autoStartCreate={autoStartCreate} />
+        <MapControls mapState={mapState} autoStartCreate={autoStartCreate} isActive={isActive} />
       )}
     </SharedMap>
   );
@@ -53,9 +60,10 @@ export const Map = ({ autoStartCreate }: MapProps) => {
 interface MapControlsProps {
   mapState: SharedMapState;
   autoStartCreate?: boolean;
+  isActive: boolean;
 }
 
-const MapControls = ({ mapState, autoStartCreate }: MapControlsProps) => {
+const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) => {
   const {
     mapInstance,
     apiClient,
@@ -106,7 +114,10 @@ const MapControls = ({ mapState, autoStartCreate }: MapControlsProps) => {
   // be idempotent. prevCreateMode is what tells "the param just appeared" apart from
   // "the flow just ended" - both look like autoStartCreate && createMode === none.
   useEffect(() => {
-    if (!isInitialized) {
+    // While another route is on top, the map keeps its create flow but the url no longer carries
+    // the param, so syncing would cancel the flow - and its "flow finished" branch would navigate
+    // away from the page the user is actually on.
+    if (!isInitialized || !isActive) {
       return;
     }
 
@@ -134,6 +145,7 @@ const MapControls = ({ mapState, autoStartCreate }: MapControlsProps) => {
     }
   }, [
     autoStartCreate,
+    isActive,
     isInitialized,
     createMode,
     prevCreateMode,

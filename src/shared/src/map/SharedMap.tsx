@@ -82,6 +82,10 @@ export const SharedMap = ({
   const defaultBaseLayer = persistedBaseLayer || MapConfiguration.osmBaseMapId;
 
   const mapInstanceRef = useRef<MapInstance | null>(null);
+  // The map is created once with the layer that was active at mount; later changes are applied to
+  // the running instance instead (see the setActiveBaseLayer effect below), so the creation effect
+  // must not depend on activeBaseLayer.
+  const initialBaseLayerRef = useRef<string>(defaultBaseLayer);
   const mapInstance = mapInstanceRef.current;
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const { isInitialized, handleMapEvent } = useMapEvents();
@@ -124,19 +128,37 @@ export const SharedMap = ({
 
   // map initialization
   useEffect(() => {
-    if (mapContainerRef.current && !mapInstanceRef.current && activeBaseLayer) {
+    if (mapContainerRef.current && !mapInstanceRef.current && initialBaseLayerRef.current) {
       const map = new MapInstance({
         container: mapContainerRef.current,
-        baseLayer: activeBaseLayer,
+        baseLayer: initialBaseLayerRef.current,
         overlays: [defaultActiveOverlay, OverlayType.userLocation],
         onEvent: onMapEvent,
         hash: isHash,
         apiClient: apiClient,
       });
       mapInstanceRef.current = map;
-      return () => mapInstanceRef.current?.remove();
+      // Clearing the ref matters: without it a re-run of this effect (StrictMode's double invoke,
+      // or a changed dependency) removes the instance and then skips recreating it.
+      return () => {
+        mapInstanceRef.current?.remove();
+        mapInstanceRef.current = null;
+      };
     }
-  }, [activeBaseLayer, isHash, onMapEvent, apiClient]);
+  }, [isHash, onMapEvent, apiClient]);
+
+  // A base layer picked elsewhere (e.g. a settings screen that stays mounted next to the map)
+  // arrives as a prop change and has to reach the running instance.
+  useEffect(() => {
+    if (persistedBaseLayer) {
+      setActiveBaseLayerState(persistedBaseLayer);
+    }
+  }, [persistedBaseLayer]);
+
+  useEffect(() => {
+    // no-ops while the instance is still loading or already on this layer
+    void mapInstanceRef.current?.setActiveBaseLayer(activeBaseLayer);
+  }, [activeBaseLayer, isInitialized]);
 
   const handleOnCreateStart = () => {
     setEditFeature(null);

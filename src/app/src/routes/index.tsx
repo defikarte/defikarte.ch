@@ -1,8 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { Map } from '../features/map/Map';
 
-interface MapSearch {
-  /** Set by the "create" nav button to start the create flow without unmounting the map. */
+export interface MapSearch {
+  /** Set by the "create" nav button to start the create flow. */
   create?: boolean;
 }
 
@@ -13,12 +12,8 @@ export const Route = createFileRoute('/')({
   component: RouteComponent,
 });
 
+// The map itself is mounted by the root layout so it survives navigation - this route only owns
+// the url (and its create search param) that makes the map the visible screen.
 function RouteComponent() {
-  const { create } = Route.useSearch();
-
-  return (
-    <div className="w-full h-full">
-      <Map autoStartCreate={create} />
-    </div>
-  );
+  return null;
 }

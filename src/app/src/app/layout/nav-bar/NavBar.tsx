@@ -28,8 +28,8 @@ export const NavBar = () => {
         >
           {t('nav.home')}
         </IconLink>
-        {/* The map is mounted by the "/" route, so create mode is started via a search param
-            instead of a dedicated route, which would tear down the map instance. */}
+        {/* Create mode is a search param on "/" rather than its own route: the map stays the
+            visible screen, and the param is what the nav bar reads to highlight this entry. */}
         <IconLink
           to="/"
           search={{ create: true }}

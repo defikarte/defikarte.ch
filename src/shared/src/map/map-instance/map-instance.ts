@@ -150,10 +150,13 @@ export class MapInstance {
       return;
     }
 
+    // claimed before awaiting the style, so a second call for the same layer arriving while this
+    // one is still loading is dropped instead of swapping the style twice
+    this.activeBaseLayer = id;
+
     let style = await this.getBaseLayerStyleSpec(id);
     style = await this.overlayManager.applyActiveOverlaysOnStyle(style);
 
-    this.activeBaseLayer = id;
     this.mapInstance?.setStyle(style, { diff: true });
   }
 
