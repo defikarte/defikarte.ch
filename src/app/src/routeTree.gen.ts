@@ -9,15 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings.index'
+import { Route as SettingsMapdesignRouteImport } from './routes/settings.mapdesign'
+import { Route as SettingsLanguageRouteImport } from './routes/settings.language'
 
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -28,46 +25,78 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsMapdesignRoute = SettingsMapdesignRouteImport.update({
+  id: '/settings/mapdesign',
+  path: '/settings/mapdesign',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsLanguageRoute = SettingsLanguageRouteImport.update({
+  id: '/settings/language',
+  path: '/settings/language',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/settings': typeof SettingsRoute
+  '/settings/language': typeof SettingsLanguageRoute
+  '/settings/mapdesign': typeof SettingsMapdesignRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/settings': typeof SettingsRoute
+  '/settings/language': typeof SettingsLanguageRoute
+  '/settings/mapdesign': typeof SettingsMapdesignRoute
+  '/settings': typeof SettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/settings': typeof SettingsRoute
+  '/settings/language': typeof SettingsLanguageRoute
+  '/settings/mapdesign': typeof SettingsMapdesignRoute
+  '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/settings'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/settings/language'
+    | '/settings/mapdesign'
+    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/settings'
-  id: '__root__' | '/' | '/about' | '/settings'
+  to:
+    | '/'
+    | '/about'
+    | '/settings/language'
+    | '/settings/mapdesign'
+    | '/settings'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/settings/language'
+    | '/settings/mapdesign'
+    | '/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  SettingsRoute: typeof SettingsRoute
+  SettingsLanguageRoute: typeof SettingsLanguageRoute
+  SettingsMapdesignRoute: typeof SettingsMapdesignRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -82,13 +111,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/': {
+      id: '/settings/'
+      path: '/settings'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/mapdesign': {
+      id: '/settings/mapdesign'
+      path: '/settings/mapdesign'
+      fullPath: '/settings/mapdesign'
+      preLoaderRoute: typeof SettingsMapdesignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/language': {
+      id: '/settings/language'
+      path: '/settings/language'
+      fullPath: '/settings/language'
+      preLoaderRoute: typeof SettingsLanguageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  SettingsRoute: SettingsRoute,
+  SettingsLanguageRoute: SettingsLanguageRoute,
+  SettingsMapdesignRoute: SettingsMapdesignRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
