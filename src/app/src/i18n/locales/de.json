@@ -17,7 +17,10 @@
   "settings": {
     "settings": "Einstellungen",
     "language": "Sprache",
-    "mapdesign": "Kartendesign"
+    "mapdesign": "Kartendesign",
+    "basemap": "Base Map",
+    "osm": "Open Street",
+    "satellite": "Satellit"
   },
   "navigate": "Navigieren",
   "distanceAway": "{{distance}}{{unit}} entfernt",

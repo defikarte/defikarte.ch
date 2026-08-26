@@ -17,7 +17,7 @@ import iconCheckCircleGreen from '../../assets/icons/icon-check-circle-green.svg
 import iconCrossmarkCircleRed from '../../assets/icons/icon-crossmark-circle-red.svg';
 import { CustomToast } from '../../components/ui/custom-toast/CustomToast';
 import AppConfiguration from '../../configuration/app.configuration';
-import { usePersistenceState } from '../../hooks/usePersistenceState';
+import { useBaseLayer } from '../../hooks/useBaseLayer';
 import { CapacitorGeolocationService } from '../../services/capacitor-geolocation.service';
 
 const mapConfig = {
@@ -32,10 +32,7 @@ interface MapProps {
 
 export const Map = ({ autoStartCreate }: MapProps) => {
   const locationProvider = useMemo(() => new CapacitorGeolocationService(), []);
-  const [persistedBaseLayer, setPersistedBaseLayer] = usePersistenceState<string>(
-    AppConfiguration.baseLayerLocalStorageKey,
-    'osm-vector'
-  );
+  const [persistedBaseLayer, setPersistedBaseLayer] = useBaseLayer();
 
   return (
     <SharedMap

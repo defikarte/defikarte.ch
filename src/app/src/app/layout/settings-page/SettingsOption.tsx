@@ -27,8 +27,10 @@ export const SettingsOption = ({ children, leading, onSelect, selected }: Settin
   );
   return (
     <button type="button" role="radio" aria-checked={selected} onClick={onSelect} className={cn}>
-      {leading}
-      <span className="flex-1">{children}</span>
+      <span className="flex flex-1 items-center gap-3">
+        {leading}
+        <span className="flex-1">{children}</span>
+      </span>
       {selected && <img src={iconCheckGreen} alt="" className="size-4 shrink-0" />}
     </button>
   );

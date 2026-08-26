@@ -1,8 +1,26 @@
 {
+  "nav": {
+    "home": "Defikarte",
+    "about": "Infos",
+    "settings": "Paramètres",
+    "create": "Créer"
+  },
+  "infos": {
+    "project": "Le projet",
+    "projectText": "L'application defikarte.ch aide à trouver le défibrillateur le plus proche. L'application de navigation de votre appareil vous permet de vous y rendre. Defikarte est un projet de l'association OpenBrackets, qui s'engage pour les données ouvertes en se concentrant sur les organisations de secours.",
+    "sponsors": "Sponsors",
+    "sponsorsText": "Nos sponsors platine soutiennent activement le projet et l'enrichissent de leur expertise professionnelle.",
+    "allSponsors": "Tous les sponsors",
+    "openSource": "Open Source",
+    "openSourceText": "Les données sont open source et sont entretenues et gérées par la communauté dans OpenStreetMap (OSM). Comme il n'existe en Suisse ni jeu de données complet ni obligation de déclarer les défibrillateurs, tous ne sont pas recensés. Si vous constatez qu'un défibrillateur n'est pas répertorié, soutenez la communauté en l'ajoutant à l'aide de cette application. "
+  },
   "settings": {
     "settings": "Paramètres",
     "language": "Langue",
-    "mapdesign": "Style de carte"
+    "mapdesign": "Style de carte",
+    "basemap": "Carte de base",
+    "osm": "Open Street",
+    "satellite": "Satellite"
   },
   "navigate": "Naviguer",
   "distanceAway": "{{distance}}{{unit}} éloigné",

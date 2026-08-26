@@ -1,14 +1,26 @@
 {
   "nav": {
-    "home": "Home",
-    "create": "Create",
+    "home": "Defikarte",
+    "about": "About",
     "settings": "Settings",
-    "about": "About"
+    "create": "Create"
+  },
+  "infos": {
+    "project": "The project",
+    "projectText": "The defikarte.ch app helps you find the nearest defibrillator. Using your device's navigation app you can be guided to it. Defikarte is a project of the association OpenBrackets, which is committed to open data with a focus on emergency organisations.",
+    "sponsors": "Sponsors",
+    "sponsorsText": "Our platinum sponsors actively support the project and enrich it with their professional expertise.",
+    "allSponsors": "All sponsors",
+    "openSource": "Open Source",
+    "openSourceText": "The data is open source and is maintained and managed by the community in OpenStreetMap (OSM). As there is no complete dataset and no obligation to report defibrillators in Switzerland, not all of them are recorded. So if you notice that a defibrillator is missing, support the community by adding it with this app. "
   },
   "settings": {
     "settings": "Settings",
     "language": "Language",
-    "mapdesign": "Map design"
+    "mapdesign": "Map design",
+    "basemap": "Base map",
+    "osm": "Open Street",
+    "satellite": "Satellite"
   },
   "navigate": "Navigate",
   "distanceAway": "{{distance}}{{unit}} away",
