@@ -39,11 +39,14 @@ importers:
         specifier: ^4.7.1
         version: 4.7.1
       react:
-        specifier: 19.2.3
+        specifier: ^19.2.0
         version: 19.2.3
       react-dom:
-        specifier: 19.2.3
+        specifier: ^19.2.0
         version: 19.2.3(react@19.2.3)
+      react-hook-form:
+        specifier: ^7.56.4
+        version: 7.69.0(react@19.2.3)
       react-hot-toast:
         specifier: ^2.5.2
         version: 2.6.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -148,17 +151,17 @@ importers:
         specifier: ^3.8.0
         version: 3.9.0(typescript@6.0.3)
       react:
-        specifier: '>=18.0.0'
-        version: 19.0.0
+        specifier: ^19.0.0
+        version: 19.2.3
       react-hook-form:
         specifier: ^7.56.4
-        version: 7.69.0(react@19.0.0)
+        version: 7.69.0(react@19.2.3)
       react-i18next:
         specifier: ^15.4.0
-        version: 15.7.4(i18next@24.2.3(typescript@6.0.3))(react-dom@19.2.3(react@19.2.3))(react@19.0.0)(typescript@6.0.3)
+        version: 15.7.4(i18next@24.2.3(typescript@6.0.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
       react-responsive:
         specifier: ^10.0.1
-        version: 10.0.1(react@19.0.0)
+        version: 10.0.1(react@19.2.3)
     devDependencies:
       '@types/geojson':
         specifier: ^7946.0.16
@@ -2125,10 +2128,6 @@ packages:
     engines: {node: '>=14'}
     peerDependencies:
       react: '>=16.8.0'
-
-  react@19.0.0:
-    resolution: {integrity: sha512-V8AVnmPIICiWpGfm6GLzCR/W5FXLchHop40W4nXBmdlEceh16rCN8O8LNWm5bh5XUX91fh7KpA+W0TgMKmgTpQ==}
-    engines: {node: '>=0.10.0'}
 
   react@19.2.3:
     resolution: {integrity: sha512-Ku/hhYbVjOQnXDZFv2+RibmLFGwFdeeKHFcOTlrt7xplBnya5OGn/hIRDsqDiSUcfORsDC7MPxwork8jBwsIWA==}
@@ -4456,9 +4455,9 @@ snapshots:
       react: 19.2.3
       scheduler: 0.27.0
 
-  react-hook-form@7.69.0(react@19.0.0):
+  react-hook-form@7.69.0(react@19.2.3):
     dependencies:
-      react: 19.0.0
+      react: 19.2.3
 
   react-hot-toast@2.6.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:
@@ -4477,12 +4476,12 @@ snapshots:
       react-dom: 19.2.3(react@19.2.3)
       typescript: 5.9.3
 
-  react-i18next@15.7.4(i18next@24.2.3(typescript@6.0.3))(react-dom@19.2.3(react@19.2.3))(react@19.0.0)(typescript@6.0.3):
+  react-i18next@15.7.4(i18next@24.2.3(typescript@6.0.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@6.0.3):
     dependencies:
       '@babel/runtime': 7.28.4
       html-parse-stringify: 3.0.1
       i18next: 24.2.3(typescript@6.0.3)
-      react: 19.0.0
+      react: 19.2.3
     optionalDependencies:
       react-dom: 19.2.3(react@19.2.3)
       typescript: 6.0.3
@@ -4493,14 +4492,6 @@ snapshots:
 
   react-refresh@0.17.0: {}
 
-  react-responsive@10.0.1(react@19.0.0):
-    dependencies:
-      hyphenate-style-name: 1.1.0
-      matchmediaquery: 0.4.2
-      prop-types: 15.8.1
-      react: 19.0.0
-      shallow-equal: 3.1.0
-
   react-responsive@10.0.1(react@19.2.3):
     dependencies:
       hyphenate-style-name: 1.1.0
@@ -4508,8 +4499,6 @@ snapshots:
       prop-types: 15.8.1
       react: 19.2.3
       shallow-equal: 3.1.0
-
-  react@19.0.0: {}
 
   react@19.2.3: {}
 
