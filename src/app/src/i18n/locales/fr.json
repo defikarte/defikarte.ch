@@ -1,4 +1,9 @@
 {
+  "settings": {
+    "settings": "Paramètres",
+    "language": "Langue",
+    "mapdesign": "Style de carte"
+  },
   "navigate": "Naviguer",
   "distanceAway": "{{distance}}{{unit}} éloigné",
   "public": "Public",

@@ -1,4 +1,9 @@
 {
+  "settings": {
+    "settings": "Impostazioni",
+    "language": "Lingua",
+    "mapdesign": "Stile della mappa"
+  },
   "navigate": "Navigare",
   "distanceAway": "{{distance}}{{unit}} lontano",
   "public": "Pubblico",

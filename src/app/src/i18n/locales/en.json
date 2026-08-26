@@ -5,6 +5,11 @@
     "settings": "Settings",
     "about": "About"
   },
+  "settings": {
+    "settings": "Settings",
+    "language": "Language",
+    "mapdesign": "Map design"
+  },
   "navigate": "Navigate",
   "distanceAway": "{{distance}}{{unit}} away",
   "public": "Public",
