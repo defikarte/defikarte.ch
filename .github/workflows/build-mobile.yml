@@ -1,0 +1,326 @@
+name: "Mobile: Build & Publish"
+
+# Builds the Capacitor app in src/app for both platforms and publishes it to
+# TestFlight and the Google Play internal testing track.
+#
+# One-time credential setup (EAS export, App Store Connect API key, Play service
+# account, GitHub secrets): see docs/mobile-release-setup.md
+
+on:
+  push:
+    tags:
+      - "v*"
+
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Platform(s) to build"
+        type: choice
+        options: [both, ios, android]
+        default: both
+      publish:
+        description: "Publish to TestFlight / Play internal track"
+        type: boolean
+        default: false
+      version:
+        description: "Version name override, e.g. 1.2.3 (defaults to 0.0.<run number>)"
+        type: string
+        required: false
+
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version_name: ${{ steps.version.outputs.version_name }}
+      build_number: ${{ steps.version.outputs.build_number }}
+      build_ios: ${{ github.event_name == 'push' || inputs.platform != 'android' }}
+      build_android: ${{ github.event_name == 'push' || inputs.platform != 'ios' }}
+      publish: ${{ github.event_name == 'push' || inputs.publish }}
+    steps:
+      - name: Resolve version and build number
+        id: version
+        env:
+          # Set the MOBILE_BUILD_NUMBER_OFFSET repository variable if the previously
+          # published (Expo) app already used higher build numbers than the run number.
+          OFFSET: ${{ vars.MOBILE_BUILD_NUMBER_OFFSET || 0 }}
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            version_name="${GITHUB_REF_NAME#v}"
+          elif [ -n "${VERSION_INPUT}" ]; then
+            version_name="${VERSION_INPUT}"
+          else
+            version_name="0.0.${GITHUB_RUN_NUMBER}"
+          fi
+          echo "version_name=${version_name}" >> "$GITHUB_OUTPUT"
+          echo "build_number=$(( GITHUB_RUN_NUMBER + OFFSET ))" >> "$GITHUB_OUTPUT"
+
+      - name: Summary
+        run: |
+          echo "Version ${{ steps.version.outputs.version_name }} (build ${{ steps.version.outputs.build_number }})" >> "$GITHUB_STEP_SUMMARY"
+
+  build-android:
+    needs: prepare
+    if: needs.prepare.outputs.build_android == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      VITE_BACKEND_API: ${{ vars.BACKEND_API_URL }}
+      VITE_BACKEND_API_KEY: ${{ secrets.BACKEND_API_KEY }}
+      VITE_MAPTILER_API_KEY: ${{ secrets.MAPTILER_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: src/app/pnpm-lock.yaml
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        working-directory: ./src/app
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web bundle
+        working-directory: ./src/app
+        run: pnpm run build
+
+      - name: Capacitor sync
+        working-directory: ./src/app
+        run: pnpm run sync:android
+
+      - name: Decode upload keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+
+      - name: Build AAB and APK
+        working-directory: ./src/app/android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/upload.jks
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_VERSION_NAME: ${{ needs.prepare.outputs.version_name }}
+          ANDROID_VERSION_CODE: ${{ needs.prepare.outputs.build_number }}
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew --no-daemon bundleRelease assembleRelease
+
+      - name: Collect outputs
+        run: |
+          set -euo pipefail
+          v="${{ needs.prepare.outputs.version_name }}-${{ needs.prepare.outputs.build_number }}"
+          out="$RUNNER_TEMP/android-out"
+          mkdir -p "$out"
+          cp src/app/android/app/build/outputs/bundle/release/app-release.aab "$out/defikarte-$v.aab"
+          cp src/app/android/app/build/outputs/apk/release/app-release.apk "$out/defikarte-$v.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: ${{ runner.temp }}/android-out/*
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload.jks"
+
+  build-ios:
+    needs: prepare
+    if: needs.prepare.outputs.build_ios == 'true'
+    runs-on: macos-15
+    environment: production
+    env:
+      VITE_BACKEND_API: ${{ vars.BACKEND_API_URL }}
+      VITE_BACKEND_API_KEY: ${{ secrets.BACKEND_API_KEY }}
+      VITE_MAPTILER_API_KEY: ${{ secrets.MAPTILER_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: src/app/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: ./src/app
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web bundle
+        working-directory: ./src/app
+        run: pnpm run build
+
+      - name: Capacitor sync
+        working-directory: ./src/app
+        run: pnpm run sync:ios
+
+      - name: Import signing certificate and provisioning profile
+        env:
+          IOS_DIST_CERT_P12_BASE64: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+          IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+          IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          set -euo pipefail
+          keychain="$RUNNER_TEMP/build.keychain-db"
+          keychain_password="$(uuidgen)"
+          echo "KEYCHAIN_PASSWORD=$keychain_password" >> "$GITHUB_ENV"
+
+          security create-keychain -p "$keychain_password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$keychain_password" "$keychain"
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+
+          echo "$IOS_DIST_CERT_P12_BASE64" | base64 -d > "$RUNNER_TEMP/dist.p12"
+          security import "$RUNNER_TEMP/dist.p12" -k "$keychain" -P "$IOS_DIST_CERT_PASSWORD" \
+            -T /usr/bin/codesign -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple: -k "$keychain_password" "$keychain" > /dev/null
+          rm -f "$RUNNER_TEMP/dist.p12"
+
+          profiles="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$profiles"
+          echo "$IOS_PROVISIONING_PROFILE_BASE64" | base64 -d > "$profiles/app-store.mobileprovision"
+
+      - name: Write ExportOptions.plist
+        env:
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+          IOS_PROVISIONING_PROFILE_NAME: ${{ vars.IOS_PROVISIONING_PROFILE_NAME }}
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>teamID</key>
+            <string>${APPLE_TEAM_ID}</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>uploadSymbols</key>
+            <true/>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>ch.defikarte.app</key>
+              <string>${IOS_PROVISIONING_PROFILE_NAME}</string>
+            </dict>
+          </dict>
+          </plist>
+          PLIST
+
+      - name: Archive
+        working-directory: ./src/app/ios/App
+        env:
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+          IOS_PROVISIONING_PROFILE_NAME: ${{ vars.IOS_PROVISIONING_PROFILE_NAME }}
+        run: |
+          set -euo pipefail
+          xcodebuild archive \
+            -project App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            MARKETING_VERSION="${{ needs.prepare.outputs.version_name }}" \
+            CURRENT_PROJECT_VERSION="${{ needs.prepare.outputs.build_number }}" \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            PROVISIONING_PROFILE_SPECIFIER="$IOS_PROVISIONING_PROFILE_NAME" \
+            CODE_SIGN_IDENTITY="Apple Distribution"
+
+      - name: Export IPA
+        run: |
+          set -euo pipefail
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/ios-out"
+          v="${{ needs.prepare.outputs.version_name }}-${{ needs.prepare.outputs.build_number }}"
+          mv "$RUNNER_TEMP/ios-out/App.ipa" "$RUNNER_TEMP/ios-out/defikarte-$v.ipa"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios
+          path: ${{ runner.temp }}/ios-out/*.ipa
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Clean up keychain and profile
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/build.keychain-db" || true
+          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/app-store.mobileprovision"
+
+  publish-android:
+    needs: [prepare, build-android]
+    if: needs.prepare.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: android
+          path: artifacts
+
+      - name: Upload to Play internal track
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ch.defikarte.app
+          releaseFiles: artifacts/*.aab
+          track: internal
+          status: completed
+
+  publish-ios:
+    needs: [prepare, build-ios]
+    if: needs.prepare.outputs.publish == 'true'
+    runs-on: macos-15
+    environment: production
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ios
+          path: artifacts
+
+      - name: Upload to TestFlight
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY_P8_BASE64: ${{ secrets.ASC_PRIVATE_KEY_P8_BASE64 }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$ASC_PRIVATE_KEY_P8_BASE64" | base64 -d > ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
+          ipa="$(ls artifacts/*.ipa | head -n1)"
+          xcrun altool --validate-app -t ios -f "$ipa" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+          xcrun altool --upload-app -t ios -f "$ipa" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+
+      - name: Remove API key
+        if: always()
+        run: rm -rf ~/.appstoreconnect/private_keys

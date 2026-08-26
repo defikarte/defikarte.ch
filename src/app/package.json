@@ -9,6 +9,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "sync:android": "cap sync android",
+    "sync:ios": "cap sync ios",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest"
