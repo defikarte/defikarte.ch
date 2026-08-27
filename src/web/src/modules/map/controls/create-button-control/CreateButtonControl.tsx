@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import iconPlusWhite from '../../../../assets/icons/icon-plus-white.svg';
-import { Button } from '../../../../components/ui/button/Button';
+import { Button } from '@defikarte/shared';
 
 interface CreateButtonControlProps {
   onCreateStart: () => void;

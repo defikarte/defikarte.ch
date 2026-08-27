@@ -9,6 +9,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "sync:android": "cap sync android",
+    "sync:ios": "cap sync ios",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest"
@@ -16,6 +18,7 @@
   "dependencies": {
     "@capacitor/android": "^8.0.2",
     "@capacitor/core": "^8.0.2",
+    "@capacitor/geolocation": "^7.0.1",
     "@capacitor/ios": "^8.0.2",
     "@defikarte/shared": "workspace:*",
     "@tanstack/react-router": "^1.154.13",
@@ -23,9 +26,13 @@
     "classnames": "^2.5.1",
     "i18next": "^24.2.2",
     "i18next-browser-languagedetector": "^8.0.4",
+    "maplibre-gl": "^4.7.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-i18next": "^15.4.0"
+    "react-hook-form": "^7.56.4",
+    "react-hot-toast": "^2.5.2",
+    "react-i18next": "^15.4.0",
+    "react-responsive": "^10.0.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.2",

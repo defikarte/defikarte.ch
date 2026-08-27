@@ -1,26 +1,22 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "nodenext",
-    "lib": [
-      "ES2020",
-      "DOM"
-    ],
-    "moduleResolution": "nodenext",
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": true,
     "declaration": true,
     "declarationMap": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
     "noEmit": true
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
 }

@@ -1,5 +1,5 @@
 import iconExternalLinkMiddleGreen from '../../../assets/icons/icon-external-link-middle-green.svg';
-import { IconButton } from '../../../components/ui/icon-button/IconButton';
+import { IconButton } from '@defikarte/shared';
 import { Text } from '../../../components/ui/text/Text';
 
 interface SponsorPlatinCardProps {

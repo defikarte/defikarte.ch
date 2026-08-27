@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@source '../../shared/src';
 
 @font-face {
   font-family: 'Poppins';

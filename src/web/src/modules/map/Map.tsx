@@ -1,51 +1,33 @@
-import { type Point } from 'geojson';
-import { type Dispatch, type SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  AttributionControl,
+  CreateAedControl,
+  CreateMode,
+  DetailView,
+  type Notification,
+  SearchControl,
+  SharedMap,
+  type SharedMapState,
+} from '@defikarte/shared';
+import { type Dispatch, type SetStateAction, useCallback, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import backend from '../../api/backend';
+import iconCheckCircleGreen from '../../assets/icons/icon-check-circle-green.svg';
+import iconCrossmarkCircleRed from '../../assets/icons/icon-crossmark-circle-red.svg';
 import iconGpsWarningCircleRed from '../../assets/icons/icon-gps-warning-circle-red.svg';
 import { CustomToast } from '../../components/ui/custom-toast/CustomToast';
 import { SplashScreen } from '../../components/ui/splash-screen/SplashScreen';
 import AppConfiguration from '../../configuration/app.configuration';
-import {
-  CreateMode,
-  FilterType,
-  type MapEvent,
-  type MapEventCallback,
-  type MapInteractionEvent,
-  OverlayType,
-} from '../../model/map';
-import { AttributionControl } from './controls/attribution-control/AttributionControl';
-import { CreateAedControl } from './controls/create-aed-control/CreateAedControl';
+import { GeolocationService } from '../../services/geolocation.service';
 import { CreateButtonControl } from './controls/create-button-control/CreateButtonControl';
-import { DetailView } from './controls/detail-view/DetailView';
 import { MapControl } from './controls/map-control/MapControl';
-import { SearchControl } from './controls/search-control/SearchControl';
 import { SponsorControl } from './controls/sponsor-control/SponsorControl';
-import { deselectAllFeatures } from './helper';
-import { useHandleCreateMode } from './hooks/useHandleCreateMode';
-import { useMapEvents } from './hooks/useMapEvents';
 import { usePersistenceState } from './hooks/usePersistenceState';
-import { useUserLocation } from './hooks/useUserLocation';
-import { FEATURE_STATE } from './map-instance/configuration/constants';
-import { MapConfiguration } from './map-instance/configuration/map.configuration';
-import ItemSelectInteraction from './map-instance/interactions/item-select.interaction';
-import { MapInstance } from './map-instance/map-instance';
 
-const createFilterKey = (filter: FilterType | FilterType[]) => {
-  if (Array.isArray(filter)) {
-    return filter.sort().join('');
-  }
-
-  return filter;
-};
-
-const baseLayer: string = MapConfiguration.osmVectorBasemapId;
-const overlay: FilterType[] = [FilterType.alwaysAvailable, FilterType.withOpeningHours];
-const filterToOverlayMapping = {
-  [createFilterKey(FilterType.alwaysAvailable)]: OverlayType.aedAlwaysAvailable,
-  [createFilterKey(FilterType.withOpeningHours)]: OverlayType.aedWithOpeningHours,
-  [createFilterKey(FilterType.byAvailability)]: OverlayType.aedByCurrentAvailability,
-  [createFilterKey([FilterType.alwaysAvailable, FilterType.withOpeningHours])]: OverlayType.aedAll,
+const mapConfig = {
+  baseUrl: AppConfiguration.baseUrl,
+  backendApiKey: AppConfiguration.backendApiKey,
+  maptilerApiKey: AppConfiguration.maptilerApiKey,
 };
 
 interface MapProps {
@@ -55,28 +37,58 @@ interface MapProps {
 
 export const Map = ({ isHash, setIsFullscreen }: MapProps) => {
   const { t } = useTranslation();
-  const mapInstanceRef = useRef<MapInstance | null>(null);
-  const mapInstance = mapInstanceRef.current;
-  const { isInitialized, handleMapEvent } = useMapEvents();
-  const [activeBaseLayer, setActiveBaseLayer] = usePersistenceState<string>(
+  const locationProvider = useMemo(() => new GeolocationService(), []);
+  const [persistedBaseLayer, setPersistedBaseLayer] = usePersistenceState<string>(
     AppConfiguration.baseLayerLocalStorageKey,
-    baseLayer
+    'osm-vector'
   );
-  const [activeOverlays, setActiveOverlays] = useState<FilterType[]>(overlay);
-  const [selectedFeature, setSelectedFeature] = useState<MapInteractionEvent | null>(null);
-  const [editFeature, setEditFeature] = useState<MapInteractionEvent | null>(null);
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const [createMode, setCreateMode] = useHandleCreateMode({
-    map: mapInstance,
-    feature: editFeature ?? null,
-  });
-  const userLocation = useUserLocation({ map: mapInstance });
+
+  return (
+    <SharedMap
+      config={mapConfig}
+      apiClient={backend}
+      locationProvider={locationProvider}
+      isHash={isHash}
+      persistedBaseLayer={persistedBaseLayer}
+      onBaseLayerChange={setPersistedBaseLayer}
+      splashScreen={<SplashScreen />}
+    >
+      {(mapState: SharedMapState) => (
+        <MapControls mapState={mapState} setIsFullscreen={setIsFullscreen} t={t} />
+      )}
+    </SharedMap>
+  );
+};
+
+interface MapControlsProps {
+  mapState: SharedMapState;
+  setIsFullscreen?: Dispatch<SetStateAction<boolean>>;
+  t: (key: string) => string;
+}
+
+const MapControls = ({ mapState, setIsFullscreen, t }: MapControlsProps) => {
   const {
-    userLocation: userLocationData,
-    isActive: isGpsActive,
-    setIsActive: setIsGpsActive,
-    error: locationError,
-  } = userLocation;
+    mapInstance,
+    apiClient,
+    activeBaseLayer,
+    setActiveBaseLayer,
+    activeOverlays,
+    setActiveOverlays,
+    selectedFeature,
+    editFeature,
+    setEditFeature,
+    createMode,
+    setCreateMode,
+    userLocation,
+    isGpsActive,
+    setIsGpsActive,
+    locationError,
+    handleSelectOrCenterFeatureOnMap,
+    handleEditFeature,
+    handleOnCreateStart,
+    selectFeatureOnMap,
+    deselectAll,
+  } = mapState;
 
   // automaticly activate fullscreen for editing function
   useEffect(() => {
@@ -91,29 +103,22 @@ export const Map = ({ isHash, setIsFullscreen }: MapProps) => {
     };
   }, [createMode, setIsFullscreen]);
 
-  // map event handling
-  const onMapEvent: MapEventCallback = useCallback(
-    event => {
-      if (event.type === 'item-select') {
-        setSelectedFeature(event);
+  // create / edit result handling
+  const notifyAed = useCallback(({ type, title, message }: Notification) => {
+    toast.custom(
+      toastInstance => (
+        <CustomToast
+          toastInstance={toastInstance}
+          icon={type === 'success' ? iconCheckCircleGreen : iconCrossmarkCircleRed}
+          title={title}
+          message={message}
+        />
+      ),
+      {
+        id: 'aed-toast',
       }
-
-      handleMapEvent(event);
-    },
-    [handleMapEvent]
-  );
-
-  // overlay handling
-  useEffect(() => {
-    const filterKey = createFilterKey(activeOverlays);
-    const activeOverlay = filterToOverlayMapping[filterKey];
-
-    void mapInstance?.applyOverlay(activeOverlay);
-
-    return () => {
-      mapInstance?.removeOverlay(activeOverlay);
-    };
-  }, [mapInstance, activeOverlays]);
+    );
+  }, []);
 
   // location error handling
   useEffect(() => {
@@ -129,84 +134,8 @@ export const Map = ({ isHash, setIsFullscreen }: MapProps) => {
     }
   }, [locationError, t]);
 
-  // map initialization
-  useEffect(() => {
-    if (mapContainerRef.current && !mapInstanceRef.current && activeBaseLayer) {
-      const activeOverlay = filterToOverlayMapping[createFilterKey(overlay)] || OverlayType.aedAll;
-      const map = new MapInstance({
-        container: mapContainerRef.current,
-        baseLayer: activeBaseLayer,
-        overlays: [activeOverlay, OverlayType.userLocation],
-        onEvent: onMapEvent,
-        hash: isHash,
-      });
-      mapInstanceRef.current = map;
-      return () => mapInstanceRef.current?.remove();
-    }
-  }, [activeBaseLayer, isHash, onMapEvent]);
-
-  const handleSelectOrCenterFeatureOnMap = (event: MapEvent) => {
-    if (event.type !== 'item-select' || !event.data) return;
-
-    const interactionExecuted = selectFeatureOnMap(event);
-    if (!interactionExecuted) {
-      centerFeatureOnMap(event);
-    }
-  };
-
-  const selectFeatureOnMap = (event: MapInteractionEvent): boolean => {
-    if (event.type !== 'item-select' || !event.data) return false;
-
-    let result = false;
-    mapInstance?.getActiveMapInteractions()?.forEach(interaction => {
-      if (
-        interaction instanceof ItemSelectInteraction &&
-        interaction.sourceId === event.data?.source
-      ) {
-        interaction.selectFeature(event.data, null);
-        result = true;
-      }
-    });
-
-    return result;
-  };
-
-  const centerFeatureOnMap = (event: MapInteractionEvent | null) => {
-    if (!event || !event.data) return;
-    const bbox = event.data.geometry.bbox;
-    if (bbox?.length === 4) {
-      mapInstance?.fitBounds([
-        [bbox[0], bbox[1]],
-        [bbox[2], bbox[3]],
-      ]);
-
-      return;
-    }
-    const coordinates = (event.data.geometry as Point).coordinates;
-    mapInstance?.easeTo(coordinates as [number, number], 18);
-  };
-
-  const handleEditFeature = (event: MapInteractionEvent) => {
-    if (!event || !event.data) return;
-    centerFeatureOnMap(event);
-    setEditFeature(event);
-    mapInstance?.setFeatureState(event.source ?? '', event.data.id, {
-      [FEATURE_STATE.EDITING]: true,
-    });
-    setCreateMode(CreateMode.form);
-  };
-
-  const handleOnCreateStart = () => {
-    setEditFeature(null);
-    setCreateMode(CreateMode.position);
-  };
-
   return (
-    <div className="relative flex-grow w-full">
-      <div className="absolute h-dvh w-dvw">
-        <div className="h-full w-full" ref={mapContainerRef} />
-      </div>
-      {!isInitialized && <SplashScreen />}
+    <>
       <MapControl
         map={mapInstance}
         setActiveBaseLayer={setActiveBaseLayer}
@@ -216,17 +145,20 @@ export const Map = ({ isHash, setIsFullscreen }: MapProps) => {
       {createMode !== CreateMode.none && (
         <CreateAedControl
           map={mapInstance}
+          apiClient={apiClient}
           createMode={createMode}
           feature={editFeature}
           setEditFeature={setEditFeature}
           setCreateMode={setCreateMode}
           onFeatureSelect={selectFeatureOnMap}
+          onNotify={notifyAed}
         />
       )}
       {createMode === CreateMode.none && (
         <>
           <SearchControl
             map={mapInstance}
+            apiClient={apiClient}
             isGpsActive={isGpsActive}
             setIsGpsActive={setIsGpsActive}
             onFeatureSelect={handleSelectOrCenterFeatureOnMap}
@@ -239,14 +171,14 @@ export const Map = ({ isHash, setIsFullscreen }: MapProps) => {
           {selectedFeature && (
             <DetailView
               feature={selectedFeature.data}
-              userLocation={userLocationData}
+              userLocation={userLocation}
               onCenterFeature={() => handleSelectOrCenterFeatureOnMap(selectedFeature)}
-              onClose={() => deselectAllFeatures(mapInstance)}
+              onClose={() => deselectAll()}
               onEdit={() => handleEditFeature(selectedFeature)}
             />
           )}
         </>
       )}
-    </div>
+    </>
   );
 };

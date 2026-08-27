@@ -1,10 +1,12 @@
+import { type LocationProvider } from '@defikarte/shared';
+
 const locationErrorMessages = {
   [`${GeolocationPositionError.PERMISSION_DENIED}`]: 'locationPermissionDenied',
   [`${GeolocationPositionError.POSITION_UNAVAILABLE}`]: 'locationUnavailable',
   [`${GeolocationPositionError.TIMEOUT}`]: 'locationTimeout',
 };
 
-export class GeolocationService {
+export class GeolocationService implements LocationProvider {
   private watchId = 0;
 
   public getCurrentPosition(options?: PositionOptions): Promise<GeolocationPosition | null> {

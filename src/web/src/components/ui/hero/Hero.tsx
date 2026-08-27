@@ -1,4 +1,4 @@
-import { Button } from '../button/Button';
+import { Button } from '@defikarte/shared';
 import { ContentWrapper } from '../content-wrapper/ContentWrapper';
 import { Text } from '../text/Text';
 

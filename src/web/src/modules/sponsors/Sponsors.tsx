@@ -16,7 +16,7 @@ import imageDefikartePartnerSirmed from '../../assets/landingpages/unterstuetzun
 import imageDefikartePartnerSusv from '../../assets/landingpages/unterstuetzung/defikarte-partner-susv.svg';
 import imageDefikarteUnterstuetzungSackmesser from '../../assets/landingpages/unterstuetzung/defikarte-unterstuetzung-sackmesser.jpg';
 import imageDefikarteUnterstuetzungTeaser from '../../assets/landingpages/unterstuetzung/defikarte-unterstuetzung-teaser.jpg';
-import { Button } from '../../components/ui/button/Button';
+import { Button } from '@defikarte/shared';
 import { ContentWrapper } from '../../components/ui/content-wrapper/ContentWrapper';
 import { Hero } from '../../components/ui/hero/Hero';
 import { Text } from '../../components/ui/text/Text';

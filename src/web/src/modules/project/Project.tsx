@@ -4,7 +4,7 @@ import iconArrowDownWhite from '../../assets/landingpages/icon-arrow-down-white.
 import imageDefikartePortraitChristian from '../../assets/landingpages/projekt/defikarte-portrait-christian.jpg';
 import iconZitat from '../../assets/landingpages/projekt/icon-zitat.svg';
 import imageOpenBracketLogoWhite from '../../assets/navigation/openbrackets-logo-white.svg';
-import { Button } from '../../components/ui/button/Button';
+import { Button } from '@defikarte/shared';
 import { ContentWrapper } from '../../components/ui/content-wrapper/ContentWrapper';
 import { Hero } from '../../components/ui/hero/Hero';
 import { Text } from '../../components/ui/text/Text';

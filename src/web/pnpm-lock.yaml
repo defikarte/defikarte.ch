@@ -35,20 +35,14 @@ importers:
       i18next-browser-languagedetector:
         specifier: ^8.0.4
         version: 8.2.0
-      libphonenumber-js:
-        specifier: ^1.12.9
-        version: 1.12.33
       maplibre-gl:
         specifier: ^4.7.1
         version: 4.7.1
-      opening_hours:
-        specifier: ^3.8.0
-        version: 3.9.0(typescript@5.9.3)
       react:
-        specifier: 19.2.3
+        specifier: ^19.2.0
         version: 19.2.3
       react-dom:
-        specifier: 19.2.3
+        specifier: ^19.2.0
         version: 19.2.3(react@19.2.3)
       react-hook-form:
         specifier: ^7.56.4
@@ -135,25 +129,49 @@ importers:
 
   ../shared:
     dependencies:
+      '@turf/circle':
+        specifier: ^7.2.0
+        version: 7.3.1
       axios:
         specifier: ^1.13.2
         version: 1.13.2
+      classnames:
+        specifier: ^2.5.1
+        version: 2.5.1
       geojson:
         specifier: ^0.5.0
         version: 0.5.0
+      libphonenumber-js:
+        specifier: ^1.12.9
+        version: 1.12.33
+      maplibre-gl:
+        specifier: ^4.7.1
+        version: 4.7.1
+      opening_hours:
+        specifier: ^3.8.0
+        version: 3.9.0(typescript@6.0.3)
       react:
-        specifier: '>=18.0.0'
-        version: 19.0.0
+        specifier: ^19.0.0
+        version: 19.2.3
+      react-hook-form:
+        specifier: ^7.56.4
+        version: 7.69.0(react@19.2.3)
+      react-i18next:
+        specifier: ^15.4.0
+        version: 15.7.4(i18next@24.2.3(typescript@6.0.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
+      react-responsive:
+        specifier: ^10.0.1
+        version: 10.0.1(react@19.2.3)
     devDependencies:
       '@types/geojson':
         specifier: ^7946.0.16
         version: 7946.0.16
       '@types/react':
-        specifier: ^19.0.0
-        version: 19.0.0
+        specifier: ^19.2.0
+        version: 19.2.9
       typescript:
-        specifier: ~5.6.2
-        version: 5.6.3
+        specifier: ~6.0.3
+        version: 6.0.3
 
 packages:
 
@@ -1061,9 +1079,6 @@ packages:
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
     peerDependencies:
       '@types/react': ^19.2.0
-
-  '@types/react@19.0.0':
-    resolution: {integrity: sha512-MY3oPudxvMYyesqs/kW1Bh8y9VqSmf+tzqw3ae8a9DZW68pUe3zAdHeI1jc6iAysuRdACnVknHP8AhwD4/dxtg==}
 
   '@types/react@19.2.9':
     resolution: {integrity: sha512-Lpo8kgb/igvMIPeNV2rsYKTgaORYdO1XGVZ4Qz3akwOj0ySGYMPlQWa8BaLn0G63D1aSaAQ5ldR06wCpChQCjA==}
@@ -2114,10 +2129,6 @@ packages:
     peerDependencies:
       react: '>=16.8.0'
 
-  react@19.0.0:
-    resolution: {integrity: sha512-V8AVnmPIICiWpGfm6GLzCR/W5FXLchHop40W4nXBmdlEceh16rCN8O8LNWm5bh5XUX91fh7KpA+W0TgMKmgTpQ==}
-    engines: {node: '>=0.10.0'}
-
   react@19.2.3:
     resolution: {integrity: sha512-Ku/hhYbVjOQnXDZFv2+RibmLFGwFdeeKHFcOTlrt7xplBnya5OGn/hIRDsqDiSUcfORsDC7MPxwork8jBwsIWA==}
     engines: {node: '>=0.10.0'}
@@ -2321,13 +2332,13 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: '>=4.8.4 <6.0.0'
 
-  typescript@5.6.3:
-    resolution: {integrity: sha512-hjcS1mhfuyi4WW8IWtjP7brDrG2cuDZukyrYrSauoXGNgx0S7zceP07adYkJycEr56BOUTNPzbInooiN3fn1qw==}
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
-  typescript@5.9.3:
-    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+  typescript@6.0.3:
+    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -3349,10 +3360,6 @@ snapshots:
     dependencies:
       '@types/react': 19.2.9
 
-  '@types/react@19.0.0':
-    dependencies:
-      csstype: 3.2.3
-
   '@types/react@19.2.9':
     dependencies:
       csstype: 3.2.3
@@ -4101,6 +4108,12 @@ snapshots:
     optionalDependencies:
       typescript: 5.9.3
 
+  i18next@24.2.3(typescript@6.0.3):
+    dependencies:
+      '@babel/runtime': 7.28.4
+    optionalDependencies:
+      typescript: 6.0.3
+
   ieee754@1.2.1: {}
 
   ignore@5.3.2: {}
@@ -4353,9 +4366,9 @@ snapshots:
 
   obug@2.1.1: {}
 
-  opening_hours@3.9.0(typescript@5.9.3):
+  opening_hours@3.9.0(typescript@6.0.3):
     dependencies:
-      i18next: 24.2.3(typescript@5.9.3)
+      i18next: 24.2.3(typescript@6.0.3)
       i18next-browser-languagedetector: 8.2.0
       suncalc: 1.9.0
     transitivePeerDependencies:
@@ -4463,6 +4476,16 @@ snapshots:
       react-dom: 19.2.3(react@19.2.3)
       typescript: 5.9.3
 
+  react-i18next@15.7.4(i18next@24.2.3(typescript@6.0.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@6.0.3):
+    dependencies:
+      '@babel/runtime': 7.28.4
+      html-parse-stringify: 3.0.1
+      i18next: 24.2.3(typescript@6.0.3)
+      react: 19.2.3
+    optionalDependencies:
+      react-dom: 19.2.3(react@19.2.3)
+      typescript: 6.0.3
+
   react-is@16.13.1: {}
 
   react-is@17.0.2: {}
@@ -4476,8 +4499,6 @@ snapshots:
       prop-types: 15.8.1
       react: 19.2.3
       shallow-equal: 3.1.0
-
-  react@19.0.0: {}
 
   react@19.2.3: {}
 
@@ -4668,9 +4689,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  typescript@5.6.3: {}
-
   typescript@5.9.3: {}
+
+  typescript@6.0.3: {}
 
   undici-types@7.16.0: {}
 
