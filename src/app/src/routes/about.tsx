@@ -46,10 +46,19 @@ function Divider() {
 function RouteComponent() {
   const { t } = useTranslation();
   return (
-    <div className="bg-[linear-gradient(to_bottom,var(--color-primary-100-green-04)_250px,var(--color-beige)_250px)]">
-      <div className="px-4">
+    // Inline rather than an arbitrary bg-[...] value: Tailwind's normalisation of the math in the
+    // colour stops drops the space that separates a stop's colour from its position, which makes
+    // the gradient invalid. The band grows with the top inset so it still ends at the same point
+    // below the status bar as it did without one.
+    <div
+      style={{
+        background:
+          'linear-gradient(to bottom, var(--color-primary-100-green-04) calc(250px + var(--sa-top)), var(--color-beige) calc(250px + var(--sa-top)))',
+      }}
+    >
+      <div className="pl-[calc(1rem+var(--sa-left))] pr-[calc(1rem+var(--sa-right))]">
         {/* Hero */}
-        <div className="flex flex-col items-center py-8">
+        <div className="flex flex-col items-center pt-[calc(2rem+var(--sa-top))] pb-8">
           <img src={logo} alt="defikarte.ch" />
         </div>
         {/* Mood image */}
@@ -81,7 +90,7 @@ function RouteComponent() {
           </div>
 
           <div className="mt-4">
-            <ExternalLinkCard url="defikarte.ch/sponsors" title={t('infos.allSponsors')} />
+            <ExternalLinkCard url="www.defikarte.ch/sponsors" title={t('infos.allSponsors')} />
           </div>
         </section>
 

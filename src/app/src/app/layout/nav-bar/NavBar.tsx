@@ -14,7 +14,10 @@ export const NavBar = () => {
   const activeClassName = 'text-primary-100-green-02';
 
   return (
-    <div className="flex justify-center px-4 py-1.5 bg-primary-100-green-04 text-primary-100-white">
+    // The bar keeps its background full-bleed to the bottom edge and grows its padding by the
+    // safe-area insets instead, so the tabs stay clear of the home indicator without leaving a
+    // strip of a different colour below them. The side insets matter in landscape.
+    <div className="flex justify-center py-1.5 pb-[calc(0.375rem+var(--sa-bottom))] pl-[calc(1rem+var(--sa-left))] pr-[calc(1rem+var(--sa-right))] bg-primary-100-green-04 text-primary-100-white">
       <div className="flex w-full">
         {/* Both entries point at "/" and are told apart by the create search param, so they need
             exact matching: without it the search comparison is partial and the empty search of the

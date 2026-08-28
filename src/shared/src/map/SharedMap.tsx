@@ -199,7 +199,19 @@ export const SharedMap = ({
         <div className="h-full w-full" ref={mapContainerRef} />
       </div>
       {!isInitialized && splashScreen}
-      {children(mapState)}
+      {/* Safe-area layer: the map canvas stays full-bleed under the status bar and the side
+          notches, while every control positions against this inset box instead of the raw
+          viewport. Padding would not do - absolutely positioned children resolve against the
+          padding box - so the layer is offset with top/left/right. No bottom inset: the map's
+          bottom edge belongs to whatever the host renders below it - in the app the nav bar is a
+          flow element that already absorbs --sa-bottom in its own padding, and on the web the map
+          runs to the viewport bottom where the inset is 0px. Insetting here too would lift every
+          bottom-anchored control by a second full inset. pointer-events-none keeps map pan/zoom
+          working through the transparent areas; the controls get their events back on the direct
+          children. */}
+      <div className="absolute top-safe-t bottom-0 left-safe-l right-safe-r pointer-events-none [&>*]:pointer-events-auto">
+        {children(mapState)}
+      </div>
     </div>
   );
 };

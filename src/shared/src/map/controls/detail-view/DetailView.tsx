@@ -106,15 +106,17 @@ export const DetailView = ({
     'bottom-4',
     'top-auto',
     'inset-y-0',
-    'max-h-[calc(100vh-143px)]',
     'bg-primary-100-white',
     'rounded-2xl',
     'shadow-lg',
     'shadow-green-shadow-64',
     compact
-      ? // forced mobile: full-width with gutters on phones, centered + capped on large screens
-        ['left-1/2', '-translate-x-1/2', 'w-[calc(100%-2rem)]', 'max-w-[768px]']
+      ? // forced mobile: full-width with gutters on phones, centered + capped on large screens.
+        // max-h-full, not a 100vh calc: the sheet sits inside the map's safe-area layer, so 100%
+        // is exactly the space it may use and it never grows into the status bar.
+        ['left-1/2', '-translate-x-1/2', 'w-[calc(100%-2rem)]', 'max-w-[768px]', 'max-h-full']
       : [
+          'max-h-[calc(100vh-143px)]',
           'md:bottom-16',
           'md:right-6',
           'mx-4',

@@ -8,11 +8,18 @@ interface SettingsPageProps extends React.PropsWithChildren {
 
 export const SettingsPage = ({ backTo, children, title }: SettingsPageProps) => {
   return (
-    <div className="relative h-full flex gap-2 flex-col px-4 pt-16 bg-linear-to-b from-primary-100-green-04 to-[#487745]">
+    // The gradient stays full-bleed under the status bar; only the content is pushed down by the
+    // top inset.
+    <div className="relative min-h-full flex gap-2 flex-col pl-[calc(1rem+var(--sa-left))] pr-[calc(1rem+var(--sa-right))] pt-[calc(4rem+var(--sa-top))] bg-linear-to-b from-primary-100-green-04 to-[#487745]">
       {/* The back link sits in the top-left corner of the page, outside the flex flow, so it
-          neither shifts the title down nor pushes it off centre. */}
+          neither shifts the title down nor pushes it off centre. Being absolutely positioned, it
+          resolves against the padding box and so is not moved by the padding above - it has to
+          carry the top and left insets itself, or it lands under the notch in landscape. */}
       {backTo && (
-        <Link to={backTo} className="absolute top-4 start-4 flex items-center">
+        <Link
+          to={backTo}
+          className="absolute top-[calc(1rem+var(--sa-top))] left-[calc(1rem+var(--sa-left))] flex items-center"
+        >
           <img src={iconArrowLeftWhite} alt="" className="h-5" />
         </Link>
       )}

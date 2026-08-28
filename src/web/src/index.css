@@ -109,6 +109,13 @@
   --shadow-custom-lg: 0px 0px 64px 0px;
   --shadow-green-custom: #98c8670d 0px 20px 30px 0px, #98c86700 0px 15px 15px 0px;
 
+  /* safe area - see the --sa-* block below for where the values come from. Living in the
+     --spacing namespace means these also yield pt-safe-t, pb-safe-b, top-safe-t, left-safe-l, ... */
+  --spacing-safe-t: var(--sa-top);
+  --spacing-safe-b: var(--sa-bottom);
+  --spacing-safe-l: var(--sa-left);
+  --spacing-safe-r: var(--sa-right);
+
   /* font */
   --font-sans: 'Poppins', sans-serif;
 
@@ -145,6 +152,19 @@
       opacity: 0.5;
     }
   }
+}
+
+/* The app is edge-to-edge on both platforms, so the safe area insets have to come from somewhere.
+   On Android, Capacitor's built-in SystemBars plugin injects --safe-area-inset-* onto <html> - the
+   WebView itself only ever reports display cutouts through env(), never the system bars. iOS and
+   the web have no injection and fall through to env(), which is correct there. Capacitor writes its
+   variables as an inline style on <html>, and <html> is :root, so the injected value wins over this
+   rule and the fallback only applies when there was no injection. */
+:root {
+  --sa-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --sa-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --sa-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+  --sa-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
 }
 
 input[type='search']::-webkit-search-cancel-button {
