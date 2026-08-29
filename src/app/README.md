@@ -24,6 +24,10 @@ plugins.
   The required permissions are already declared natively (`ACCESS_COARSE_LOCATION` /
   `ACCESS_FINE_LOCATION` in `android/app/src/main/AndroidManifest.xml`,
   `NSLocationWhenInUseUsageDescription` in `ios/App/App/Info.plist`).
+- **Splash screen** — [`@capacitor/splash-screen`](https://capacitorjs.com/docs/apis/splash-screen)
+  with `launchAutoHide: false` in [`capacitor.config.ts`](capacitor.config.ts), handing over to an
+  in-app overlay that stays up until the map is ready. See "App icon and splash screen" below —
+  the split between the two is not a preference, it is what Android's launch splash forces.
 - **System bars** — [`src/routes/__root.tsx`](src/routes/__root.tsx) uses `SystemBars` from
   `@capacitor/core` to switch the status bar icon style per route, guarded by
   `Capacitor.isNativePlatform()`. Guard every native-only call the same way so the browser dev flow
@@ -32,6 +36,68 @@ plugins.
   [`index.html`](index.html) makes `env(safe-area-inset-*)` report real values on iOS, and
   [`src/app/styles/index.css`](src/app/styles/index.css) normalises those and Capacitor's
   Android-side `--safe-area-inset-*` variables into the `--sa-*` variables used across the UI.
+
+## App icon and splash screen
+
+The source artwork lives in [`assets/`](assets) and every platform size is generated from it — never
+edit the generated files under `android/app/src/main/res` or `ios/App/App/Assets.xcassets` by hand.
+
+| file | used for |
+| --- | --- |
+| `icon.png` | the iOS app icon (opaque, no alpha — App Store rejects transparency) |
+| `icon-foreground.png` / `icon-background.png` | the two layers of the Android adaptive icon |
+| `icon-monochrome.png` | Android 13+ themed ("monochrome") icons — only its alpha channel matters |
+| `splash.png` | the splash, 2732x2732, white — there is no dark variant |
+
+```bash
+pnpm run assets   # capacitor-assets generate, then scripts/fix-generated-assets.mjs
+```
+
+The generated files are committed.
+[`scripts/fix-generated-assets.mjs`](scripts/fix-generated-assets.mjs) runs at the end of that
+script and corrects what `capacitor-assets` gets wrong for this app — read it before changing any of
+this, it explains each fix. `capacitor-assets` also reformats `AndroidManifest.xml` on every run
+without changing anything in it: check that file out again
+(`git checkout android/app/src/main/AndroidManifest.xml`) before committing.
+
+### Where the splash actually comes from
+
+Android and iOS do not agree here, and the difference drives the whole setup:
+
+- **iOS** shows `Splash.imageset` through `LaunchScreen.storyboard` — the full artwork, lockup and
+  all. A splash image is centre-cropped to the device's aspect ratio, so only the central ~45% of the
+  2732x2732 canvas survives on a tall phone; the lockup is sized to ~31% of the canvas to stay clear
+  of that. Keep that in mind when replacing the artwork.
+- **Android cannot show the artwork at all.** `@capacitor/splash-screen` draws the launch splash
+  through `androidx.core:core-splashscreen`, whose `Theme.SplashScreen` pins
+  `android:windowBackground` to a layer of `?windowSplashScreenBackground` plus one centred
+  `?windowSplashScreenAnimatedIcon`. `@drawable/splash` is never drawn, on any API level, which is
+  why `fix-generated-assets.mjs` deletes the generated Android splash bitmaps instead of shipping
+  ~2 MB of dead weight. `AppTheme.NoActionBarLaunch` in `res/values/styles.xml` sets those two
+  attributes and nothing else.
+
+So the lockup lives in an **in-app splash overlay**
+([`src/components/ui/splash-screen/SplashScreen.tsx`](src/components/ui/splash-screen/SplashScreen.tsx)),
+built from the same two logo SVGs as `assets/splash.png` and in the same proportions. Start-up runs:
+
+| | launch splash | in-app overlay | map |
+| --- | --- | --- | --- |
+| Android | mark on white | lockup + procamed | ✔ |
+| iOS | lockup + procamed | the same, so no visible change | ✔ |
+
+[`useAppReady`](src/hooks/useAppReady.tsx) is what ties it together: the map calls `markReady()` once
+`SharedMap` reports `isInitialized`, `__root.tsx` drops the overlay when it does, and the provider
+holds a 5s fallback so a map that never initialises cannot strand the splash. The native splash is
+hidden one frame *after* the overlay has painted — hiding it earlier would flash the bare page.
+
+`res/drawable/ic_defikarte_mark.xml` is a hand-maintained VectorDrawable, not generated output: the
+Android 12+ splash scales its icon onto a 288dp canvas and the adaptive icon expects a 108dp layer,
+while `capacitor-assets` only writes 48dp-bucket bitmaps (192px at xxxhdpi), which visibly
+pixelates. The vector backs both the launcher icon and the splash icon.
+
+`public/` (the PWA favicons and `site.webmanifest`) is *not* generated — it is kept in sync with
+[`../web/public`](../web/public) by hand, and `pnpm run assets` is pinned to `--android --ios` so it
+cannot overwrite it.
 
 ## Prerequisites
 

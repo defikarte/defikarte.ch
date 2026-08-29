@@ -5,7 +5,15 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default defineConfig([
-  globalIgnores(["dist", "node_modules", "src/routeTree.gen.ts"]),
+  // android/**/build and ios/**/build hold native build output, including Capacitor's bundled
+  // native-bridge.js - linting it fails on rules this config does not define.
+  globalIgnores([
+    "dist",
+    "node_modules",
+    "src/routeTree.gen.ts",
+    "android/**/build",
+    "ios/**/build",
+  ]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [

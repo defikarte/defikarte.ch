@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "assets": "npx --yes @capacitor/assets@3.0.5 generate --android --ios --iconBackgroundColor \"#154430\" --iconBackgroundColorDark \"#154430\" --splashBackgroundColor \"#ffffff\" && node scripts/fix-generated-assets.mjs",
     "sync:android": "cap sync android",
     "sync:ios": "cap sync ios",
     "lint": "eslint .",
@@ -20,6 +21,7 @@
     "@capacitor/core": "^8.0.2",
     "@capacitor/geolocation": "^7.0.1",
     "@capacitor/ios": "^8.0.2",
+    "@capacitor/splash-screen": "^8.0.2",
     "@defikarte/shared": "workspace:*",
     "@tanstack/react-router": "^1.154.13",
     "@tanstack/react-router-devtools": "^1.154.13",

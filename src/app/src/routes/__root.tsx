@@ -1,12 +1,16 @@
 import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core';
+import { SplashScreen } from '@capacitor/splash-screen';
 import { createRootRoute, Outlet, useRouterState } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { NavBar } from '../app/layout/nav-bar/NavBar';
+import { SplashScreen as AppSplashScreen } from '../components/ui/splash-screen/SplashScreen';
 import { Map } from '../features/map/Map';
+import { useAppReady } from '../hooks/useAppReady';
 
 function RootComponent() {
   const pathname = useRouterState({ select: state => state.location.pathname });
+  const [isReady] = useAppReady();
   const isMapRoute = pathname === '/';
 
   // The app draws under the system bars, so the bar icons sit on top of app content and have to be
@@ -22,8 +26,25 @@ function RootComponent() {
     });
   }, [isMapRoute]);
 
+  // Hand the native launch splash over to the in-app one. Waiting for the frame after the first
+  // paint is the point: hiding it any earlier would show the bare page between the two, and both
+  // are the same white artwork, so handing over after the overlay is on screen makes the seam
+  // invisible. The overlay itself stays until the map is ready.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) {
+      return;
+    }
+
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => void SplashScreen.hide());
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   return (
     <div className="w-full h-dvh flex flex-col">
+      {!isReady && <AppSplashScreen />}
       <Toaster
         position="top-center"
         containerStyle={{

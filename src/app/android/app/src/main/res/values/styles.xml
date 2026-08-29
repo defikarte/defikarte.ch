@@ -16,7 +16,14 @@
     </style>
 
 
+    <!-- The launch splash is drawn by androidx.core:core-splashscreen (via
+         @capacitor/splash-screen), whose Theme.SplashScreen pins android:windowBackground to a
+         background colour plus one centred icon. A full splash image cannot be shown here at all -
+         the lockup is the job of the in-app splash overlay - so these two attributes are the whole
+         launch appearance. The icon is a vector because the system scales it onto a 288dp canvas.
+         Capacitor's template also sets android:background here; it is inert under this parent. -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-        <item name="android:background">@drawable/splash</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_defikarte_mark</item>
     </style>
 </resources>

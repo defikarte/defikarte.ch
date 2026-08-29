@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The defikarte mark, converted by hand from src/web/src/assets/icons/icon-defikarte.svg.
+
+     This is NOT generated output - "pnpm run assets" leaves it alone. It exists because
+     capacitor-assets writes mipmap-*/ic_launcher_foreground.png at launcher sizes (192px at
+     xxxhdpi), while the Android 12+ splash draws its icon on a 288dp canvas (~1150px at xxxhdpi)
+     and the adaptive icon expects a 108dp layer - both upscale that bitmap into a visibly
+     pixelated mark. A vector stays sharp at any of those sizes, so it backs the adaptive launcher
+     icon and the splash icon alike.
+
+     The path is the untouched 48x48 artwork; the 96-unit viewport plus the 24-unit offset centre
+     it at half the canvas, which keeps it inside the adaptive icon's 72dp safe zone and inside
+     the splash icon's visible inner two thirds (192dp of 288dp). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <group
+        android:translateX="24"
+        android:translateY="24">
+        <path
+            android:fillColor="#97C568"
+            android:pathData="M44.9751 31.3234H37.7159L43.2767 25.58C46.4817 22.1528 47.9975 17.0215 46.29 11.6076C45.0755 7.77559 42.2906 4.76268 38.6107 3.39745C32.8124 1.25075 27.3794 3.17148 24.0009 7.04119C20.6224 3.17148 15.1802 1.24134 9.39109 3.39745C5.71124 4.77209 2.92625 7.785 1.71181 11.617C0.0042887 17.0309 1.51093 22.1622 4.71595 25.5894L16.9425 38.1966C17.1799 38.4414 17.5635 38.4414 17.8009 38.1966L21.0972 34.7976C21.3346 34.5528 21.3346 34.1574 21.0972 33.9126L13.8014 26.3897L13.8106 26.3803L8.82496 21.2489C6.81611 19.1776 6.09475 16.0328 7.21788 13.3401C9.43675 8.04863 15.5911 7.20125 19.0701 10.7885L23.5626 15.4208C23.8091 15.6751 24.2018 15.6751 24.4392 15.4208L28.9865 10.732C30.9953 8.66063 34.0451 7.91682 36.6566 9.0749C41.7792 11.3628 42.6101 17.7088 39.122 21.296L34.1912 26.3803L34.2004 26.3897L27.3246 33.4795C27.0142 33.7996 27.2333 34.3457 27.6716 34.3457H36.4923L26.8407 45.2392C26.4846 45.6441 27.005 46.2278 27.4251 45.9077L45.2399 32.1237C45.3403 32.0578 45.3951 31.9259 45.3951 31.7847C45.4043 31.5305 45.2216 31.3234 44.9751 31.3234Z" />
+    </group>
+</vector>

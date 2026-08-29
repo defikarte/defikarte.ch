@@ -17,6 +17,7 @@ import iconCheckCircleGreen from '../../assets/icons/icon-check-circle-green.svg
 import iconCrossmarkCircleRed from '../../assets/icons/icon-crossmark-circle-red.svg';
 import { CustomToast } from '../../components/ui/custom-toast/CustomToast';
 import AppConfiguration from '../../configuration/app.configuration';
+import { useAppReady } from '../../hooks/useAppReady';
 import { useBaseLayer } from '../../hooks/useBaseLayer';
 import type { MapSearch } from '../../routes/index';
 import { CapacitorGeolocationService } from '../../services/capacitor-geolocation.service';
@@ -86,10 +87,21 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
     deselectAll,
   } = mapState;
   const navigate = useNavigate();
+  const [, markReady] = useAppReady();
   const prevCreateMode = usePrevious(createMode);
   // Editing is started from the detail view, which only renders while createMode is none - so an
   // edit never carries the ?create=true param and never highlights the create nav button.
   const isCreatingNew = createMode !== CreateMode.none && !editFeature;
+
+  // The splash covers everything until here, so the user never sees the empty map container while
+  // maplibre boots. AppReadyProvider holds a timeout that gives up if the map never initialises.
+  useEffect(() => {
+    if (!isInitialized) {
+      return;
+    }
+
+    markReady();
+  }, [isInitialized, markReady]);
 
   // create / edit result handling
   const notifyAed = useCallback(({ type, title, message }: Notification) => {
