@@ -126,7 +126,7 @@ export const Knowledge = () => {
               icon={iconExternalLinkWhite}
               size="large"
               className="w-fit"
-              onClick={() => open('https://www.aed.ch/kontakt/Erste-Hilfeset.php', '_blank')}
+              onClick={() => open('https://www.aed.ch/reanimation/infobox/index.php', '_blank')}
             >
               {t('Order')}
             </Button>
