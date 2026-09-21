@@ -1,0 +1,61 @@
+{
+    "data_format": 1,
+    "data_url": "https://www.defikarte.ch/taginfo.json",
+    "data_updated": "20260412T200000Z",
+    "project": {         
+        "name": "Defikarte.ch",
+        "description": "A map to show the next defibrillator with OpenStreetMap data",   
+        "project_url": "https://defikarte.ch",
+        "icon_url": "https://defikarte.ch/assets/defikarte-logo-C2rpPPds.svg",
+        "contact_name": "Christian Nüssli",
+        "contact_email": "christian@defikarte.ch"
+    },
+    "tags": [
+        {
+            "key": "emergency",
+            "value": "defibrillator",        
+            "description": "To mark a defi on the map and work woth it."
+        },
+        {
+            "key": "defribillator:location",
+            "description": "To describe the location of a defibrillator in words"
+        },
+        {
+            "key": "opening_hours",
+            "description": "To map the opening_hours of a defibrillator"
+        },
+        {
+            "key": "indoor",
+            "description": "To describe if a defi is in or outside"
+        },
+        {
+            "key": "access",
+            "description": "To describe the accessability of a defi"
+        },
+        {
+            "key": "emergency:phone",
+            "value": "144",
+            "description": "the national emergency number in switzerland"
+        },
+        {
+            "key": "level",
+            "description": "level of a defi"
+        },
+        {
+            "key": "description",
+            "description": "To describe the situation around the defi or for more information"
+        },
+        {
+            "key": "operator",
+            "description": "Describes the operator of the defi"
+        },
+                {
+            "key": "email",
+            "description": "the email address, either the operator or the defi itself"
+        },
+        {
+            "key": "phone",
+            "description": "the phone number, either the operator or the defi itself"
+        }
+    ]
+}

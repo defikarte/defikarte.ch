@@ -28,6 +28,7 @@
   "description": "Descrizione",
   "operator": "Operatore",
   "operatorPhone": "Telefono dell'operatore",
+  "operatorEmail": "E-Mail dell'operatore",
   "details": "Dettagli",
   "hide": "Nascondi",
   "close": "Chiudi",
@@ -59,6 +60,7 @@
   "locationPlaceholder": "Scuola Zurigo Ovest, vicino all’ingresso",
   "operatorPlaceholder": "Municipio, Associazione, Persona privata",
   "operatorPhonePlaceholder": "+41 79 123 45 67",
+  "operatorEmailPlaceholder": "andrea.muster@example.ch",
   "openingHoursPlaceholder": "24/7 o Lun-Ven 08:00-17:00",
   "reporterRequired": "Il nome del segnalatore è richiesto.",
   "locationRequired": "La posizione è richiesta.",
@@ -102,10 +104,14 @@
   "operatorTooltipContent": "Qui vanno inserite le informazioni relative al gestore, in modo da poterlo informare se il defibrillatore è stato utilizzato o è difettoso.",
   "operatorPhoneTooltipTitle": "Telefono dell'operatore",
   "operatorPhoneTooltipContent": "Il numero di telefono dell'operatore per poterlo contattare facilmente.",
+  "operatorEmailTooltipTitle": "E-mail dell'operatore",
+  "operatorEmailTooltipContent": "L'indirizzo e-mail dell'operatore per l'invio automatico di eventuali segnalazioni relative all'uso di un defibrillatore.",
   "accessTooltipTitle": "Accesso",
   "accessTooltipContent": "Il defibrillatore è accessibile al pubblico o solo “privato”, ad esempio dai dipendenti?",
   "more": "Di più",
   "notFound": "La pagina non è stata trovata.",
   "goHome": "Vai alla homepage",
-  "node": "Nodo"
+  "node": "Nodo",
+  "photoLoading": "Caricamento foto...",
+  "photoAlt": "Foto del defibrillatore"
 }

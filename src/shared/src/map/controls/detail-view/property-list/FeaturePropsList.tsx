@@ -17,6 +17,7 @@ import iconStairsCircleGreen from '../../../../assets/icons/icon-stairs-circle-g
 import iconStairsCircleGrey from '../../../../assets/icons/icon-stairs-circle-grey.svg';
 import iconTimeCircleGreen from '../../../../assets/icons/icon-time-circle-green.svg';
 import iconTimeCircleGrey from '../../../../assets/icons/icon-time-circle-grey.svg';
+import { AedPhoto } from './aed-photo/AedPhoto';
 import { ItemProperty } from './item-property/ItemProperty';
 
 interface FeaturePropsListProps {
@@ -80,11 +81,19 @@ export const FeaturePropsList = ({ feature, isOpen, className }: FeaturePropsLis
           value={props.phone as string}
         />
       )}
+      {props.email && (
+        <ItemProperty
+          icon={isOpen ? iconInfoCircleGreen : iconInfoCircleGrey}
+          title={t('operatorEmail')}
+          value={props.email}
+        />
+      )}
       <ItemProperty
         icon={isOpen ? iconPinCircleGreen : iconPinCircleGrey}
         title={t('node')}
         value={feature.id ?? ''}
       />
+      <AedPhoto wikimediaCommons={props.wikimedia_commons} image={props.image} />
     </div>
   );
 };

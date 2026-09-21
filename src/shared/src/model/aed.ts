@@ -12,6 +12,7 @@ export interface AedData {
   openingHours?: string; // Opening hours of the AED location
   operator?: string; // Name of the organization or person responsible for the AED
   operatorPhone?: string; // Contact phone number for the operator
+  operatorEmail?: string; // Contact e-mail-address for the operator
   access?: AedAccess;
   indoor?: AedIndoor;
   latitude: number;

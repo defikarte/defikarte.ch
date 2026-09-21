@@ -28,6 +28,7 @@
   "description": "Description",
   "operator": "Opérateur",
   "operatorPhone": "Téléphone de l'opérateur",
+  "operatorEmail": "E-Mail de l'opérateur",
   "details": "Détails",
   "hide": "Cacher",
   "close": "Fermer",
@@ -59,6 +60,7 @@
   "locationPlaceholder": "École Zurich Ouest, à côté de l'entrée",
   "operatorPlaceholder": "Municipalité, Association, Personne privée",
   "operatorPhonePlaceholder": "+41 79 123 45 67",
+  "operatorEmailPlaceholder": "andrea.muster@example.ch",
   "openingHoursPlaceholder": "24/7 ou Lundi-Vendredi 08:00-17:00",
   "reporterRequired": "Le nom du reporter est requis.",
   "locationRequired": "L'emplacement est requis.",
@@ -102,10 +104,14 @@
   "operatorTooltipContent": "Les informations sur l'exploitant doivent être indiquées ici afin de pouvoir le contacter si le défibrillateur a été utilisé ou est défectueux.",
   "operatorPhoneTooltipTitle": "Téléphone de l'opérateur",
   "operatorPhoneTooltipContent": "Le numéro de téléphone de l'exploitant afin de pouvoir le joindre facilement.",
+  "operatorEmailTooltipTitle": "E-mail de l'exploitant",
+  "operatorEmailTooltipContent": "Adresse e-mail de l'exploitant pour l'envoi automatisé d'éventuels messages concernant l'utilisation d'un défibrillateur.",
   "accessTooltipTitle": "Accès",
   "accessTooltipContent": "Le défibrillateur est-il accessible au public ou uniquement « privé », par exemple par les employés ?",
   "more": "Plus",
   "notFound": "La page a été introuvable.",
   "goHome": "Aller à la page d'accueil",
-  "node": "Nœud"
+  "node": "Nœud",
+  "photoLoading": "Chargement de la photo...",
+  "photoAlt": "Photo du défibrillateur"
 }

@@ -2,13 +2,13 @@ import { useTranslation } from 'react-i18next';
 import iconArrowDownWhite from '../../assets/landingpages/icon-arrow-down-white.svg';
 import iconEmailWhite from '../../assets/landingpages/icon-email-white.svg';
 import iconExternalLinkWhite from '../../assets/landingpages/icon-external-link-white.svg';
+import imageDefikartePartnerAkkupoint from '../../assets/landingpages/unterstuetzung/defikarte-partner-akkupoint.jpg';
 import imageDefikartePartnerByteworks from '../../assets/landingpages/unterstuetzung/defikarte-partner-byteworks.svg';
 import imageDefikartePartnerFirstResponder from '../../assets/landingpages/unterstuetzung/defikarte-partner-first-responder.jpg';
-import imageDefikartePartnerFurrer from '../../assets/landingpages/unterstuetzung/defikarte-partner-furrer.jpg';
-import imageDefikartePartnerHexagon from '../../assets/landingpages/unterstuetzung/defikarte-partner-hexagon.svg';
 import imageDefikartePartnerHostpoint from '../../assets/landingpages/unterstuetzung/defikarte-partner-hostpoint.svg';
 import imageDefikartePartnerKtsg from '../../assets/landingpages/unterstuetzung/defikarte-partner-ktsg.svg';
 import imageDefikartePartnerLifetec from '../../assets/landingpages/unterstuetzung/defikarte-partner-lifetec.svg';
+import imageDefikartePartnerOctave from '../../assets/landingpages/unterstuetzung/defikarte-partner-octave.svg';
 import imageDefikartePartnerProcamed from '../../assets/landingpages/unterstuetzung/defikarte-partner-procamed.svg';
 import imageDefikartePartnerResqpro from '../../assets/landingpages/unterstuetzung/defikarte-partner-resqpro.jpg';
 import imageDefikartePartnerSinoma from '../../assets/landingpages/unterstuetzung/defikarte-partner-sinoma.jpg';
@@ -128,11 +128,13 @@ export const Sponsors = () => {
           {t('SectionSponsorsGold')}
         </Text>
         <div className="flex gap-5 md:gap-9 justify-center flex-wrap">
-          <SponsorCard src={imageDefikartePartnerFirstResponder} href="https://www.first-responder.ch/"/>
+          <SponsorCard
+            src={imageDefikartePartnerFirstResponder}
+            href="https://www.first-responder.ch/"
+          />
           <SponsorCard src={imageDefikartePartnerSirmed} href="https://www.sirmed.ch/" />
           <SponsorCard src={imageDefikartePartnerResqpro} href="https://www.resqpro.ch/" />
           <SponsorCard src={imageDefikartePartnerByteworks} href="https://www.byteworks.ch/" />
-          <SponsorCard src={imageDefikartePartnerFurrer} href="https://www.furrerit.ch/" />
           <SponsorCard src={imageDefikartePartnerSinoma} href="https://www.sinoma.ch/" />
           <SponsorCard src={imageDefikartePartnerKtsg} href="https://www.sg.ch/" />
         </div>
@@ -140,9 +142,18 @@ export const Sponsors = () => {
           {t('SectionSponsorsSilver')}
         </Text>
         <div className="flex gap-5 md:gap-9 justify-center flex-wrap">
-          <SponsorCard src={imageDefikartePartnerHexagon} href="https://www.hexagon.com/" />
-          <SponsorCard src={imageDefikartePartnerHostpoint} href="https://www.hostpoint.ch/" />
-          <SponsorCard src={imageDefikartePartnerSusv} href="https://www.susv.ch/" />
+          <SponsorCard src={imageDefikartePartnerOctave} href="https://www.octave.com/" compact />
+          <SponsorCard
+            src={imageDefikartePartnerHostpoint}
+            href="https://www.hostpoint.ch/"
+            compact
+          />
+          <SponsorCard src={imageDefikartePartnerSusv} href="https://www.susv.ch/" compact />
+          <SponsorCard
+            src={imageDefikartePartnerAkkupoint}
+            href="https://www.akkupoint.ch/"
+            compact
+          />
         </div>
       </ContentWrapper>
       <AppAdvertisment />
