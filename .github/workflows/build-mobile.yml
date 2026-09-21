@@ -1,31 +1,36 @@
-name: "Mobile: Build & Publish"
+name: "Mobile: Build"
 
-# Builds the Capacitor app in src/app for both platforms and publishes it to
-# TestFlight and the Google Play internal testing track.
+# Builds the Capacitor app in src/app for both platforms and publishes the .apk, .aab and .ipa
+# as a GitHub release. Store uploads are handled by deploy-mobile.yml, which runs after this
+# workflow completes.
+#
+# Version: MAJOR.MINOR from src/app/package.json, patch = build number (run number + offset),
+# e.g. 1.0.52 with Android versionCode / iOS build number 52. The tag v1.0.52 is created here.
+# Pushes to main produce a release; manual runs on other branches produce a beta prerelease.
 #
 # One-time credential setup (EAS export, App Store Connect API key, Play service
 # account, GitHub secrets): see docs/mobile-release-setup.md
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
+    paths:
+      - "src/app/**"
+      - "src/shared/**"
+      - ".github/workflows/build-mobile.yml"
 
   workflow_dispatch:
     inputs:
+      release:
+        description: "Create a GitHub release and deploy to TestFlight / Play internal (beta if not on main)"
+        type: boolean
+        default: true
       platform:
-        description: "Platform(s) to build"
+        description: "Platform(s) to build (a release requires both)"
         type: choice
         options: [both, ios, android]
         default: both
-      publish:
-        description: "Publish to TestFlight / Play internal track"
-        type: boolean
-        default: false
-      version:
-        description: "Version name override, e.g. 1.2.3 (defaults to 0.0.<run number>)"
-        type: string
-        required: false
 
 concurrency:
   group: mobile-${{ github.ref }}
@@ -36,33 +41,69 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version_name: ${{ steps.version.outputs.version_name }}
+      android_version_name: ${{ steps.version.outputs.android_version_name }}
       build_number: ${{ steps.version.outputs.build_number }}
+      tag: ${{ steps.version.outputs.tag }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+      is_release: ${{ steps.version.outputs.is_release }}
       build_ios: ${{ github.event_name == 'push' || inputs.platform != 'android' }}
       build_android: ${{ github.event_name == 'push' || inputs.platform != 'ios' }}
-      publish: ${{ github.event_name == 'push' || inputs.publish }}
     steps:
-      - name: Resolve version and build number
+      - uses: actions/checkout@v4
+
+      - name: Resolve version, build number and tag
         id: version
         env:
           # Set the MOBILE_BUILD_NUMBER_OFFSET repository variable if the previously
           # published (Expo) app already used higher build numbers than the run number.
           OFFSET: ${{ vars.MOBILE_BUILD_NUMBER_OFFSET || 0 }}
-          VERSION_INPUT: ${{ inputs.version }}
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_INPUT: ${{ inputs.release }}
+          PLATFORM_INPUT: ${{ inputs.platform }}
         run: |
           set -euo pipefail
-          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
-            version_name="${GITHUB_REF_NAME#v}"
-          elif [ -n "${VERSION_INPUT}" ]; then
-            version_name="${VERSION_INPUT}"
-          else
-            version_name="0.0.${GITHUB_RUN_NUMBER}"
+          package_version="$(jq -r .version src/app/package.json)"
+          if ! [[ "$package_version" =~ ^([0-9]+)\.([0-9]+)\.[0-9]+$ ]]; then
+            echo "::error::src/app/package.json version '$package_version' is not MAJOR.MINOR.PATCH"
+            exit 1
           fi
-          echo "version_name=${version_name}" >> "$GITHUB_OUTPUT"
-          echo "build_number=$(( GITHUB_RUN_NUMBER + OFFSET ))" >> "$GITHUB_OUTPUT"
+          build_number=$(( GITHUB_RUN_NUMBER + OFFSET ))
+          version_name="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${build_number}"
+
+          if [ "$EVENT_NAME" = "push" ] || [ "$RELEASE_INPUT" = "true" ]; then
+            is_release=true
+          else
+            is_release=false
+          fi
+          if [ "$is_release" = "true" ] && [ "$EVENT_NAME" != "push" ] && [ "$PLATFORM_INPUT" != "both" ]; then
+            echo "::error::A release requires platform 'both'"
+            exit 1
+          fi
+
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            prerelease=false
+            suffix=""
+          else
+            prerelease=true
+            suffix="-beta"
+          fi
+
+          {
+            echo "version_name=${version_name}"
+            echo "android_version_name=${version_name}${suffix}"
+            echo "build_number=${build_number}"
+            echo "tag=v${version_name}${suffix}"
+            echo "prerelease=${prerelease}"
+            echo "is_release=${is_release}"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Summary
         run: |
-          echo "Version ${{ steps.version.outputs.version_name }} (build ${{ steps.version.outputs.build_number }})" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "Version ${{ steps.version.outputs.version_name }} (build ${{ steps.version.outputs.build_number }})"
+            echo ""
+            echo "Tag: ${{ steps.version.outputs.tag }} — release: ${{ steps.version.outputs.is_release }}, prerelease: ${{ steps.version.outputs.prerelease }}"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   build-android:
     needs: prepare
@@ -119,7 +160,7 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          ANDROID_VERSION_NAME: ${{ needs.prepare.outputs.version_name }}
+          ANDROID_VERSION_NAME: ${{ needs.prepare.outputs.android_version_name }}
           ANDROID_VERSION_CODE: ${{ needs.prepare.outputs.build_number }}
         run: |
           set -euo pipefail
@@ -127,13 +168,14 @@ jobs:
           ./gradlew --no-daemon bundleRelease assembleRelease
 
       - name: Collect outputs
+        env:
+          TAG: ${{ needs.prepare.outputs.tag }}
         run: |
           set -euo pipefail
-          v="${{ needs.prepare.outputs.version_name }}-${{ needs.prepare.outputs.build_number }}"
           out="$RUNNER_TEMP/android-out"
           mkdir -p "$out"
-          cp src/app/android/app/build/outputs/bundle/release/app-release.aab "$out/defikarte-$v.aab"
-          cp src/app/android/app/build/outputs/apk/release/app-release.apk "$out/defikarte-$v.apk"
+          cp src/app/android/app/build/outputs/bundle/release/app-release.aab "$out/defikarte-$TAG.aab"
+          cp src/app/android/app/build/outputs/apk/release/app-release.apk "$out/defikarte-$TAG.apk"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -255,14 +297,15 @@ jobs:
             CODE_SIGN_IDENTITY="Apple Distribution"
 
       - name: Export IPA
+        env:
+          TAG: ${{ needs.prepare.outputs.tag }}
         run: |
           set -euo pipefail
           xcodebuild -exportArchive \
             -archivePath "$RUNNER_TEMP/App.xcarchive" \
             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
             -exportPath "$RUNNER_TEMP/ios-out"
-          v="${{ needs.prepare.outputs.version_name }}-${{ needs.prepare.outputs.build_number }}"
-          mv "$RUNNER_TEMP/ios-out/App.ipa" "$RUNNER_TEMP/ios-out/defikarte-$v.ipa"
+          mv "$RUNNER_TEMP/ios-out/App.ipa" "$RUNNER_TEMP/ios-out/defikarte-$TAG.ipa"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -277,50 +320,55 @@ jobs:
           security delete-keychain "$RUNNER_TEMP/build.keychain-db" || true
           rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/app-store.mobileprovision"
 
-  publish-android:
-    needs: [prepare, build-android]
-    if: needs.prepare.outputs.publish == 'true'
+  release:
+    needs: [prepare, build-android, build-ios]
+    if: needs.prepare.outputs.is_release == 'true'
     runs-on: ubuntu-latest
-    environment: production
+    permissions:
+      contents: write
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: android
+          pattern: "{android,ios}"
           path: artifacts
+          merge-multiple: true
 
-      - name: Upload to Play internal track
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          packageName: ch.defikarte.app
-          releaseFiles: artifacts/*.aab
-          track: internal
-          status: completed
-
-  publish-ios:
-    needs: [prepare, build-ios]
-    if: needs.prepare.outputs.publish == 'true'
-    runs-on: macos-15
-    environment: production
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: ios
-          path: artifacts
-
-      - name: Upload to TestFlight
+      - name: Create GitHub release
         env:
-          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-          ASC_PRIVATE_KEY_P8_BASE64: ${{ secrets.ASC_PRIVATE_KEY_P8_BASE64 }}
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          BUILD_NUMBER: ${{ needs.prepare.outputs.build_number }}
+          PRERELEASE: ${{ needs.prepare.outputs.prerelease }}
         run: |
           set -euo pipefail
-          mkdir -p ~/.appstoreconnect/private_keys
-          echo "$ASC_PRIVATE_KEY_P8_BASE64" | base64 -d > ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
-          ipa="$(ls artifacts/*.ipa | head -n1)"
-          xcrun altool --validate-app -t ios -f "$ipa" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
-          xcrun altool --upload-app -t ios -f "$ipa" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+          if gh release view "$TAG" -R "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            # Re-run of the same workflow run: replace the assets of the existing release.
+            gh release upload "$TAG" artifacts/* --clobber -R "$GITHUB_REPOSITORY"
+          else
+            flags=()
+            if [ "$PRERELEASE" = "true" ]; then
+              flags+=(--prerelease)
+            fi
+            gh release create "$TAG" artifacts/* \
+              --target "$GITHUB_SHA" \
+              --title "$TAG (build $BUILD_NUMBER)" \
+              --generate-notes \
+              "${flags[@]}" \
+              -R "$GITHUB_REPOSITORY"
+          fi
+          echo "Release: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Remove API key
-        if: always()
-        run: rm -rf ~/.appstoreconnect/private_keys
+      # Handoff for deploy-mobile.yml, which runs on completion of this workflow.
+      - name: Write release metadata
+        env:
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          mkdir -p release-meta
+          echo "$TAG" > release-meta/release-tag.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-meta
+          path: release-meta/release-tag.txt
+          if-no-files-found: error
+          retention-days: 30

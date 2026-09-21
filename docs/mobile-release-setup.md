@@ -1,7 +1,7 @@
 # Mobile release setup (iOS / Android)
 
-One-time setup required before `.github/workflows/build-mobile.yml` can build and publish
-the Capacitor app in `src/app`.
+One-time setup required before `.github/workflows/build-mobile.yml` can build and
+`.github/workflows/deploy-mobile.yml` can publish the Capacitor app in `src/app`.
 
 The app was previously built with Expo/EAS. **No signing material exists in this repository** —
 the credentials from that setup live only in EAS's managed credential store and must be exported
@@ -78,7 +78,7 @@ build number — see [Version numbers](#version-numbers) below.
 ## 6. Store everything as GitHub secrets
 
 All secrets and variables go into the **`production`** GitHub Environment
-(Settings → Environments → production), which the mobile workflow already uses for the web build
+(Settings → Environments → production), which the mobile workflows already use for the web build
 configuration.
 
 Binary files must be base64-encoded first:
@@ -124,27 +124,39 @@ Already present and reused: `BACKEND_API_URL`.
 
 ## Cutting a release
 
-```bash
-git tag v1.2.3
-git push origin v1.2.3
-```
+Releases are cut by two workflows:
 
-This runs **Mobile: Build & Publish**, which:
+- **Mobile: Build** (`build-mobile.yml`) builds the web bundle against the production backend,
+  runs `cap sync`, produces a signed `.aab`, `.apk` (Android) and `.ipa` (iOS), then creates the
+  git tag and a GitHub release with those three files attached.
+- **Mobile: Deploy to Stores** (`deploy-mobile.yml`) runs automatically when a build that
+  produced a release finishes. It downloads the `.aab` / `.ipa` from the release and uploads them
+  to the Play **internal** testing track and TestFlight. Promotion to production stays a manual
+  step in the store consoles.
 
-1. builds the web bundle against the production backend, runs `cap sync`
-2. produces a signed `.aab`, `.apk` (Android) and `.ipa` (iOS) as workflow artifacts
-3. uploads the `.ipa` to TestFlight and the `.aab` to the Play **internal** testing track
+| How | Result |
+| --- | --- |
+| Merge / push to `main` touching `src/app` or `src/shared` | release `v1.0.52` → deployed |
+| **Run workflow** on another branch, `release` checked | prerelease `v1.0.52-beta` → deployed (beta for testing) |
+| **Run workflow**, `release` unchecked | workflow artifacts only (e.g. an APK for manual QA); nothing released or deployed. Lets you pick a single platform. |
 
-To build without publishing — e.g. to produce an APK for manual QA — run the workflow manually
-from the Actions tab (**Run workflow**) with `publish` unchecked. The manual run also lets you
-pick a single platform and override the version name.
+To deploy an existing release again (e.g. after a store upload failed), run **Mobile: Deploy to
+Stores** manually with the release tag and optionally a single platform.
+
+Tags are created by the workflow. Do not push version tags by hand.
 
 ## Version numbers
 
-- `versionName` / `MARKETING_VERSION` comes from the git tag (`v1.2.3` → `1.2.3`), or the
-  `version` input on a manual run.
-- `versionCode` / `CURRENT_PROJECT_VERSION` is the GitHub Actions run number, which only ever
-  increases.
+The version is `MAJOR.MINOR.<build number>`, e.g. `1.0.52`:
+
+- `MAJOR.MINOR` comes from `version` in `src/app/package.json` (its patch part is ignored). Bump
+  it there to start a new minor or major version.
+- The build number is the GitHub Actions run number plus `MOBILE_BUILD_NUMBER_OFFSET`. It is
+  used as the patch part, the Android `versionCode` and the iOS `CURRENT_PROJECT_VERSION`, so
+  `1.0.52` is always build 52. It only ever increases, including across minor/major bumps
+  (`1.0.52` → `1.1.53`), and skips numbers used by non-release runs.
+- Beta builds get the tag `v1.0.52-beta` and Android `versionName` `1.0.52-beta`. iOS
+  `MARKETING_VERSION` stays `1.0.52` because Apple only accepts numeric versions.
 
 Both stores reject a build whose build number is not higher than the last one they accepted.
 The run number starts low, so if the legacy Expo app already published a higher `versionCode`
