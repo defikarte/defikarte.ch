@@ -126,6 +126,8 @@ export const AedForm = ({
     'bg-primary-100-white',
     'shadow-custom-lg',
     'shadow-green-shadow-64',
+    // forced mobile: same centered 768px cap as the DetailView sheet
+    compact && ['max-w-[768px]', 'mx-auto'],
     // In compact mode the phone layout is forced, so no breakpoint variants are applied.
     !compact && [
       'lg:w-[555px]',
