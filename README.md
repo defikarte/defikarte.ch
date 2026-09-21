@@ -19,9 +19,9 @@ Die App zu Defikarte.ch findet man in den Stores des jeweiligen Anbieters.
 
 ## Awards
 
-***Nominierungen***
+**_Nominierungen_**
 
-* DINACon Award [Shortlist der Kategorie Community Award](https://awards.dinacon.ch/shortlist-2020/)
+- DINACon Award [Shortlist der Kategorie Community Award](https://awards.dinacon.ch/shortlist-2020/)
 
 ## Sponsoren
 
@@ -46,7 +46,85 @@ Open Source und Open Data ist einer der Grund-Manifeste der Defikarte.
 
 Wir untersützen folgende Open Source Initiativen:
 
-* [OpenData Swiss](https://opendata.swiss/de/)
+- [OpenData Swiss](https://opendata.swiss/de/)
+
+## Development Setup
+
+This is a monorepo with three packages, wired together with pnpm workspaces:
+
+- **`/src/app`** - React + Vite app, packaged as a native iOS & Android app with [Capacitor](https://capacitorjs.com)
+- **`/src/web`** - React web application
+- **`/src/shared`** - Shared code between app and web
+
+`src/app` and `src/web` each link `../shared` as a workspace package, so dependencies are installed
+per package.
+
+### Prerequisites
+
+- Node.js 24
+- pnpm 10
+- For mobile builds: Android Studio + JDK 21 (Android), macOS with Xcode (iOS)
+
+### Installation
+
+```bash
+cd src/app
+pnpm install
+
+cd ../web
+pnpm install
+```
+
+Both packages read their configuration from a local `.env` file - copy `.env.template` and fill in
+the values.
+
+### Running the Projects
+
+**Mobile App:**
+
+```bash
+cd src/app
+pnpm run dev            # browser dev server
+pnpm run build          # web bundle into dist/ (this is what Capacitor ships)
+pnpm run sync:android   # copy dist/ + plugins into the Android project
+pnpm run sync:ios       # same for iOS (macOS only)
+npx cap open android    # open in Android Studio to run on a device/emulator
+npx cap open ios        # open in Xcode
+```
+
+**Web Application:**
+
+```bash
+cd src/web
+pnpm run dev        # Start development server
+pnpm run build      # Build for production
+```
+
+### Mobile (Capacitor)
+
+The app is not React Native - Capacitor wraps the built web bundle (`src/app/dist`) in a native
+WebView and exposes native APIs through plugins, currently geolocation via `@capacitor/geolocation`
+and the system bars via `@capacitor/core`. The native projects are committed under
+`src/app/android` and `src/app/ios`, and the app id is `ch.defikarte.app`.
+
+Because the native shells load the production build, `pnpm run build` has to run before every
+`cap sync`. See [src/app/README.md](src/app/README.md) for the full workflow, and
+[docs/mobile-release-setup.md](docs/mobile-release-setup.md) for signing and store releases.
+
+### Shared Code
+
+The `/shared` folder contains utilities and hooks that are used by both the app and web projects. See `/shared/README.md` for more details.
+
+**Example usage:**
+
+```typescript
+import {
+  formatCoordinates,
+  calculateDistance,
+  useDebounce,
+} from "@defikarte/shared";
+```
+
 
 **Code on**
 <img src="images/GitHub_Logo.png" alt="drawing" width="60"/>
