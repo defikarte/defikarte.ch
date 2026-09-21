@@ -34,8 +34,8 @@ Von unserer Plattform profitieren viele Organisationen. Mit deiner Unterstützun
 
 ## Contributors
 
-<a href="https://github.com/chnuessli/defikarte.ch/graphs/contributors">
-  <img src="https://contributors-img.web.app/image?repo=chnuessli/defikarte.ch" />
+<a href="https://github.com/defikarte/defikarte.ch/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=defikarte/defikarte.ch" />
 </a>
 
 Made with [contributors-img](https://contributors-img.web.app).
@@ -124,7 +124,3 @@ import {
   useDebounce,
 } from "@defikarte/shared";
 ```
-
-
-**Code on**
-<img src="images/GitHub_Logo.png" alt="drawing" width="60"/>
