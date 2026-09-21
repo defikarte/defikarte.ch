@@ -111,6 +111,19 @@ Because the native shells load the production build, `pnpm run build` has to run
 `cap sync`. See [src/app/README.md](src/app/README.md) for the full workflow, and
 [docs/mobile-release-setup.md](docs/mobile-release-setup.md) for signing and store releases.
 
+### CI/CD Pipelines
+
+| Workflow | Trigger | What it does |
+| --- | --- | --- |
+| **Web: Build and Deploy** (`deploy-web.yml`) | push to `main` / `dev` touching `src/web` | builds the web app and deploys it to defikarte.ch (`main` → production, `dev` → staging) |
+| **Mobile: Build** (`build-mobile.yml`) | push to `main` touching `src/app` / `src/shared`, or manual on any branch | builds signed `.apk`, `.aab` and `.ipa`, creates the version tag and a GitHub release (prerelease `-beta` off `main`) |
+| **Mobile: Deploy to Stores** (`deploy-mobile.yml`) | after a release-producing mobile build, or manual with a release tag | uploads the `.aab` to the Play internal track and the `.ipa` to TestFlight |
+
+Mobile versions are `MAJOR.MINOR.<build number>` (e.g. `1.0.52` = Android `versionCode` 52 = iOS
+build 52). Bump `MAJOR.MINOR` via `version` in `src/app/package.json`. The tags are created by the
+workflow, so don't push version tags by hand. Details:
+[docs/mobile-release-setup.md](docs/mobile-release-setup.md).
+
 ### Shared Code
 
 The `/shared` folder contains utilities and hooks that are used by both the app and web projects. See `/shared/README.md` for more details.

@@ -187,7 +187,16 @@ pnpm run preview    # serve the production build locally
 
 ## Releases
 
-Release builds are automated: pushing a `v*` tag runs `.github/workflows/build-mobile.yml`, which
-builds the bundle, runs `cap sync`, produces a signed `.aab` and `.ipa`, and publishes them to the
-Play internal testing track and TestFlight. The one-time credential setup is documented in
+Release builds are automated and split into two workflows:
+
+- `.github/workflows/build-mobile.yml` runs on every push to `main` that touches `src/app` or
+  `src/shared` (or manually on any branch for a beta). It builds the bundle, runs `cap sync`,
+  produces a signed `.apk`, `.aab` and `.ipa`, and attaches them to a GitHub release with an
+  automatically created tag (`v1.0.52`, or `v1.0.52-beta` off `main`).
+- `.github/workflows/deploy-mobile.yml` then uploads the `.aab` and `.ipa` from that release to
+  the Play internal testing track and TestFlight.
+
+The version is `MAJOR.MINOR.<build number>`. `MAJOR.MINOR` is taken from `version` in
+`package.json`, and the build number is also the Android `versionCode` / iOS build number. Release
+flow, versioning and the one-time credential setup are documented in
 [`docs/mobile-release-setup.md`](../../docs/mobile-release-setup.md).
