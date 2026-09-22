@@ -1,4 +1,4 @@
-name: Build and Deploy defikarte.ch web
+name: "Web: Build and Deploy to defikarte.ch"
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
       - dev
     paths:
-      - "web/**"
+      - "src/web/**"
 
   workflow_dispatch:
 
@@ -25,15 +25,20 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "20"
+          node-version: "24"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
 
       - name: Install Dependencies
-        working-directory: ./web
-        run: npm install
+        working-directory: ./src/web
+        run: pnpm install --frozen-lockfile
 
       - name: Build React App
-        working-directory: ./web
-        run: npm run build
+        working-directory: ./src/web
+        run: pnpm run build
 
       - name: Clean target directory on server
         uses: appleboy/ssh-action@v1
@@ -53,6 +58,6 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.KEY }}
           port: ${{ secrets.SERVER_PORT }}
-          source: ./web/dist/
+          source: ./src/web/dist/
           target: ${{ vars.STATIC_SITE_DEPLOYMENT_PATH }}
-          strip_components: 3
+          strip_components: 4

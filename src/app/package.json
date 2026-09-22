@@ -1,0 +1,63 @@
+{
+  "name": "app",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "workspaces": [
+    "../shared"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "assets": "npx --yes @capacitor/assets@3.0.5 generate --android --ios --iconBackgroundColor \"#154430\" --iconBackgroundColorDark \"#154430\" --splashBackgroundColor \"#ffffff\" && node scripts/fix-generated-assets.mjs",
+    "sync:android": "cap sync android",
+    "sync:ios": "cap sync ios",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.2",
+    "@capacitor/core": "^8.0.2",
+    "@capacitor/geolocation": "^7.0.1",
+    "@capacitor/ios": "^8.0.2",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@defikarte/shared": "workspace:*",
+    "@tanstack/react-router": "^1.154.13",
+    "@tanstack/react-router-devtools": "^1.154.13",
+    "classnames": "^2.5.1",
+    "i18next": "^24.2.2",
+    "i18next-browser-languagedetector": "^8.0.4",
+    "maplibre-gl": "^4.7.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-hook-form": "^7.56.4",
+    "react-hot-toast": "^2.5.2",
+    "react-i18next": "^15.4.0",
+    "react-responsive": "^10.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.2",
+    "@eslint-react/eslint-plugin": "^2.4.0",
+    "@eslint/js": "^9.39.1",
+    "@tailwindcss/postcss": "^4.0.14",
+    "@tanstack/router-plugin": "^1.157.16",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "jsdom": "^27.4.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^4.0.14",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "^7.2.4",
+    "vitest": "^4.0.16"
+  }
+}

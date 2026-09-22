@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:background">@null</item>
+    </style>
+
+
+    <!-- The launch splash is drawn by androidx.core:core-splashscreen (via
+         @capacitor/splash-screen), whose Theme.SplashScreen pins android:windowBackground to a
+         background colour plus one centred icon. A full splash image cannot be shown here at all -
+         the lockup is the job of the in-app splash overlay - so these two attributes are the whole
+         launch appearance. The icon is a vector because the system scales it onto a 288dp canvas.
+         Capacitor's template also sets android:background here; it is inert under this parent. -->
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_defikarte_mark</item>
+    </style>
+</resources>
