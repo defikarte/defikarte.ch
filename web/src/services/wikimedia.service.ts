@@ -24,6 +24,33 @@ export interface WikimediaPhoto {
   descriptionUrl: string;
 }
 
+// Characters MediaWiki never allows in a page title (regardless of language
+// or script): # < > [ ] | { } and raw control characters. OSM contributors
+// occasionally paste wiki markup (e.g. "[[File:Name.jpg]]") or a full browser
+// URL including its "#/media/..." fragment straight into the tag value
+// instead of a clean filename. Sending that through unchanged makes the
+// MediaWiki API reject the whole request with "invalidtitle" instead of just
+// not finding a photo, which is worse: it errors instead of degrading.
+const INVALID_TITLE_CHARS = /[#<>[\]|{}\x00-\x1f\x7f]/;
+
+function sanitizeTitle(raw: string): string | null {
+  let cleaned = raw.trim();
+
+  // Strip "[[...]]" wiki-link markup if someone pasted the full wikitext.
+  cleaned = cleaned.replace(/^\[\[\s*/, '').replace(/\s*\]\]$/, '');
+
+  // Drop a trailing "#..." fragment (e.g. copied from a Commons page URL).
+  cleaned = cleaned.split('#')[0].trim();
+
+  if (!cleaned) return null;
+
+  // Anything else MediaWiki would still reject: bail out rather than send a
+  // request we know will error.
+  if (INVALID_TITLE_CHARS.test(cleaned)) return null;
+
+  return cleaned;
+}
+
 function extractFilename(tag: string): string | null {
   // Normalize to NFC first: OSM tag values can arrive in either NFC or NFD
   // Unicode form depending on the device/editor used to enter them (macOS/iOS
@@ -31,7 +58,7 @@ function extractFilename(tag: string): string | null {
   // e.g. ä/ö/ü). Wikimedia Commons titles are stored in NFC, so leaving the
   // tag un-normalized causes an otherwise-correct filename to not match on
   // Commons and results in no photo being shown.
-  const normalized = tag.trim().normalize('NFC');
+  const normalized = sanitizeTitle(tag)?.normalize('NFC');
   if (!normalized) return null;
 
   if (/^https?:\/\//i.test(normalized)) {
@@ -39,7 +66,7 @@ function extractFilename(tag: string): string | null {
       const url = new URL(normalized);
       if (url.hostname.toLowerCase() !== 'commons.wikimedia.org') return null;
       const wikiMatch = url.pathname.match(/^\/wiki\/(File:[^#?]+)/i);
-      if (wikiMatch) return decodeURIComponent(wikiMatch[1]).normalize('NFC');
+      if (wikiMatch) return sanitizeTitle(decodeURIComponent(wikiMatch[1]))?.normalize('NFC') ?? null;
       return null;
     } catch {
       return null;
