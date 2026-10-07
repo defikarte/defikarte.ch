@@ -31,6 +31,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Your location is used to show defibrillators near you on the map.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is used to show defibrillators near you on the map.</string>
 	<key>UILaunchStoryboardName</key>

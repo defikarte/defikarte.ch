@@ -1,1 +1,2 @@
 "NSLocationWhenInUseUsageDescription" = "Dein Standort wird verwendet, um Defibrillatoren in deiner Nähe auf der Karte anzuzeigen.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Dein Standort wird verwendet, um Defibrillatoren in deiner Nähe auf der Karte anzuzeigen.";
