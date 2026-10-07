@@ -70,9 +70,6 @@ function RouteComponent() {
           <p className="mt-3 text-xs leading-normal text-primary-100-green-04">
             {t('infos.projectText')}
           </p>
-          <div className="mt-6">
-            <ExternalLinkCard url="www.openbrackets.ch" />
-          </div>
         </section>
 
         <Divider />
@@ -107,7 +104,7 @@ function RouteComponent() {
 
           <div className="mt-6 flex flex-col gap-3">
             <ExternalLinkCard url="www.openstreetmap.org" />
-            <ExternalLinkCard url="www.github.com/OpenBracketsCH" />
+            <ExternalLinkCard url="www.github.com/defikarte" />
           </div>
         </section>
       </div>
