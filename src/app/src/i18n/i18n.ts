@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import i18n from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
@@ -19,6 +20,11 @@ void i18n
   .init({
     debug: false, // import.meta.env.DEV,
     fallbackLng: 'de',
+    supportedLngs: Object.keys(resources),
+    nonExplicitSupportedLngs: true,
+    // On iOS the language is chosen in the system settings (per-app language), so only
+    // follow the OS and never persist a choice that could override it.
+    detection: Capacitor.getPlatform() === 'ios' ? { order: ['navigator'], caches: [] } : undefined,
     interpolation: {
       escapeValue: false,
     },

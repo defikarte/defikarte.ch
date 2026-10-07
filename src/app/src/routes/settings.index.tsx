@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
@@ -14,9 +15,12 @@ function RouteComponent() {
   const { t } = useTranslation();
   return (
     <SettingsPage title={t('settings.settings')}>
-      <SettingsLink to="/settings/language" icon={iconGlobeWhite}>
-        {t('settings.language')}
-      </SettingsLink>
+      {/* On iOS the language is set in the system settings, not in the app. */}
+      {Capacitor.getPlatform() !== 'ios' && (
+        <SettingsLink to="/settings/language" icon={iconGlobeWhite}>
+          {t('settings.language')}
+        </SettingsLink>
+      )}
       <SettingsLink to="/settings/mapdesign" icon={iconLayersWhite}>
         {t('settings.mapdesign')}
       </SettingsLink>

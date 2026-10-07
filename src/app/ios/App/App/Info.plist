@@ -8,6 +8,13 @@
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
         <string>defikarte.ch</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>de</string>
+		<string>fr</string>
+		<string>it</string>
+		<string>en</string>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
