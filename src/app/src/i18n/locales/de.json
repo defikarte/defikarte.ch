@@ -37,6 +37,7 @@
   "description": "Beschreibung",
   "operator": "Betreiber",
   "operatorPhone": "Betreiber Telefon",
+  "operatorEmail": "Betreiber E-Mail",
   "details": "Details",
   "hide": "Ausblenden",
   "close": "Schliessen",
@@ -70,6 +71,7 @@
   "openingHoursPlaceholder": "24/7 oder Mo-Fr 08:00-17:00",
   "operatorPlaceholder": "Gemeinde, Verein, Privatperson",
   "operatorPhonePlaceholder": "+41 79 123 45 67",
+  "operatorEmailPlaceholder": "andrea.muster@example.ch",
   "reporterRequired": "Der Melder ist erforderlich.",
   "locationRequired": "Der Standort ist erforderlich.",
   "indoorRequired": "Im Gebäude ist erforderlich.",
@@ -102,7 +104,11 @@
   "operatorTooltipContent": "Hier gehören Betreiberinformationen rein um dem Betreiber Infos geben zu können wenn der Defibrillator benutzt wurde oder defekt ist.",
   "operatorPhoneTooltipTitle": "Betreiber Telefon",
   "operatorPhoneTooltipContent": "Die Telefonnummer des Betreibers um ihn möglichst einfach zu erreichen.",
+  "operatorEmailTooltipTitle": "Betreiber E-Mail",
+  "operatorEmailTooltipContent": "Die E-Mail-Adresse des Betreibers um allfällige Meldungen über den Gebrauch eines Defibrillators automatisiert zu versenden",
   "accessTooltipTitle": "Zugang",
   "accessTooltipContent": "Ist der Defibrillator öffentlich zugänglich oder nur „privat“ wie z.B durch Mitarbeitende.",
-  "more": "Mehr"
+  "more": "Mehr",
+  "photoLoading": "Foto wird geladen...",
+  "photoAlt": "Foto des Defibrillators"
 }
