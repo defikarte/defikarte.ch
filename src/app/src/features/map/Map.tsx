@@ -12,9 +12,11 @@ import {
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { useCallback, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import backend from '../../api/backend';
 import iconCheckCircleGreen from '../../assets/icons/icon-check-circle-green.svg';
 import iconCrossmarkCircleRed from '../../assets/icons/icon-crossmark-circle-red.svg';
+import iconGpsWarningCircleRed from '../../assets/icons/icon-gps-warning-circle-red.svg';
 import { CustomToast } from '../../components/ui/custom-toast/CustomToast';
 import AppConfiguration from '../../configuration/app.configuration';
 import { useAppReady } from '../../hooks/useAppReady';
@@ -80,12 +82,14 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
     userLocation,
     isGpsActive,
     setIsGpsActive,
+    locationError,
     handleSelectOrCenterFeatureOnMap,
     handleEditFeature,
     handleOnCreateStart,
     selectFeatureOnMap,
     deselectAll,
   } = mapState;
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [, markReady] = useAppReady();
   const prevCreateMode = usePrevious(createMode);
@@ -119,6 +123,27 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
       }
     );
   }, []);
+
+  // location error handling
+  useEffect(() => {
+    if (!locationError) {
+      return;
+    }
+
+    toast.custom(
+      toastInstance => (
+        <CustomToast
+          toastInstance={toastInstance}
+          icon={iconGpsWarningCircleRed}
+          title={t('locationErrorTitle')}
+          message={t(locationError)}
+        />
+      ),
+      {
+        id: 'location-toast',
+      }
+    );
+  }, [locationError, t]);
 
   // ?create=true is the single source of truth for "a create-new flow is open", so the nav bar can
   // highlight the create button for exactly as long as the flow runs. The effect re-runs on every
