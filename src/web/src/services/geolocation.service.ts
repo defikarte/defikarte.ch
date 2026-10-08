@@ -42,7 +42,15 @@ export class GeolocationService implements LocationProvider {
     options?: PositionOptions
   ): void {
     if (navigator.geolocation && this.watchId === 0) {
-      this.watchId = navigator.geolocation.watchPosition(successCallback, errorCallback, options);
+      this.watchId = navigator.geolocation.watchPosition(
+        successCallback,
+        e =>
+          errorCallback?.({
+            code: e.code,
+            message: locationErrorMessages[e.code] ?? 'unknownLocationErrorOccurred',
+          } as GeolocationPositionError),
+        options
+      );
     }
   }
 

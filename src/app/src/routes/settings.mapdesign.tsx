@@ -1,5 +1,5 @@
 import { MapConfiguration } from '@defikarte/shared';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { SettingsOption } from '../app/layout/settings-page/SettingsOption';
 import { SettingsPage } from '../app/layout/settings-page/SettingsPage';
@@ -31,6 +31,7 @@ const mapDesigns: MapDesign[] = [
 function RouteComponent() {
   const { t } = useTranslation();
   const [baseLayer, setBaseLayer] = useBaseLayer();
+  const navigate = useNavigate();
 
   return (
     <SettingsPage backTo="/settings" title={t('settings.mapdesign')}>
@@ -39,7 +40,11 @@ function RouteComponent() {
           <SettingsOption
             key={design.id}
             selected={baseLayer === design.id}
-            onSelect={() => setBaseLayer(design.id)}
+            onSelect={() => {
+              setBaseLayer(design.id);
+              // Go straight to the map so the new base layer is visible right away.
+              void navigate({ to: '/' });
+            }}
             leading={
               <img src={design.image} alt="" className="size-12 shrink-0 rounded-lg object-cover" />
             }

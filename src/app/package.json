@@ -19,7 +19,7 @@
   "dependencies": {
     "@capacitor/android": "^8.0.2",
     "@capacitor/core": "^8.0.2",
-    "@capacitor/geolocation": "^7.0.1",
+    "@capacitor/geolocation": "^8.2.2",
     "@capacitor/ios": "^8.0.2",
     "@capacitor/splash-screen": "^8.0.2",
     "@defikarte/shared": "workspace:*",

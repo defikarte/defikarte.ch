@@ -85,7 +85,7 @@ jobs:
   deploy-ios:
     needs: resolve
     if: needs.resolve.outputs.deploy_ios == 'true'
-    runs-on: macos-15
+    runs-on: macos-26
     environment: production
     steps:
       - name: Download IPA from release

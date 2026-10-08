@@ -15,8 +15,8 @@ importers:
         specifier: ^8.0.2
         version: 8.0.2
       '@capacitor/geolocation':
-        specifier: ^7.0.1
-        version: 7.1.8(@capacitor/core@8.0.2)
+        specifier: ^8.2.2
+        version: 8.2.2(@capacitor/core@8.0.2)
       '@capacitor/ios':
         specifier: ^8.0.2
         version: 8.0.2(@capacitor/core@8.0.2)
@@ -313,10 +313,10 @@ packages:
   '@capacitor/core@8.0.2':
     resolution: {integrity: sha512-EXZfxkL6GFJS2cb7TIBR7RiHA5iz6ufDcl1VmUpI2pga3lJ5Ck2+iqbx7N+osL3XYem9ad4XCidJEMm64DX6UQ==}
 
-  '@capacitor/geolocation@7.1.8':
-    resolution: {integrity: sha512-x/rJieD2N2zlGvXFRD3ru4ArJWTwXAIYmyhfo5zg4F1DKGos7mCCOvIOSVMdfQmt14SCsmJeO9Qe8EtDGNGCrw==}
+  '@capacitor/geolocation@8.2.2':
+    resolution: {integrity: sha512-X8ryw6CfL4LspJnnfVL4++DUKKZVfdUIA9JljWVRljEDIQxZQZtz6xf7qstht+ymc+le6oa5EaUChVA6KsCYlA==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
   '@capacitor/ios@8.0.2':
     resolution: {integrity: sha512-7EM7vBxXI3Ku49aYCJcS9su5Y3i6UmXpx7e0y+oQV9PzCnZ6l5B0ACJ+gXAU0bM3q7/f+kGBsOtXMid84rU6MQ==}
@@ -2951,7 +2951,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@capacitor/geolocation@7.1.8(@capacitor/core@8.0.2)':
+  '@capacitor/geolocation@8.2.2(@capacitor/core@8.0.2)':
     dependencies:
       '@capacitor/core': 8.0.2
       '@capacitor/synapse': 1.0.4

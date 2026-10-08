@@ -8,6 +8,13 @@
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
         <string>defikarte.ch</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>de</string>
+		<string>fr</string>
+		<string>it</string>
+		<string>en</string>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -24,6 +31,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Your location is used to show defibrillators near you on the map.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is used to show defibrillators near you on the map.</string>
 	<key>UILaunchStoryboardName</key>

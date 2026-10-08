@@ -7,12 +7,12 @@
   },
   "infos": {
     "project": "Das Projekt",
-    "projectText": "Die defikarte.ch-App hilft dabei, den nächsten Defibrillator in der Nähe zu finden. Über die Navigations-App des Gerätes kannst du dich zu diesem navigieren lassen. Defikarte ist ein Projekt vom Verein OpenBrackets, welcher sich für offene Daten einsetzt mit dem Fokus auf Notfallorganisationen.",
+    "projectText": "Die defikarte.ch-App hilft dabei, den nächsten Defibrillator in der Nähe zu finden. Über die Navigations-App des Gerätes kannst du dich zu diesem navigieren lassen. Defikarte ist ein Projekt vom Verein defikarte.ch, welcher sich für offene Daten einsetzt mit dem Fokus auf Notfallorganisationen.",
     "sponsors": "Sponsoren",
     "sponsorsText": "Unsere Platin Sponsoren unterstützen das Projekt tatkräftig und bereichern es mit der Expertise aus dem fachlichen Bereich.",
     "allSponsors": "Alle Sponsoren",
     "openSource": "Open Source",
-    "openSourceText": "Die Daten sind Open Source und werden von der Community in OpenStreetMaps (OSM) gepflegt und verwaltet. Da es in der Schweiz keinen kompletten Datensatz und auch keine Meldepflicht für Defibrillatoren gibt, sind nicht alle erfasst. Bemerkst du also, dass ein Defibrillator nicht eingetragen ist, unterstütze die Community indem du den fehlenden Defibrillator mithilfe dieser App erfasst. "
+    "openSourceText": "Die Daten sind Open Source und werden von der Community in OpenStreetMap (OSM) gepflegt und verwaltet. Da es in der Schweiz keinen kompletten Datensatz und auch keine Meldepflicht für Defibrillatoren gibt, sind nicht alle erfasst. Bemerkst du also, dass ein Defibrillator nicht eingetragen ist, unterstütze die Community indem du den fehlenden Defibrillator mithilfe dieser App erfasst. "
   },
   "settings": {
     "settings": "Einstellungen",
@@ -37,6 +37,7 @@
   "description": "Beschreibung",
   "operator": "Betreiber",
   "operatorPhone": "Betreiber Telefon",
+  "operatorEmail": "Betreiber E-Mail",
   "details": "Details",
   "hide": "Ausblenden",
   "close": "Schliessen",
@@ -53,6 +54,12 @@
   "clear": "Löschen",
   "filter": "Filter",
   "showLocation": "Deinen Standort anzeigen",
+  "locationErrorTitle": "Standort nicht verfügbar",
+  "locationPermissionDenied": "Um den Standort zu nutzen, aktiviere den Zugriff in den Einstellungen deines Geräts.",
+  "locationUnavailable": "Um den Standort zu nutzen, aktiviere den Zugriff in den Einstellungen deines Geräts.",
+  "locationTimeout": "Dein Standort konnte nicht ermittelt werden. Versuche es später erneut.",
+  "locationNotAccurate": "Die Standortdaten sind ungenau. Begib dich in offenes Gelände um die Genauigkeit zu verbessern.",
+  "unknownLocationErrorOccurred": "Dein Standort konnte nicht ermittelt werden. Versuche es später erneut.",
   "cancel": "Abbrechen",
   "choosePositionForNewAedOnMap": "Wählen Sie die Position des Defibrillators auf der Karte aus",
   "confirmPosition": "Position bestätigen",
@@ -70,6 +77,7 @@
   "openingHoursPlaceholder": "24/7 oder Mo-Fr 08:00-17:00",
   "operatorPlaceholder": "Gemeinde, Verein, Privatperson",
   "operatorPhonePlaceholder": "+41 79 123 45 67",
+  "operatorEmailPlaceholder": "andrea.muster@example.ch",
   "reporterRequired": "Der Melder ist erforderlich.",
   "locationRequired": "Der Standort ist erforderlich.",
   "indoorRequired": "Im Gebäude ist erforderlich.",
@@ -102,7 +110,11 @@
   "operatorTooltipContent": "Hier gehören Betreiberinformationen rein um dem Betreiber Infos geben zu können wenn der Defibrillator benutzt wurde oder defekt ist.",
   "operatorPhoneTooltipTitle": "Betreiber Telefon",
   "operatorPhoneTooltipContent": "Die Telefonnummer des Betreibers um ihn möglichst einfach zu erreichen.",
+  "operatorEmailTooltipTitle": "Betreiber E-Mail",
+  "operatorEmailTooltipContent": "Die E-Mail-Adresse des Betreibers um allfällige Meldungen über den Gebrauch eines Defibrillators automatisiert zu versenden",
   "accessTooltipTitle": "Zugang",
   "accessTooltipContent": "Ist der Defibrillator öffentlich zugänglich oder nur „privat“ wie z.B durch Mitarbeitende.",
-  "more": "Mehr"
+  "more": "Mehr",
+  "photoLoading": "Foto wird geladen...",
+  "photoAlt": "Foto des Defibrillators"
 }
