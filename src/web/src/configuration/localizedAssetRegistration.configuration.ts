@@ -1,7 +1,7 @@
-import appScreenTeaserDe from '../assets/landingpages/home/app-screen-teaser-de.png';
-import appScreenTeaserEn from '../assets/landingpages/home/app-screen-teaser-en.png';
-import appScreenTeaserFr from '../assets/landingpages/home/app-screen-teaser-fr.png';
-import appScreenTeaserkIt from '../assets/landingpages/home/app-screen-teaser-it.png';
+import appScreenTeaserDe from '../assets/landingpages/home/app-screen-blank-de.png';
+import appScreenTeaserEn from '../assets/landingpages/home/app-screen-blank-en.png';
+import appScreenTeaserFr from '../assets/landingpages/home/app-screen-blank-fr.png';
+import appScreenTeaserkIt from '../assets/landingpages/home/app-screen-blank-it.png';
 
 import illustrationFeaturesCaptureDe from '../assets/landingpages/home/illustration-features-capture-de.png';
 import illustrationFeaturesCaptureEn from '../assets/landingpages/home/illustration-features-capture-en.png';
