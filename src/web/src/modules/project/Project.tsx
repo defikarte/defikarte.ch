@@ -1,7 +1,10 @@
+import { Button } from '@defikarte/shared';
 import { useTranslation } from 'react-i18next';
+import iconExternalLinkMiddleGreen from '../../assets/icons/icon-external-link-middle-green.svg';
 import iconArrowDownWhite from '../../assets/landingpages/icon-arrow-down-white.svg';
 import imageDefikartePortraitChristian from '../../assets/landingpages/projekt/defikarte-portrait-christian.jpg';
 import iconZitat from '../../assets/landingpages/projekt/icon-zitat.svg';
+import imageOpenStreetMapLogo from '../../assets/landingpages/projekt/openstreetmap-logo.svg';
 import { ContentWrapper } from '../../components/ui/content-wrapper/ContentWrapper';
 import { Hero } from '../../components/ui/hero/Hero';
 import { Text } from '../../components/ui/text/Text';
@@ -20,6 +23,17 @@ const InfoCard = ({ title, description }: InfoCardProps) => (
       {title}
     </Text>
     <Text variant="primary" size="regular" weight="light">
+      {description}
+    </Text>
+  </div>
+);
+
+const OsmFactCard = ({ title, description }: InfoCardProps) => (
+  <div className="p-8 bg-white/10 rounded-2xl h-full">
+    <Text variant="white" size="regular" weight="bold" className="pb-2">
+      {title}
+    </Text>
+    <Text variant="white" size="small" weight="light">
       {description}
     </Text>
   </div>
@@ -105,6 +119,45 @@ export const Project = () => {
             </Text>
             <Text size="small">{t('SectionProjectAppDescriptionTwoContent')}</Text>
           </div>
+        </div>
+      </ContentWrapper>
+      <ContentWrapper variant="green-gradient" paddingY="regular" className="flex-col">
+        <Text variant="tint" size="large" weight="bold" className="pb-8" center>
+          {t('SectionProjectOsmTitle')}
+        </Text>
+        <img src={imageOpenStreetMapLogo} alt="OpenStreetMap" className="w-[120px] md:w-[160px] pb-10" />
+        <Text variant="white" size="regular" weight="light" center className="pb-12">
+          {t('SectionProjectOsmContent')}
+        </Text>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full pb-12">
+          <OsmFactCard
+            title={t('SectionProjectOsmFactOneTitle')}
+            description={t('SectionProjectOsmFactOneContent')}
+          />
+          <OsmFactCard
+            title={t('SectionProjectOsmFactTwoTitle')}
+            description={t('SectionProjectOsmFactTwoContent')}
+          />
+          <OsmFactCard
+            title={t('SectionProjectOsmFactThreeTitle')}
+            description={t('SectionProjectOsmFactThreeContent')}
+          />
+        </div>
+        <div className="flex flex-col md:flex-row gap-4">
+          <Button
+            variant="white"
+            icon={iconExternalLinkMiddleGreen}
+            onClick={() => open('https://www.openstreetmap.org', '_blank')}
+          >
+            OpenStreetMap.org
+          </Button>
+          <Button
+            variant="white"
+            icon={iconExternalLinkMiddleGreen}
+            onClick={() => open('https://www.openstreetmap.org/copyright', '_blank')}
+          >
+            {t('SectionProjectOsmLicense')}
+          </Button>
         </div>
       </ContentWrapper>
     </div>
