@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Background of the launch splash, matched to the white of assets/splash.png and of the
+         in-app splash overlay that takes over from it. -->
+    <color name="splash_background">#FFFFFF</color>
+</resources>

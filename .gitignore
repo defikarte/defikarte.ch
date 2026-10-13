@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 
 .env
+
+web-statistics
+
+.vscode
+.vite
