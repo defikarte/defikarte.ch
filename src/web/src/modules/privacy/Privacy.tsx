@@ -70,16 +70,6 @@ export const Privacy = () => {
           {t('SectionImpressumPartTenContent')}
         </Text>
         <Text>Ottikon, 13.10.2026</Text>
-        <Text>
-          Quelle:{' '}
-          <a
-            href="https://www.swissanwalt.ch/"
-            target="_blank"
-            className="text-primary-100-green-03 cursor-pointer"
-          >
-            Swiss Anwalt
-          </a>
-        </Text>
       </ContentWrapper>
     </div>
   );
