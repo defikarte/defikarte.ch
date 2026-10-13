@@ -1,6 +1,12 @@
-import { type Feature, type GeoJsonProperties, type Geometry, type Point } from 'geojson';
+import {
+  type Feature,
+  type FeatureCollection,
+  type GeoJsonProperties,
+  type Geometry,
+  type Point,
+} from 'geojson';
 import { type MapGeoJSONFeature } from 'maplibre-gl';
-import { type Dispatch, type SetStateAction } from 'react';
+import { type Dispatch, type SetStateAction, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { type ApiClient } from '../../../api/api-client';
@@ -8,6 +14,7 @@ import iconInfoCircleGreenM from '../../../assets/icons/icon-info-circle-green-m
 import { type AedAccess, type AedData, type AedIndoor } from '../../../model/aed';
 import { type NotificationHandler } from '../../../model/common';
 import { CreateMode, type MapInteractionEvent } from '../../../model/map';
+import { findNearbyAeds, type NearbyAed } from '../../../services/nearby-aed.service';
 import { getActiveAedOverlay } from '../../helper';
 import { FEATURE_STATE } from '../../map-instance/configuration/constants';
 import { MapConfiguration } from '../../map-instance/configuration/map.configuration';
@@ -84,9 +91,20 @@ export const CreateAedControl = ({
     reValidateMode: 'onChange',
     defaultValues: createDefaultValues(feature?.data ?? null),
   });
+  const [nearbyAeds, setNearbyAeds] = useState<NearbyAed[]>([]);
+
+  const loadAllAeds = async (): Promise<FeatureCollection> => {
+    // The availability overlay only holds AEDs that are open right now, so it can't be used to
+    // look for duplicates - request the full dataset instead.
+    if (getActiveAedOverlay(map) === MapConfiguration.aedSourceId && map) {
+      return map.getGeoJsonSourceData(MapConfiguration.aedSourceId);
+    }
+    return apiClient.requestAedData();
+  };
 
   const handleCancel = () => {
     form.reset();
+    setNearbyAeds([]);
     if (feature) {
       map?.setFeatureState(feature.source ?? '', feature.data?.id, {
         [FEATURE_STATE.EDITING]: false,
@@ -108,7 +126,28 @@ export const CreateAedControl = ({
     const lng = (feature.geometry as Point).coordinates[0];
     form.setValue('latitude', lat);
     form.setValue('longitude', lng);
+
+    // Only warn when creating: an edited AED would otherwise be reported as its own duplicate.
+    if (!form.getValues('id')) {
+      try {
+        setNearbyAeds(findNearbyAeds(await loadAllAeds(), { lat, lon: lng }));
+      } catch (error) {
+        // The hint is optional, it must never block creating an AED.
+        console.error(error);
+        setNearbyAeds([]);
+      }
+    }
+
     setCreateMode(CreateMode.form);
+  };
+
+  const handleShowNearbyAed = (nearbyFeature: Feature) => {
+    handleCancel();
+    onFeatureSelect({
+      source: getActiveAedOverlay(map),
+      data: { ...nearbyFeature, source: getActiveAedOverlay(map) } as MapGeoJSONFeature,
+      type: 'item-select',
+    });
   };
 
   const handleChangePosition = () => {
@@ -161,6 +200,9 @@ export const CreateAedControl = ({
           apiClient={apiClient}
           form={form}
           setCreateMode={setCreateMode}
+          nearbyAeds={nearbyAeds}
+          onShowNearbyAed={handleShowNearbyAed}
+          onDismissNearbyAeds={() => setNearbyAeds([])}
           onSuccess={handleOnSuccess}
           onNotify={onNotify}
           compact={compact}
