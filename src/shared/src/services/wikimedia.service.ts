@@ -51,14 +51,20 @@ function sanitizeTitle(raw: string): string | null {
   return cleaned;
 }
 
+// OSM tag values are sometimes percent-encoded (e.g. "Schiebet%C3%BCre.jpg"
+// instead of "Schiebetüre.jpg"), which the MediaWiki API rejects as an invalid
+// title. A literal "%" that isn't part of an escape sequence makes
+// decodeURIComponent throw, in which case the value is kept as-is.
+function decodeTitle(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 function extractFilename(tag: string): string | null {
-  // Normalize to NFC first: OSM tag values can arrive in either NFC or NFD
-  // Unicode form depending on the device/editor used to enter them (macOS/iOS
-  // in particular tend to produce NFD for names with combining diacritics,
-  // e.g. ä/ö/ü). Wikimedia Commons titles are stored in NFC, so leaving the
-  // tag un-normalized causes an otherwise-correct filename to not match on
-  // Commons and results in no photo being shown.
-  const normalized = sanitizeTitle(tag)?.normalize('NFC');
+  const normalized = sanitizeTitle(tag);
   if (!normalized) return null;
 
   if (/^https?:\/\//i.test(normalized)) {
@@ -66,15 +72,18 @@ function extractFilename(tag: string): string | null {
       const url = new URL(normalized);
       if (url.hostname.toLowerCase() !== 'commons.wikimedia.org') return null;
       const wikiMatch = url.pathname.match(/^\/wiki\/(File:[^#?]+)/i);
-      if (wikiMatch) return sanitizeTitle(decodeURIComponent(wikiMatch[1]))?.normalize('NFC') ?? null;
+      if (wikiMatch) return sanitizeTitle(decodeTitle(wikiMatch[1]));
       return null;
     } catch {
       return null;
     }
   }
 
-  if (/^file:/i.test(normalized)) return normalized;
-  if (/\.(jpe?g|png|gif|webp|svg)$/i.test(normalized)) return `File:${normalized}`;
+  if (/^file:/i.test(normalized)) return sanitizeTitle(decodeTitle(normalized));
+  if (/\.(jpe?g|png|gif|webp|svg)$/i.test(normalized)) {
+    const title = sanitizeTitle(decodeTitle(normalized));
+    return title ? `File:${title}` : null;
+  }
   return null;
 }
 
@@ -122,17 +131,7 @@ export const fetchWikimediaPhoto = async (
 
   try {
     const page = await queryWikimediaPage(filename, signal);
-    if (page) return toPhoto(page, filename);
-
-    // Fallback: on the rare chance the Commons title itself is stored in NFD
-    // form, retry once with the decomposed variant before giving up.
-    const nfdFilename = filename.normalize('NFD');
-    if (nfdFilename !== filename) {
-      const nfdPage = await queryWikimediaPage(nfdFilename, signal);
-      if (nfdPage) return toPhoto(nfdPage, nfdFilename);
-    }
-
-    return null;
+    return page ? toPhoto(page, filename) : null;
   } catch (error) {
     if (axios.isCancel(error)) {
       console.warn('Wikimedia photo request canceled.');
