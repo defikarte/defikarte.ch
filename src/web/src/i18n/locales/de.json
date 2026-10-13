@@ -83,7 +83,7 @@
   "project": "Projekt",
   "sponsors": "Unterstützen",
   "supportedBy": "Unterstützt durch",
-  "legal": "Impressum",
+  "imprint": "Impressum",
   "privacy": "Datenschutz",
   "coordinatesTooltipTitle": "Koordinaten",
   "coordinatesTooltipContent": "Die Koordinaten des Defibrillators. Diese werden automatisch durch den Marker auf der Karte berechnet und müssen nicht eingegeben werden.",

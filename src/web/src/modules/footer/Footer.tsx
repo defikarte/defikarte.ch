@@ -38,11 +38,18 @@ export const Footer = () => {
               </Link>
             ))}
           <Link
-            key="legal"
-            to="/privacy"
-            className="text-primary-100-white font-normal leading-[150%] text-sm cursor-pointer row-span-2"
+            key="imprint"
+            to="/imprint"
+            className="text-primary-100-white font-normal leading-[150%] text-sm cursor-pointer"
           >
-            {t('legal')}
+            {t('imprint')}
+          </Link>
+          <Link
+            key="privacy"
+            to="/privacy"
+            className="text-primary-100-white font-normal leading-[150%] text-sm cursor-pointer"
+          >
+            {t('privacy')}
           </Link>
           <a
             href="https://github.com/defikarte/defikarte.ch"
