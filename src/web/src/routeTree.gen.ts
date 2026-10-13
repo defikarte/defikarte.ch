@@ -14,6 +14,7 @@ import { Route as ProjectRouteImport } from './routes/project'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MapRouteImport } from './routes/map'
 import { Route as KnowledgeRouteImport } from './routes/knowledge'
+import { Route as ImprintRouteImport } from './routes/imprint'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SponsorsRoute = SponsorsRouteImport.update({
@@ -41,6 +42,11 @@ const KnowledgeRoute = KnowledgeRouteImport.update({
   path: '/knowledge',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImprintRoute = ImprintRouteImport.update({
+  id: '/imprint',
+  path: '/imprint',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -49,6 +55,7 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/imprint': typeof ImprintRoute
   '/knowledge': typeof KnowledgeRoute
   '/map': typeof MapRoute
   '/privacy': typeof PrivacyRoute
@@ -57,6 +64,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/imprint': typeof ImprintRoute
   '/knowledge': typeof KnowledgeRoute
   '/map': typeof MapRoute
   '/privacy': typeof PrivacyRoute
@@ -66,6 +74,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/imprint': typeof ImprintRoute
   '/knowledge': typeof KnowledgeRoute
   '/map': typeof MapRoute
   '/privacy': typeof PrivacyRoute
@@ -74,12 +83,27 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/knowledge' | '/map' | '/privacy' | '/project' | '/sponsors'
+  fullPaths:
+    | '/'
+    | '/imprint'
+    | '/knowledge'
+    | '/map'
+    | '/privacy'
+    | '/project'
+    | '/sponsors'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/knowledge' | '/map' | '/privacy' | '/project' | '/sponsors'
+  to:
+    | '/'
+    | '/imprint'
+    | '/knowledge'
+    | '/map'
+    | '/privacy'
+    | '/project'
+    | '/sponsors'
   id:
     | '__root__'
     | '/'
+    | '/imprint'
     | '/knowledge'
     | '/map'
     | '/privacy'
@@ -89,6 +113,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ImprintRoute: typeof ImprintRoute
   KnowledgeRoute: typeof KnowledgeRoute
   MapRoute: typeof MapRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -133,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KnowledgeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/imprint': {
+      id: '/imprint'
+      path: '/imprint'
+      fullPath: '/imprint'
+      preLoaderRoute: typeof ImprintRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -145,6 +177,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ImprintRoute: ImprintRoute,
   KnowledgeRoute: KnowledgeRoute,
   MapRoute: MapRoute,
   PrivacyRoute: PrivacyRoute,

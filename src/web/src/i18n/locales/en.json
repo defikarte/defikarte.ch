@@ -84,7 +84,7 @@
   "sponsors": "Support",
   "supportedBy": "Supported by",
   "projectOf": "A project by",
-  "legal": "Legal Notice",
+  "imprint": "Legal notice",
   "privacy": "Privacy",
   "coordinatesTooltipTitle": "Coordinates",
   "coordinatesTooltipContent": "The coordinates of the defibrillator. These are automatically calculated by the marker on the map and do not need to be entered.",

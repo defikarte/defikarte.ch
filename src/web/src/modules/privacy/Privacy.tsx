@@ -14,13 +14,8 @@ export const Privacy = () => {
   return (
     <div>
       <Hero
-        title={t('SectionImpressumTitle')}
-        description={[
-          'Verein defikarte.ch',
-          'Christian Nüssli',
-          'Grüningerstrasse 149a',
-          '8626 Ottikon',
-        ]}
+        title={t('SectionPrivacyTitle')}
+        description={[t('SectionPrivacyContent')]}
         buttonText="info@defikarte.ch"
         buttonIcon={iconEmailWhite}
         onButtonClick={handleMailtoClick}
@@ -63,18 +58,6 @@ export const Privacy = () => {
           {t('SectionImpressumPartSixContent')}
         </Text>
         <Text size="medium" weight="bold" className="pb-3 lg:max-w-full">
-          {t('SectionImpressumPartSevenTitle')}
-        </Text>
-        <Text size="regular" weight="regular" className="pb-10 lg:max-w-full">
-          {t('SectionImpressumPartSevenContent')}
-        </Text>
-        <Text size="medium" weight="bold" className="pb-3 lg:max-w-full">
-          {t('SectionImpressumPartEightTitle')}
-        </Text>
-        <Text size="regular" weight="regular" className="pb-10 lg:max-w-full">
-          {t('SectionImpressumPartEightContent')}
-        </Text>
-        <Text size="medium" weight="bold" className="pb-3 lg:max-w-full">
           {t('SectionImpressumPartNineTitle')}
         </Text>
         <Text size="regular" weight="regular" className="pb-10 lg:max-w-full">
@@ -86,7 +69,7 @@ export const Privacy = () => {
         <Text size="regular" weight="regular" className="pb-10 lg:max-w-full">
           {t('SectionImpressumPartTenContent')}
         </Text>
-        <Text>Ottikon, 05.08.2023</Text>
+        <Text>Ottikon, 13.10.2026</Text>
         <Text>
           Quelle:{' '}
           <a
