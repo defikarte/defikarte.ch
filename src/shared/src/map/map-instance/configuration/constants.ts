@@ -12,6 +12,7 @@ export const IMAGE_SCALE = 0.25;
 export const COLORS = {
   PRIMARY_100_WHITE: '#FFF',
   SECONDARY_GREEN_01: '#93C460',
+  SECONDARY_ORANGE_01: '#FFB875',
   SECONDARY_ORANGE_02: '#FB8F01',
   USER_LOCATION: '#1982C4',
   TRANSPARENT: 'rgba(0, 0, 0, 0)',
@@ -21,4 +22,6 @@ export const COLORS = {
 export const FEATURE_STATE = {
   SELECTED: 'selected',
   EDITING: 'editing',
+  // existing AED close to the position of a new one - a potential duplicate
+  NEARBY: 'nearby',
 };
