@@ -79,6 +79,7 @@ const MapControls = ({ mapState, setIsFullscreen, t }: MapControlsProps) => {
     setEditFeature,
     createMode,
     setCreateMode,
+    createPosition,
     userLocation,
     isGpsActive,
     setIsGpsActive,
@@ -148,10 +149,12 @@ const MapControls = ({ mapState, setIsFullscreen, t }: MapControlsProps) => {
           apiClient={apiClient}
           createMode={createMode}
           feature={editFeature}
+          createPosition={createPosition}
           setEditFeature={setEditFeature}
           setCreateMode={setCreateMode}
           onFeatureSelect={selectFeatureOnMap}
           onNotify={notifyAed}
+          userLocation={userLocation}
         />
       )}
       {createMode === CreateMode.none && (

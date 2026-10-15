@@ -1,19 +1,20 @@
 import { type Feature, type GeoJsonProperties, type Geometry, type Point } from 'geojson';
 import { type MapGeoJSONFeature } from 'maplibre-gl';
-import { type Dispatch, type SetStateAction } from 'react';
+import { type Dispatch, type SetStateAction, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
 import { type ApiClient } from '../../../api/api-client';
-import iconInfoCircleGreenM from '../../../assets/icons/icon-info-circle-green-m.svg';
 import { type AedAccess, type AedData, type AedIndoor } from '../../../model/aed';
 import { type NotificationHandler } from '../../../model/common';
 import { CreateMode, type MapInteractionEvent } from '../../../model/map';
-import { getActiveAedOverlay } from '../../helper';
+import { getActiveAedOverlay, getMoveInteraction } from '../../helper';
 import { FEATURE_STATE } from '../../map-instance/configuration/constants';
 import { MapConfiguration } from '../../map-instance/configuration/map.configuration';
 import { type MapInstance } from '../../map-instance/map-instance';
+import { DetailView } from '../detail-view/DetailView';
 import { AedForm } from './aed-form/AedForm';
 import { MapButtons } from './map-buttons/MapButtons';
+import { PositionHint } from './position-hint/PositionHint';
+import { useNearbyAeds } from './useNearbyAeds';
 
 const createDefaultValues = (feature: Feature | null): AedData | undefined => {
   if (!feature) {
@@ -60,10 +61,12 @@ interface CreateAedControlProps {
   apiClient: ApiClient;
   createMode: CreateMode;
   feature: MapInteractionEvent | null;
+  createPosition: { lat: number; lon: number } | null;
   setEditFeature: Dispatch<SetStateAction<MapInteractionEvent | null>>;
   setCreateMode: Dispatch<SetStateAction<CreateMode>>;
   onFeatureSelect: (event: MapInteractionEvent) => void;
   onNotify: NotificationHandler;
+  userLocation?: GeolocationPosition | null;
   compact?: boolean;
 }
 
@@ -72,18 +75,48 @@ export const CreateAedControl = ({
   apiClient,
   createMode,
   feature,
+  createPosition,
   setEditFeature,
   setCreateMode,
   onFeatureSelect,
   onNotify,
+  userLocation,
   compact,
 }: CreateAedControlProps) => {
-  const { t } = useTranslation();
   const form = useForm<AedData>({
     shouldUseNativeValidation: true,
     reValidateMode: 'onChange',
     defaultValues: createDefaultValues(feature?.data ?? null),
   });
+  // Warn while the marker is placed, so a duplicate is noticed before the form is filled in.
+  const { nearbyAeds, checkNow } = useNearbyAeds({
+    map,
+    apiClient,
+    isActive: createMode === CreateMode.position && !feature,
+    position: createPosition,
+  });
+  const [isHintExpanded, setIsHintExpanded] = useState(false);
+  // A nearby AED opened from the hint. It is shown without leaving the create flow, so closing
+  // it returns to positioning with the marker where it was.
+  const [previewAed, setPreviewAed] = useState<MapGeoJSONFeature | null>(null);
+
+  useEffect(() => {
+    if (nearbyAeds.length === 0) setIsHintExpanded(false);
+  }, [nearbyAeds]);
+
+  // The preview belongs to positioning; leaving it some other way (e.g. the app's back button
+  // ending the flow) drops it, the move interaction is then handled by useHandleCreateMode.
+  useEffect(() => {
+    if (createMode !== CreateMode.position) setPreviewAed(null);
+  }, [createMode]);
+
+  useEffect(() => {
+    if (!map || !previewAed) return;
+
+    map.setFeatureState(previewAed.source, previewAed.id, { [FEATURE_STATE.SELECTED]: true });
+    return () =>
+      map.setFeatureState(previewAed.source, previewAed.id, { [FEATURE_STATE.SELECTED]: false });
+  }, [map, previewAed]);
 
   const handleCancel = () => {
     form.reset();
@@ -97,6 +130,18 @@ export const CreateAedControl = ({
   };
 
   const handleConfirmPosition = async () => {
+    // With potential duplicates close by, the regular button only opens the hint - the position
+    // is confirmed from within it, so the message can't be skipped. checkNow waits for data that
+    // may still be loading, so a fast confirm can't slip past the warning either.
+    if ((await checkNow()).length > 0) {
+      setIsHintExpanded(true);
+      return;
+    }
+
+    await proceedToForm();
+  };
+
+  const proceedToForm = async () => {
     const data = await map?.getGeoJsonSourceData(MapConfiguration.aedCreateSourceId);
     if (!data) {
       setCreateMode(CreateMode.none);
@@ -109,6 +154,26 @@ export const CreateAedControl = ({
     form.setValue('latitude', lat);
     form.setValue('longitude', lng);
     setCreateMode(CreateMode.form);
+  };
+
+  const centerOnFeature = (target: Feature) => {
+    if (target.geometry.type !== 'Point') return;
+    map?.easeTo(target.geometry.coordinates as [number, number], 18);
+  };
+
+  const handleShowNearbyAed = (nearbyFeature: Feature) => {
+    const source = getActiveAedOverlay(map);
+    if (!source) return;
+
+    // taps on the map would otherwise move the create marker behind the detail view
+    getMoveInteraction(map)?.off();
+    setPreviewAed({ ...nearbyFeature, source } as MapGeoJSONFeature);
+    centerOnFeature(nearbyFeature);
+  };
+
+  const handleClosePreview = () => {
+    setPreviewAed(null);
+    getMoveInteraction(map)?.on();
   };
 
   const handleChangePosition = () => {
@@ -140,19 +205,33 @@ export const CreateAedControl = ({
 
   return (
     <>
-      <MapButtons
-        createMode={createMode}
-        handleCancel={handleCancel}
-        handleConfirmPosition={() => void handleConfirmPosition()}
-        handleChangePosition={handleChangePosition}
-        compact={compact}
-      />
-      {createMode === CreateMode.position && (
+      {previewAed && (
+        <DetailView
+          feature={previewAed}
+          userLocation={userLocation ?? null}
+          onCenterFeature={() => centerOnFeature(previewAed)}
+          onClose={handleClosePreview}
+          compact={compact}
+        />
+      )}
+      {!previewAed && (
+        <MapButtons
+          createMode={createMode}
+          handleCancel={handleCancel}
+          handleConfirmPosition={() => void handleConfirmPosition()}
+          handleChangePosition={handleChangePosition}
+          compact={compact}
+        />
+      )}
+      {createMode === CreateMode.position && !previewAed && (
         <div className="absolute top-6 z-5 w-full flex flex-row justify-center items-start h-0">
-          <div className="flex items-center px-3 md:px-5 py-2 md:py-4 gap-2.5 mx-9 md:mx-0 rounded-[50px] text-xs md:text-base leading-[150%] bg-primary-100-white text-primary-100-green-04 shadow-custom shadow-green-shadow">
-            <img src={iconInfoCircleGreenM} />
-            <span>{t('choosePositionForNewAedOnMap')}</span>
-          </div>
+          <PositionHint
+            nearbyAeds={nearbyAeds}
+            isExpanded={isHintExpanded}
+            onToggle={() => setIsHintExpanded(expanded => !expanded)}
+            onShowNearbyAed={handleShowNearbyAed}
+            onConfirm={() => void proceedToForm()}
+          />
         </div>
       )}
       {createMode === CreateMode.form && (

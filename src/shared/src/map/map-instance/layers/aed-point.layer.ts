@@ -40,11 +40,21 @@ export const createAedPointLayers = (baseId: string, source: string): LayerSpeci
     type: 'circle',
     paint: {
       'circle-color': [
-        'match',
-        ['get', 'opening_hours'],
-        '24/7',
-        COLORS.SECONDARY_GREEN_01,
-        COLORS.SECONDARY_ORANGE_02,
+        'case',
+        ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
+        [
+          'case',
+          ['boolean', ['feature-state', FEATURE_STATE.SELECTED], false],
+          COLORS.SECONDARY_ORANGE_02, // the nearby AED currently shown
+          COLORS.SECONDARY_ORANGE_01,
+        ],
+        [
+          'match',
+          ['get', 'opening_hours'],
+          '24/7',
+          COLORS.SECONDARY_GREEN_01,
+          COLORS.SECONDARY_ORANGE_02,
+        ],
       ],
       'circle-radius': [
         'case',
@@ -57,7 +67,21 @@ export const createAedPointLayers = (baseId: string, source: string): LayerSpeci
           20, // not selected
         ],
       ],
-      'circle-opacity': ['match', ['get', 'opening_hours'], '24/7', 0.6, 0.4],
+      'circle-opacity': [
+        'case',
+        ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
+        ['case', ['boolean', ['feature-state', FEATURE_STATE.SELECTED], false], 0.8, 0.5],
+        ['match', ['get', 'opening_hours'], '24/7', 0.6, 0.4],
+      ],
+      // an outline, so the nearby ring also stands out on the orange ring of AEDs with opening hours
+      'circle-stroke-width': [
+        'case',
+        ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
+        2,
+        0,
+      ],
+      'circle-stroke-color': COLORS.SECONDARY_ORANGE_02,
+      'circle-stroke-opacity': 0.6,
       'circle-translate': [0, -18],
       'circle-translate-anchor': 'viewport',
     },

@@ -33,7 +33,8 @@ interface DetailViewProps {
   userLocation: GeolocationPosition | null;
   onCenterFeature: () => void;
   onClose: () => void;
-  onEdit: () => void;
+  // without it the edit buttons are hidden, e.g. while the AED is previewed during a create flow
+  onEdit?: () => void;
   compact?: boolean;
 }
 
@@ -203,7 +204,7 @@ export const DetailView = ({
           isOpen={isOpen}
           className={cn({ hidden: isMobile && !propsVisible })}
         />
-        {isMobile && (
+        {isMobile && onEdit && (
           <IconButton
             title={t('edit')}
             icon={iconEditDarkGreen}
@@ -217,7 +218,7 @@ export const DetailView = ({
       </div>
       <div className={cn('py-3 px-4 flex-shrink flex w-full items-end', !compact && '2xl:py-4')}>
         <div className="flex justify-between items-center w-full flex-row-reverse h-10">
-          {!isMobile && (
+          {!isMobile && onEdit && (
             <IconButton
               title={t('edit')}
               icon={iconEditDarkGreen}

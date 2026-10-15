@@ -42,6 +42,8 @@ export interface SharedMapState {
   setEditFeature: Dispatch<SetStateAction<MapInteractionEvent | null>>;
   createMode: CreateMode;
   setCreateMode: Dispatch<SetStateAction<CreateMode>>;
+  // current position of the marker while an AED is created or edited
+  createPosition: { lat: number; lon: number } | null;
   userLocation: GeolocationPosition | null;
   isGpsActive: boolean;
   setIsGpsActive: Dispatch<SetStateAction<boolean>>;
@@ -92,6 +94,7 @@ export const SharedMap = ({
   const [activeBaseLayer, setActiveBaseLayerState] = useState<string>(defaultBaseLayer);
   const [selectedFeature, setSelectedFeature] = useState<MapInteractionEvent | null>(null);
   const [editFeature, setEditFeature] = useState<MapInteractionEvent | null>(null);
+  const [createPosition, setCreatePosition] = useState<{ lat: number; lon: number } | null>(null);
   const { activeOverlays, setActiveOverlays } = useOverlays(mapInstance);
   const [createMode, setCreateMode] = useHandleCreateMode({
     map: mapInstance,
@@ -119,6 +122,11 @@ export const SharedMap = ({
     event => {
       if (event.type === 'item-select') {
         setSelectedFeature(event);
+      }
+
+      if (event.type === 'item-move' && event.data) {
+        const [lon, lat] = event.data.geometry.coordinates;
+        setCreatePosition({ lat, lon });
       }
 
       handleMapEvent(event);
@@ -160,6 +168,13 @@ export const SharedMap = ({
     void mapInstanceRef.current?.setActiveBaseLayer(activeBaseLayer);
   }, [activeBaseLayer, isInitialized]);
 
+  // Without the reset, the next flow would briefly start from the previous flow's marker position.
+  useEffect(() => {
+    if (createMode === CreateMode.none) {
+      setCreatePosition(null);
+    }
+  }, [createMode]);
+
   const handleOnCreateStart = () => {
     setEditFeature(null);
     setCreateMode(CreateMode.position);
@@ -182,6 +197,7 @@ export const SharedMap = ({
     setEditFeature,
     createMode,
     setCreateMode,
+    createPosition,
     userLocation: userLocationData,
     isGpsActive,
     setIsGpsActive,
