@@ -8,6 +8,7 @@ import { Text } from '../../components/ui/text/Text';
 import { useHandleNextViewClick } from '../../hooks/useHandleNextViewClick';
 import { useLocalizedAsset } from '../../hooks/useLocalizedAsset';
 import { AppAdvertisment } from '../app-advertisment/AppAdvertisment';
+import { OsmSection } from './osm-section/OsmSection';
 
 interface InfoCardProps {
   title: string;
@@ -15,8 +16,8 @@ interface InfoCardProps {
 }
 
 const InfoCard = ({ title, description }: InfoCardProps) => (
-  <div className="p-8 bg-primary-100-white rounded-2xl h-full">
-    <Text variant="primary" size="large" className="font-semibold">
+  <div className="p-8 bg-primary-100-white rounded-2xl h-full min-w-0">
+    <Text variant="primary" size="large" className="font-semibold break-words">
       {title}
     </Text>
     <Text variant="primary" size="regular" weight="light">
@@ -107,6 +108,7 @@ export const Project = () => {
           </div>
         </div>
       </ContentWrapper>
+      <OsmSection />
     </div>
   );
 };
