@@ -71,7 +71,7 @@
   "nearbyAedContent": "Please check whether it is the same defibrillator. If so, please correct the existing entry instead.",
   "nearbyAedNoLocation": "No location given",
   "nearbyAedShow": "Show",
-  "nearbyAedDismiss": "Add new anyway",
+  "nearbyAedConfirm": "Add new anyway",
   "submit": "Submit",
   "location": "Location",
   "reporter": "Reporter",

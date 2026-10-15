@@ -51,7 +51,7 @@
   "nearbyAedContent": "Verifichi se si tratta dello stesso defibrillatore. In tal caso, corregga piuttosto la voce esistente.",
   "nearbyAedNoLocation": "Nessuna indicazione del luogo",
   "nearbyAedShow": "Mostra",
-  "nearbyAedDismiss": "Registrare comunque",
+  "nearbyAedConfirm": "Registrare comunque",
   "submit": "Invia",
   "location": "Posizione",
   "reporter": "Segnalatore",

@@ -34,7 +34,17 @@ export const createAedAvailabilityPointLayers = (
     source: source,
     type: 'circle',
     paint: {
-      'circle-color': COLORS.SECONDARY_GREEN_01,
+      'circle-color': [
+        'case',
+        ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
+        [
+          'case',
+          ['boolean', ['feature-state', FEATURE_STATE.SELECTED], false],
+          COLORS.SECONDARY_ORANGE_02, // the nearby AED currently shown
+          COLORS.SECONDARY_ORANGE_01,
+        ],
+        COLORS.SECONDARY_GREEN_01,
+      ],
       'circle-radius': [
         'case',
         ['boolean', ['feature-state', FEATURE_STATE.EDITING], false],
@@ -46,7 +56,12 @@ export const createAedAvailabilityPointLayers = (
           20, // not selected
         ],
       ],
-      'circle-opacity': 0.6,
+      'circle-opacity': [
+        'case',
+        ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
+        ['case', ['boolean', ['feature-state', FEATURE_STATE.SELECTED], false], 0.8, 0.5],
+        0.6,
+      ],
       'circle-translate': [0, -18],
       'circle-translate-anchor': 'viewport',
     },

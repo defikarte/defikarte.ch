@@ -6,7 +6,14 @@ import {
   type Point,
 } from 'geojson';
 import { type MapGeoJSONFeature } from 'maplibre-gl';
-import { type Dispatch, type SetStateAction, useState } from 'react';
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { type ApiClient } from '../../../api/api-client';
@@ -15,12 +22,14 @@ import { type AedAccess, type AedData, type AedIndoor } from '../../../model/aed
 import { type NotificationHandler } from '../../../model/common';
 import { CreateMode, type MapInteractionEvent } from '../../../model/map';
 import { findNearbyAeds, type NearbyAed } from '../../../services/nearby-aed.service';
-import { getActiveAedOverlay } from '../../helper';
+import { getActiveAedOverlay, getMoveInteraction } from '../../helper';
 import { FEATURE_STATE } from '../../map-instance/configuration/constants';
 import { MapConfiguration } from '../../map-instance/configuration/map.configuration';
 import { type MapInstance } from '../../map-instance/map-instance';
+import { DetailView } from '../detail-view/DetailView';
 import { AedForm } from './aed-form/AedForm';
 import { MapButtons } from './map-buttons/MapButtons';
+import { NearbyAedHint } from './nearby-aed-hint/NearbyAedHint';
 
 const createDefaultValues = (feature: Feature | null): AedData | undefined => {
   if (!feature) {
@@ -67,10 +76,12 @@ interface CreateAedControlProps {
   apiClient: ApiClient;
   createMode: CreateMode;
   feature: MapInteractionEvent | null;
+  createPosition: { lat: number; lon: number } | null;
   setEditFeature: Dispatch<SetStateAction<MapInteractionEvent | null>>;
   setCreateMode: Dispatch<SetStateAction<CreateMode>>;
   onFeatureSelect: (event: MapInteractionEvent) => void;
   onNotify: NotificationHandler;
+  userLocation?: GeolocationPosition | null;
   compact?: boolean;
 }
 
@@ -79,10 +90,12 @@ export const CreateAedControl = ({
   apiClient,
   createMode,
   feature,
+  createPosition,
   setEditFeature,
   setCreateMode,
   onFeatureSelect,
   onNotify,
+  userLocation,
   compact,
 }: CreateAedControlProps) => {
   const { t } = useTranslation();
@@ -92,19 +105,83 @@ export const CreateAedControl = ({
     defaultValues: createDefaultValues(feature?.data ?? null),
   });
   const [nearbyAeds, setNearbyAeds] = useState<NearbyAed[]>([]);
+  const [isHintExpanded, setIsHintExpanded] = useState(false);
+  // A nearby AED opened from the hint. It is shown without leaving the create flow, so closing
+  // it returns to positioning with the marker where it was.
+  const [previewAed, setPreviewAed] = useState<MapGeoJSONFeature | null>(null);
+  // Loaded once per flow (this control unmounts when it ends) and reused on every marker move.
+  const allAedsRef = useRef<Promise<FeatureCollection> | null>(null);
 
-  const loadAllAeds = async (): Promise<FeatureCollection> => {
+  const loadAllAeds = useCallback(async (): Promise<FeatureCollection> => {
     // The availability overlay only holds AEDs that are open right now, so it can't be used to
     // look for duplicates - request the full dataset instead.
     if (getActiveAedOverlay(map) === MapConfiguration.aedSourceId && map) {
       return map.getGeoJsonSourceData(MapConfiguration.aedSourceId);
     }
     return apiClient.requestAedData();
-  };
+  }, [map, apiClient]);
+
+  // Warn while the marker is placed, so a duplicate is noticed before the form is filled in. Only
+  // when creating: an edited AED would otherwise be reported as its own duplicate.
+  useEffect(() => {
+    if (createMode !== CreateMode.position || feature || !createPosition) {
+      setNearbyAeds(prev => (prev.length ? [] : prev));
+      return;
+    }
+
+    let isCurrent = true;
+    allAedsRef.current ??= loadAllAeds();
+    allAedsRef.current
+      .then(data => {
+        if (isCurrent) setNearbyAeds(findNearbyAeds(data, createPosition));
+      })
+      .catch((error: unknown) => {
+        // The hint is optional, it must never block creating an AED.
+        console.error(error);
+        allAedsRef.current = null;
+        if (isCurrent) setNearbyAeds([]);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [createMode, createPosition, feature, loadAllAeds]);
+
+  // Highlight the nearby AEDs on the map; the cleanup removes the highlight again as soon as the
+  // list changes or the flow ends.
+  useEffect(() => {
+    const sourceId = getActiveAedOverlay(map);
+    if (!map || !sourceId || nearbyAeds.length === 0) return;
+
+    const setNearby = (value: boolean) =>
+      nearbyAeds.forEach(({ feature }) =>
+        map.setFeatureState(sourceId, feature.id, { [FEATURE_STATE.NEARBY]: value })
+      );
+
+    setNearby(true);
+    return () => setNearby(false);
+  }, [map, nearbyAeds]);
+
+  useEffect(() => {
+    if (nearbyAeds.length === 0) setIsHintExpanded(false);
+  }, [nearbyAeds]);
+
+  // The preview belongs to positioning; leaving it some other way (e.g. the app's back button
+  // ending the flow) drops it, the move interaction is then handled by useHandleCreateMode.
+  useEffect(() => {
+    if (createMode !== CreateMode.position) setPreviewAed(null);
+  }, [createMode]);
+
+  useEffect(() => {
+    if (!map || !previewAed) return;
+
+    map.setFeatureState(previewAed.source, previewAed.id, { [FEATURE_STATE.SELECTED]: true });
+    return () =>
+      map.setFeatureState(previewAed.source, previewAed.id, { [FEATURE_STATE.SELECTED]: false });
+  }, [map, previewAed]);
 
   const handleCancel = () => {
     form.reset();
-    setNearbyAeds([]);
     if (feature) {
       map?.setFeatureState(feature.source ?? '', feature.data?.id, {
         [FEATURE_STATE.EDITING]: false,
@@ -115,6 +192,17 @@ export const CreateAedControl = ({
   };
 
   const handleConfirmPosition = async () => {
+    // With potential duplicates close by, the regular button only opens the hint - the position
+    // is confirmed from within it, so the message can't be skipped.
+    if (nearbyAeds.length > 0) {
+      setIsHintExpanded(true);
+      return;
+    }
+
+    await proceedToForm();
+  };
+
+  const proceedToForm = async () => {
     const data = await map?.getGeoJsonSourceData(MapConfiguration.aedCreateSourceId);
     if (!data) {
       setCreateMode(CreateMode.none);
@@ -126,28 +214,27 @@ export const CreateAedControl = ({
     const lng = (feature.geometry as Point).coordinates[0];
     form.setValue('latitude', lat);
     form.setValue('longitude', lng);
-
-    // Only warn when creating: an edited AED would otherwise be reported as its own duplicate.
-    if (!form.getValues('id')) {
-      try {
-        setNearbyAeds(findNearbyAeds(await loadAllAeds(), { lat, lon: lng }));
-      } catch (error) {
-        // The hint is optional, it must never block creating an AED.
-        console.error(error);
-        setNearbyAeds([]);
-      }
-    }
-
     setCreateMode(CreateMode.form);
   };
 
+  const centerOnFeature = (target: Feature) => {
+    if (target.geometry.type !== 'Point') return;
+    map?.easeTo(target.geometry.coordinates as [number, number], 18);
+  };
+
   const handleShowNearbyAed = (nearbyFeature: Feature) => {
-    handleCancel();
-    onFeatureSelect({
-      source: getActiveAedOverlay(map),
-      data: { ...nearbyFeature, source: getActiveAedOverlay(map) } as MapGeoJSONFeature,
-      type: 'item-select',
-    });
+    const source = getActiveAedOverlay(map);
+    if (!source) return;
+
+    // taps on the map would otherwise move the create marker behind the detail view
+    getMoveInteraction(map)?.off();
+    setPreviewAed({ ...nearbyFeature, source } as MapGeoJSONFeature);
+    centerOnFeature(nearbyFeature);
+  };
+
+  const handleClosePreview = () => {
+    setPreviewAed(null);
+    getMoveInteraction(map)?.on();
   };
 
   const handleChangePosition = () => {
@@ -179,19 +266,39 @@ export const CreateAedControl = ({
 
   return (
     <>
-      <MapButtons
-        createMode={createMode}
-        handleCancel={handleCancel}
-        handleConfirmPosition={() => void handleConfirmPosition()}
-        handleChangePosition={handleChangePosition}
-        compact={compact}
-      />
-      {createMode === CreateMode.position && (
-        <div className="absolute top-6 z-5 w-full flex flex-row justify-center items-start h-0">
+      {previewAed && (
+        <DetailView
+          feature={previewAed}
+          userLocation={userLocation ?? null}
+          onCenterFeature={() => centerOnFeature(previewAed)}
+          onClose={handleClosePreview}
+          compact={compact}
+        />
+      )}
+      {!previewAed && (
+        <MapButtons
+          createMode={createMode}
+          handleCancel={handleCancel}
+          handleConfirmPosition={() => void handleConfirmPosition()}
+          handleChangePosition={handleChangePosition}
+          compact={compact}
+        />
+      )}
+      {createMode === CreateMode.position && !previewAed && (
+        <div className="absolute top-6 z-5 w-full flex flex-col items-center gap-2 h-0">
           <div className="flex items-center px-3 md:px-5 py-2 md:py-4 gap-2.5 mx-9 md:mx-0 rounded-[50px] text-xs md:text-base leading-[150%] bg-primary-100-white text-primary-100-green-04 shadow-custom shadow-green-shadow">
             <img src={iconInfoCircleGreenM} />
             <span>{t('choosePositionForNewAedOnMap')}</span>
           </div>
+          {nearbyAeds.length > 0 && (
+            <NearbyAedHint
+              nearbyAeds={nearbyAeds}
+              isExpanded={isHintExpanded}
+              onToggle={() => setIsHintExpanded(expanded => !expanded)}
+              onShowNearbyAed={handleShowNearbyAed}
+              onConfirm={() => void proceedToForm()}
+            />
+          )}
         </div>
       )}
       {createMode === CreateMode.form && (
@@ -200,9 +307,6 @@ export const CreateAedControl = ({
           apiClient={apiClient}
           form={form}
           setCreateMode={setCreateMode}
-          nearbyAeds={nearbyAeds}
-          onShowNearbyAed={handleShowNearbyAed}
-          onDismissNearbyAeds={() => setNearbyAeds([])}
           onSuccess={handleOnSuccess}
           onNotify={onNotify}
           compact={compact}

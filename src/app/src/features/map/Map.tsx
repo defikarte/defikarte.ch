@@ -79,6 +79,7 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
     setEditFeature,
     createMode,
     setCreateMode,
+    createPosition,
     userLocation,
     isGpsActive,
     setIsGpsActive,
@@ -200,10 +201,12 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
           apiClient={apiClient}
           createMode={createMode}
           feature={editFeature}
+          createPosition={createPosition}
           setEditFeature={setEditFeature}
           setCreateMode={setCreateMode}
           onFeatureSelect={selectFeatureOnMap}
           onNotify={notifyAed}
+          userLocation={userLocation}
           compact
         />
       )}

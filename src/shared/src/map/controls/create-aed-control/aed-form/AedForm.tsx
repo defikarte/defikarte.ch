@@ -4,7 +4,6 @@ import { type Dispatch, type SetStateAction } from 'react';
 import { type useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { type ApiClient } from '../../../../api/api-client';
-import iconInfoCircleGreenM from '../../../../assets/icons/icon-info-circle-green-m.svg';
 import { Button } from '../../../../components/ui/button/Button';
 import { SelectField } from '../../../../components/ui/select-field/SelectField';
 import { TextField } from '../../../../components/ui/text-field/TextField';
@@ -16,7 +15,6 @@ import {
   formatPhoneNumber,
   isPhoneNumberValid,
 } from '../../../../services/custom-validation.service';
-import { type NearbyAed } from '../../../../services/nearby-aed.service';
 import { type MapInstance } from '../../../map-instance/map-instance';
 
 interface AedFormProps {
@@ -24,9 +22,6 @@ interface AedFormProps {
   apiClient: ApiClient;
   form: ReturnType<typeof useForm<AedData>>;
   setCreateMode: Dispatch<SetStateAction<CreateMode>>;
-  nearbyAeds: NearbyAed[];
-  onShowNearbyAed: (feature: Feature) => void;
-  onDismissNearbyAeds: () => void;
   onSuccess: (feature: Feature) => void;
   onNotify: NotificationHandler;
   compact?: boolean;
@@ -37,9 +32,6 @@ export const AedForm = ({
   apiClient,
   form,
   setCreateMode,
-  nearbyAeds,
-  onShowNearbyAed,
-  onDismissNearbyAeds,
   onSuccess,
   onNotify,
   compact,
@@ -161,49 +153,6 @@ export const AedForm = ({
       >
         <h1 className="border-b p-4 border-primary-05-green-05">{title}</h1>
         <div className="flex flex-col flex-grow justify-start px-4 pt-5 pb-4 gap-4 overflow-auto border-b border-primary-05-green-05">
-          {nearbyAeds.length > 0 && (
-            <div className="flex flex-col gap-3 p-4 rounded-2xl border border-primary-05-green-05 text-primary-100-green-04">
-              <div className="flex items-center gap-2.5 font-semibold">
-                <img src={iconInfoCircleGreenM} />
-                <span>{t('nearbyAedTitle', { count: nearbyAeds.length })}</span>
-              </div>
-              <span className="text-sm">{t('nearbyAedContent')}</span>
-              <ul className="flex flex-col gap-2">
-                {nearbyAeds.map(({ feature, distance }) => {
-                  const location =
-                    (feature.properties?.['defibrillator:location'] as string | undefined) ||
-                    (feature.properties?.description as string | undefined) ||
-                    t('nearbyAedNoLocation');
-                  const level = feature.properties?.level as string | undefined;
-                  return (
-                    <li key={feature.id} className="flex items-center justify-between gap-2 text-sm">
-                      <span>
-                        {Math.round(distance)} m – {location}
-                        {level && ` (${t('level')} ${level})`}
-                      </span>
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={() => onShowNearbyAed(feature)}
-                        disabled={isSubmitting}
-                      >
-                        {t('nearbyAedShow')}
-                      </Button>
-                    </li>
-                  );
-                })}
-              </ul>
-              <Button
-                type="button"
-                variant="secondary"
-                className="self-start"
-                onClick={onDismissNearbyAeds}
-                disabled={isSubmitting}
-              >
-                {t('nearbyAedDismiss')}
-              </Button>
-            </div>
-          )}
           <TextField
             label={t('coordinates')}
             type="text"

@@ -71,7 +71,7 @@
   "nearbyAedContent": "Veuillez vérifier s’il s’agit du même défibrillateur. Si c’est le cas, corrigez plutôt l’entrée existante.",
   "nearbyAedNoLocation": "Sans indication d’emplacement",
   "nearbyAedShow": "Afficher",
-  "nearbyAedDismiss": "Enregistrer quand même",
+  "nearbyAedConfirm": "Enregistrer quand même",
   "submit": "Soumettre",
   "location": "Emplacement",
   "reporter": "Reporter",
