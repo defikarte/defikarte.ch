@@ -62,6 +62,15 @@ export const createAedAvailabilityPointLayers = (
         ['case', ['boolean', ['feature-state', FEATURE_STATE.SELECTED], false], 0.8, 0.5],
         0.6,
       ],
+      // an outline, so the nearby ring also stands out on the orange ring of AEDs with opening hours
+      'circle-stroke-width': [
+        'case',
+        ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
+        2,
+        0,
+      ],
+      'circle-stroke-color': COLORS.SECONDARY_ORANGE_02,
+      'circle-stroke-opacity': 0.6,
       'circle-translate': [0, -18],
       'circle-translate-anchor': 'viewport',
     },

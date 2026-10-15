@@ -39,6 +39,11 @@ export {
   isPhoneNumberValid,
 } from './services/custom-validation.service';
 export { requestStyleSpecification } from './services/map-style.service';
+export {
+  findNearbyAeds,
+  NEARBY_AED_RADIUS_METERS,
+  type NearbyAed,
+} from './services/nearby-aed.service';
 export { isOpeningHourValid, isOpenNow } from './services/opening-hours.service';
 export { isMobileAgent } from './services/user-agent.service';
 
@@ -97,6 +102,7 @@ export { Tooltip } from './components/ui/tooltip/Tooltip';
 // SharedMap component
 export { AttributionControl } from './map/controls/attribution-control/AttributionControl';
 export { CreateAedControl } from './map/controls/create-aed-control/CreateAedControl';
+export { PositionHint } from './map/controls/create-aed-control/position-hint/PositionHint';
 export { DetailView } from './map/controls/detail-view/DetailView';
 export { SearchControl } from './map/controls/search-control/SearchControl';
 export { SharedMap, type SharedMapState } from './map/SharedMap';

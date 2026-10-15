@@ -71,6 +71,8 @@
   "nearbyAedContent": "Bitte prüfen Sie, ob es sich um denselben Defibrillator handelt. Falls ja, korrigieren Sie den bestehenden Eintrag.",
   "nearbyAedNoLocation": "Ohne Standortangabe",
   "nearbyAedShow": "Anzeigen",
+  "nearbyAedShowList": "Liste anzeigen",
+  "nearbyAedHideList": "Ausblenden",
   "nearbyAedConfirm": "Trotzdem neu erfassen",
   "submit": "Abschliessen",
   "location": "Standort",
