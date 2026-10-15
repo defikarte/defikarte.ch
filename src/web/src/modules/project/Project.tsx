@@ -15,25 +15,15 @@ import { AppAdvertisment } from '../app-advertisment/AppAdvertisment';
 interface InfoCardProps {
   title: string;
   description: string;
+  titleSize?: 'medium' | 'large';
 }
 
-const InfoCard = ({ title, description }: InfoCardProps) => (
-  <div className="p-8 bg-primary-100-white rounded-2xl h-full">
-    <Text variant="primary" size="large" className="font-semibold">
+const InfoCard = ({ title, description, titleSize = 'large' }: InfoCardProps) => (
+  <div className="p-8 bg-primary-100-white rounded-2xl h-full min-w-0">
+    <Text variant="primary" size={titleSize} className="font-semibold break-words">
       {title}
     </Text>
     <Text variant="primary" size="regular" weight="light">
-      {description}
-    </Text>
-  </div>
-);
-
-const OsmFactCard = ({ title, description }: InfoCardProps) => (
-  <div className="p-8 bg-white/10 rounded-2xl h-full">
-    <Text variant="white" size="regular" weight="bold" className="pb-2">
-      {title}
-    </Text>
-    <Text variant="white" size="small" weight="light">
       {description}
     </Text>
   </div>
@@ -130,20 +120,23 @@ export const Project = () => {
           {t('SectionProjectOsmContent')}
         </Text>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full pb-12">
-          <OsmFactCard
+          <InfoCard
+            titleSize="medium"
             title={t('SectionProjectOsmFactOneTitle')}
             description={t('SectionProjectOsmFactOneContent')}
           />
-          <OsmFactCard
+          <InfoCard
+            titleSize="medium"
             title={t('SectionProjectOsmFactTwoTitle')}
             description={t('SectionProjectOsmFactTwoContent')}
           />
-          <OsmFactCard
+          <InfoCard
+            titleSize="medium"
             title={t('SectionProjectOsmFactThreeTitle')}
             description={t('SectionProjectOsmFactThreeContent')}
           />
         </div>
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col md:flex-row items-center gap-4">
           <Button
             variant="white"
             icon={iconExternalLinkMiddleGreen}
