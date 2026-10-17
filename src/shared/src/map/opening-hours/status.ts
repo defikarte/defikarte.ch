@@ -1,5 +1,11 @@
 import { minuteOfWeek } from './time';
-import { type CompiledWeek, type MinuteOfWeek, OH_STATUS, type OpeningHoursStatus } from './types';
+import {
+  type CompiledWeek,
+  type MinuteOfWeek,
+  OH_STATUS,
+  type OpeningHoursStatus,
+  type OpeningHoursStatusMap,
+} from './types';
 
 const statusOfSchedule = (
   schedule: CompiledWeek['schedules'][number],
@@ -18,10 +24,23 @@ const statusOfSchedule = (
   return OH_STATUS.CLOSED;
 };
 
-/** One status character per schedule (index = oh_idx), see {@link OpeningHoursStatus}. */
+/** One status character per compiled schedule, see {@link OpeningHoursStatus}. */
 export const statusAt = (compiled: CompiledWeek, now: Date): string => {
   const minute = minuteOfWeek(now);
   return compiled.schedules.map(schedule => statusOfSchedule(schedule, minute)).join('');
+};
+
+/** Maps each opening_hours value to its status character; unknown values are left out. */
+export const toStatusMap = (schedules: string[], status: string): OpeningHoursStatusMap => {
+  const result: OpeningHoursStatusMap = {};
+  schedules.forEach((schedule, index) => {
+    const value = status[index] as OpeningHoursStatus | undefined;
+    if (value && value !== OH_STATUS.UNKNOWN) {
+      result[schedule] = value;
+    }
+  });
+
+  return result;
 };
 
 /**

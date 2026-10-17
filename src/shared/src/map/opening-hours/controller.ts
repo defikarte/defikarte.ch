@@ -1,23 +1,33 @@
-import { type GeoJSONSource, type Map, type MapSourceDataEvent } from 'maplibre-gl';
+import { type Feature, type FeatureCollection } from 'geojson';
+import {
+  type GeoJSONSource,
+  type GeoJSONSourceSpecification,
+  type Map,
+  type MapSourceDataEvent,
+} from 'maplibre-gl';
 import { OH_STATUS_STATE } from '../map-instance/configuration/constants';
 import { CachedCompiler, type ScheduleCompiler, WorkerCompiler } from './compiler';
-import { StatusTracker } from './status';
+import { collectSchedules, OPENING_HOURS_PROPERTY } from './schedules';
+import { StatusTracker, toStatusMap } from './status';
 import { toIsoDate, weekStart } from './time';
-import { type CompiledWeek, DEFAULT_HOLIDAY_REGION, type HolidayRegion } from './types';
+import {
+  DEFAULT_HOLIDAY_REGION,
+  type HolidayRegion,
+  OH_STATUS,
+  type OpeningHoursStatusMap,
+} from './types';
 import { type OpeningHoursWorker, OpeningHoursWorkerClient } from './worker-client';
 
 const TICK_INTERVAL_MS = 60_000;
-// start anyway if the AED source does not load, e.g. because another overlay is shown
-const SOURCE_LOAD_TIMEOUT_MS = 10_000;
 
-type OpenDataListener = (url: string) => void;
+type OpenDataListener = (data: FeatureCollection) => void;
 
 interface OpeningHoursControllerOptions {
   map: Map;
-  /** URL of the AED GeoJSON */
+  /** URL of the AED GeoJSON, loaded only if the map has not loaded all AEDs itself */
   getDataUrl: () => string;
-  /** sources showing the full AED data, they get the indexed data once it is ready */
-  sourceIds: string[];
+  /** source of the AED layers; the opening hours are read from its data */
+  sourceId: string;
   region?: HolidayRegion;
   /** defaults to the opening hours web worker */
   client?: OpeningHoursWorker;
@@ -26,43 +36,52 @@ interface OpeningHoursControllerOptions {
 }
 
 /**
- * Keeps the `oh_status` global state of the map up to date: one status character per unique
- * opening_hours value, which the AED layers look up by the `oh_idx` property of each feature.
+ * Keeps the `oh_status` global state of the map up to date: the current status of every
+ * `opening_hours` value, which the AED layers look up for each feature.
  *
- * The map renders right away with the raw data (all AEDs unknown). The worker then indexes and
- * compiles the opening hours, and the controller swaps in the indexed data together with the
- * first status. Afterwards only the global state changes, at most once a minute.
+ * The map loads and renders the AEDs as before. Once the AED source has loaded, the controller
+ * takes the unique opening_hours values from its data (already on the main thread, no second
+ * request) and compiles them in a web worker. Afterwards only the global state changes, when an
+ * opening or closing time is crossed.
  */
 export class OpeningHoursController {
   private readonly map: Map;
   private readonly getDataUrl: () => string;
-  private readonly sourceIds: string[];
+  private readonly sourceId: string;
   private readonly client: OpeningHoursWorker | null;
   private readonly compiler: ScheduleCompiler | null;
 
-  private schedules: string[] | null = null;
+  // all opening_hours values seen so far, the order matches the compiled schedules
+  private schedules: string[] = [];
+  private readonly knownSchedules = new Set<string>();
+  // all AEDs, from the last load without filter; needed for the open AEDs
+  private features: Feature[] | null = null;
+  private loadingFeatures: Promise<void> | null = null;
+  // the source data last read, to skip the many sourcedata events of the same data
+  private processedData: unknown = null;
+
   private tracker: StatusTracker | null = null;
+  // the schedules the current tracker was compiled from
+  private trackedSchedules: string[] = [];
   private status: string | null = null;
-  // object URLs of the indexed data and of the currently open AEDs
-  private dataUrl: string | null = null;
-  private openDataUrl: string | null = null;
+  private statusMap: OpeningHoursStatusMap | null = null;
+
+  private openData: FeatureCollection | null = null;
   private readonly openDataListeners = new Set<OpenDataListener>();
 
-  // newer loads and filter requests supersede older ones still running
-  private loadVersion = 0;
-  private openDataVersion = 0;
+  // a newer compilation supersedes older ones still running
+  private compileVersion = 0;
   private compilingWeek: string | null = null;
 
   private tickTimeout: ReturnType<typeof setTimeout> | null = null;
   private tickInterval: ReturnType<typeof setInterval> | null = null;
-  private stopWaitingForSource: (() => void) | null = null;
   private started = false;
   private disposed = false;
 
   constructor(options: OpeningHoursControllerOptions) {
     this.map = options.map;
     this.getDataUrl = options.getDataUrl;
-    this.sourceIds = options.sourceIds;
+    this.sourceId = options.sourceId;
 
     this.client =
       options.client ??
@@ -75,19 +94,19 @@ export class OpeningHoursController {
           )
         : null);
 
-    if (!this.client) {
+    if (!this.compiler) {
       console.warn('opening hours: web workers are not supported, AED availability is unknown');
     }
   }
 
-  /** Data for the AED sources: the indexed data if ready, otherwise the raw URL. */
-  public getSourceData(): string {
-    return this.dataUrl ?? this.getDataUrl();
+  /** All AEDs, once the map or the controller has loaded them without filter. */
+  public getAllAeds(): FeatureCollection | null {
+    return this.features ? { type: 'FeatureCollection', features: this.features } : null;
   }
 
-  /** Data of the currently open AEDs, null until it is computed. */
-  public getOpenSourceData(): string | null {
-    return this.openDataUrl;
+  /** The AEDs open right now, null until it is computed. */
+  public getOpenData(): FeatureCollection | null {
+    return this.openData;
   }
 
   /**
@@ -96,8 +115,8 @@ export class OpeningHoursController {
    */
   public subscribeOpenData(listener: OpenDataListener): () => void {
     this.openDataListeners.add(listener);
-    if (this.openDataUrl) {
-      listener(this.openDataUrl);
+    if (this.openData) {
+      listener(this.openData);
     } else {
       this.updateOpenData();
     }
@@ -108,11 +127,12 @@ export class OpeningHoursController {
   }
 
   public start() {
-    if (this.started || this.disposed || !this.client) {
+    if (this.started || this.disposed || !this.compiler) {
       return;
     }
     this.started = true;
 
+    this.map.on('sourcedata', this.onSourceData);
     this.map.on('styledata', this.onStyleData);
     document.addEventListener('visibilitychange', this.onVisibilityChange);
 
@@ -125,24 +145,22 @@ export class OpeningHoursController {
       TICK_INTERVAL_MS - (Date.now() % TICK_INTERVAL_MS) + 50
     );
 
-    // The map loads the AED data itself first, so it renders without waiting. The worker then
-    // takes the same response from the HTTP cache instead of downloading it a second time.
-    this.whenSourceLoaded(() => void this.load('force-cache'));
+    void this.readSourceData();
   }
 
-  /** Reloads the AED data, e.g. after an AED was added. */
-  public async refresh() {
-    if (!this.client) {
-      this.setSourcesData(this.getDataUrl());
-      return;
-    }
-
-    await this.load();
+  /**
+   * Reloads all AEDs, e.g. after an AED was added. Resolves with them, or null if they could
+   * not be loaded (or web workers are not supported).
+   */
+  public async refresh(): Promise<FeatureCollection | null> {
+    this.features = null;
+    await this.loadFeatures();
+    return this.getAllAeds();
   }
 
   public dispose() {
     this.disposed = true;
-    this.stopWaitingForSource?.();
+    this.map.off('sourcedata', this.onSourceData);
     this.map.off('styledata', this.onStyleData);
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
     if (this.tickTimeout) clearTimeout(this.tickTimeout);
@@ -150,92 +168,103 @@ export class OpeningHoursController {
 
     this.client?.terminate();
     this.openDataListeners.clear();
-    if (this.dataUrl) URL.revokeObjectURL(this.dataUrl);
-    if (this.openDataUrl) URL.revokeObjectURL(this.openDataUrl);
   }
 
-  private whenSourceLoaded(callback: () => void) {
-    const sourceId = this.sourceIds[0];
-    const isLoaded = () => {
-      try {
-        return !!this.map.getSource(sourceId) && this.map.isSourceLoaded(sourceId);
-      } catch {
-        return false;
-      }
-    };
-
-    if (isLoaded()) {
-      callback();
-      return;
+  private onSourceData = (event: MapSourceDataEvent) => {
+    if (event.sourceId === this.sourceId && event.isSourceLoaded) {
+      void this.readSourceData();
     }
+  };
 
-    const onSourceData = (event: MapSourceDataEvent) => {
-      if (event.sourceId === sourceId && isLoaded()) {
-        stop();
-        callback();
-      }
-    };
-    const timeout = setTimeout(() => {
-      stop();
-      callback();
-    }, SOURCE_LOAD_TIMEOUT_MS);
-    const stop = () => {
-      this.map.off('sourcedata', onSourceData);
-      clearTimeout(timeout);
-      this.stopWaitingForSource = null;
-    };
-
-    this.map.on('sourcedata', onSourceData);
-    this.stopWaitingForSource = stop;
-  }
-
-  /**
-   * @param cache 'force-cache' takes the response the map has just loaded; a refresh uses the
-   * default mode, which revalidates the cached response with the backend
-   */
-  private async load(cache?: RequestCache) {
-    if (!this.client || !this.compiler) {
-      return;
-    }
-
-    const version = ++this.loadVersion;
+  // takes the opening hours from the data the map has loaded (and copied to the main thread)
+  private async readSourceData() {
+    let source: GeoJSONSource | undefined;
     try {
-      const url = new URL(this.getDataUrl(), window.location.href).href;
-      const { data, schedules } = await this.client.request({ type: 'index', url, cache });
-      if (version !== this.loadVersion || this.disposed) {
+      source = this.map.getSource<GeoJSONSource>(this.sourceId);
+      if (!source || !this.map.isSourceLoaded(this.sourceId)) {
         return;
       }
+    } catch {
+      return;
+    }
 
-      if (!schedules) {
-        // data indexed by a backend: the schedule list has to be provided along with it
-        console.warn('opening hours: indexed data without schedule list is not supported yet');
-        return;
+    const data = await source.getData();
+    if (data === this.processedData || this.disposed || data.type !== 'FeatureCollection') {
+      return;
+    }
+    this.processedData = data;
+
+    // a filtered source only holds part of the AEDs
+    const isFiltered = !!(source.serialize() as GeoJSONSourceSpecification).filter;
+    this.addData(data.features, !isFiltered);
+  }
+
+  private async loadFeatures(cache?: RequestCache) {
+    if (!this.client) {
+      return;
+    }
+
+    this.loadingFeatures ??= (async () => {
+      try {
+        const url = new URL(this.getDataUrl(), window.location.href).href;
+        const data = await this.client!.request({ type: 'load', url, cache });
+        if (!this.disposed) {
+          this.addData(data.features, true);
+        }
+      } catch (error) {
+        console.warn('opening hours: could not load the AEDs', error);
+      } finally {
+        this.loadingFeatures = null;
       }
+    })();
 
-      const compiled = await this.compiler.getCompiledWeek(schedules, weekStart(new Date()));
-      if (version !== this.loadVersion || this.disposed) {
-        return;
-      }
+    await this.loadingFeatures;
+  }
 
-      // data and status are applied together, so oh_idx always matches the status string
-      const previousDataUrl = this.dataUrl;
-      this.dataUrl = URL.createObjectURL(data);
-      this.schedules = schedules;
-      this.setSourcesData(this.dataUrl);
-      this.setCompiled(compiled);
+  private addData(features: Feature[], isComplete: boolean) {
+    if (isComplete) {
+      this.features = features;
+      this.invalidateOpenData();
+    }
 
-      if (previousDataUrl) {
-        URL.revokeObjectURL(previousDataUrl);
-      }
-    } catch (error) {
-      console.warn('opening hours: could not compute the AED availability', error);
+    const added = collectSchedules(features, this.knownSchedules);
+    if (added.length > 0) {
+      this.schedules = [...this.schedules, ...added];
+      console.debug('opening hours: unique schedules', {
+        features: features.length,
+        schedules: this.schedules.length,
+      });
+      this.compile(weekStart(new Date()));
     }
   }
 
-  private setCompiled(compiled: CompiledWeek) {
-    this.tracker = new StatusTracker(compiled);
-    this.compilingWeek = null;
-    this.tick();
+  private compile(start: Date) {
+    if (!this.compiler || this.schedules.length === 0) {
+      return;
+    }
+
+    const schedules = this.schedules;
+    const version = ++this.compileVersion;
+    this.compilingWeek = toIsoDate(start);
+
+    this.compiler.getCompiledWeek(schedules, start).then(
+      compiled => {
+        if (version !== this.compileVersion || this.disposed) {
+          return;
+        }
+
+        this.compilingWeek = null;
+        this.tracker = new StatusTracker(compiled);
+        this.trackedSchedules = schedules;
+        this.tick();
+      },
+      (error: unknown) => {
+        if (version === this.compileVersion) {
+          this.compilingWeek = null;
+        }
+        console.warn('opening hours: could not compile the opening hours', error);
+      }
+    );
   }
 
   private tick = () => {
@@ -245,47 +274,28 @@ export class OpeningHoursController {
 
     const now = new Date();
     const currentWeekStart = weekStart(now);
-    if (toIsoDate(currentWeekStart) !== this.tracker.compiled.weekStart) {
+    const currentWeek = toIsoDate(currentWeekStart);
+    if (currentWeek !== this.tracker.compiled.weekStart && this.compilingWeek !== currentWeek) {
       // until the new week is compiled, the old one is a good approximation (same weekdays)
-      this.recompile(currentWeekStart);
+      this.compile(currentWeekStart);
     }
 
     const status = this.tracker.update(now);
     if (status !== null && status !== this.status) {
       this.status = status;
+      this.statusMap = toStatusMap(this.trackedSchedules, status);
       this.applyGlobalState();
       this.invalidateOpenData();
     }
   };
 
-  private recompile(start: Date) {
-    const week = toIsoDate(start);
-    if (!this.compiler || !this.schedules || this.compilingWeek === week) {
-      return;
-    }
-
-    this.compilingWeek = week;
-    const version = this.loadVersion;
-    this.compiler.getCompiledWeek(this.schedules, start).then(
-      compiled => {
-        if (version === this.loadVersion && !this.disposed) {
-          this.setCompiled(compiled);
-        }
-      },
-      (error: unknown) => {
-        this.compilingWeek = null;
-        console.warn('opening hours: could not compile the new week', error);
-      }
-    );
-  }
-
   private applyGlobalState() {
-    if (this.status === null) {
+    if (this.statusMap === null) {
       return;
     }
 
     try {
-      this.map.setGlobalStateProperty(OH_STATUS_STATE, this.status);
+      this.map.setGlobalStateProperty(OH_STATUS_STATE, this.statusMap);
     } catch {
       // the style is still loading, applied again on the next styledata event
     }
@@ -293,12 +303,12 @@ export class OpeningHoursController {
 
   // global state is part of the style, it has to be applied again after a style change
   private onStyleData = () => {
-    if (this.status === null) {
+    if (this.statusMap === null) {
       return;
     }
 
     try {
-      if (this.map.getGlobalState()[OH_STATUS_STATE] !== this.status) {
+      if (this.map.getGlobalState()[OH_STATUS_STATE] !== this.statusMap) {
         this.applyGlobalState();
       }
     } catch {
@@ -313,42 +323,34 @@ export class OpeningHoursController {
     }
   };
 
-  private setSourcesData(url: string) {
-    this.sourceIds.forEach(sourceId => {
-      this.map.getSource<GeoJSONSource>(sourceId)?.setData(url);
-    });
-  }
-
   private invalidateOpenData() {
-    if (this.openDataUrl) {
-      URL.revokeObjectURL(this.openDataUrl);
-      this.openDataUrl = null;
-    }
-
+    this.openData = null;
     this.updateOpenData();
   }
 
   // the open AEDs are only computed while someone shows them
   private updateOpenData() {
-    if (!this.client || this.status === null || this.openDataListeners.size === 0) {
+    if (this.openDataListeners.size === 0) {
       return;
     }
 
-    const version = ++this.openDataVersion;
-    this.client.request({ type: 'filterOpen', status: this.status }).then(
-      data => {
-        if (version !== this.openDataVersion || this.disposed) {
-          return;
-        }
+    if (!this.features) {
+      // the map has not loaded all AEDs (another filter was active), load them once
+      void this.loadFeatures('force-cache');
+      return;
+    }
 
-        if (this.openDataUrl) {
-          URL.revokeObjectURL(this.openDataUrl);
-        }
-        const url = URL.createObjectURL(data);
-        this.openDataUrl = url;
-        this.openDataListeners.forEach(listener => listener(url));
-      },
-      (error: unknown) => console.warn('opening hours: could not filter the open AEDs', error)
-    );
+    const statusMap = this.statusMap;
+    if (!statusMap) {
+      return;
+    }
+
+    const open = this.features.filter(feature => {
+      const value: unknown = feature.properties?.[OPENING_HOURS_PROPERTY];
+      return typeof value === 'string' && statusMap[value] === OH_STATUS.OPEN;
+    });
+    const data: FeatureCollection = { type: 'FeatureCollection', features: open };
+    this.openData = data;
+    this.openDataListeners.forEach(listener => listener(data));
   }
 }

@@ -20,8 +20,8 @@ import { createAedClusterLayers } from '../../layers/aed-cluster.layer';
 import { createAedSource } from '../../sources/aed.source';
 
 /**
- * Shows only the AEDs open right now. The open AEDs are a separate source (built in the opening
- * hours worker) instead of a layer filter, so the clusters count only open AEDs as well.
+ * Shows only the AEDs open right now. The open AEDs are a separate source instead of a layer
+ * filter, so the clusters count only open AEDs as well.
  */
 export class AedAvailabilityOverlayStrategy implements OverlayStrategy, RefreshableOverlayStrategy {
   private interactions: InteractionLayer[] = [];
@@ -42,13 +42,13 @@ export class AedAvailabilityOverlayStrategy implements OverlayStrategy, Refresha
 
   createSource(): GeoJSONSourceSpecification {
     // follow the open AEDs while the overlay is active, the set changes as time passes
-    this.unsubscribeOpenData ??= this.openingHours.subscribeOpenData(url => {
-      this.map.getSource<GeoJSONSource>(this.getSourceId())?.setData(url);
+    this.unsubscribeOpenData ??= this.openingHours.subscribeOpenData(data => {
+      this.map.getSource<GeoJSONSource>(this.getSourceId())?.setData(data);
     });
 
     // empty until the opening hours are computed
     return createAedSource(
-      this.openingHours.getOpenSourceData() ?? { type: 'FeatureCollection', features: [] }
+      this.openingHours.getOpenData() ?? { type: 'FeatureCollection', features: [] }
     );
   }
 

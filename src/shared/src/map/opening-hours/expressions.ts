@@ -6,23 +6,22 @@ import {
   MARKER_RED_IMAGE_ID,
   OH_STATUS_STATE,
 } from '../map-instance/configuration/constants';
-import { OH_IDX_PROPERTY } from './schedule-index';
+import { OPENING_HOURS_PROPERTY } from './schedules';
 import { OH_STATUS } from './types';
 
 /**
- * The current opening status of a feature: its character in the `oh_status` global state string.
- * Evaluates to '?' (unknown) as long as the feature has no `oh_idx` or the status is not computed yet.
+ * The current opening status of a feature, looked up by its `opening_hours` value in the
+ * `oh_status` global state. Until the status is computed (or if it cannot be), `24/7` counts as
+ * open and everything else as unknown, like before the status was computed from opening hours.
  */
 export const OH_STATUS_EXPRESSION: ExpressionSpecification = [
-  'case',
-  ['has', OH_IDX_PROPERTY],
+  'string',
   [
-    'slice',
-    ['to-string', ['global-state', OH_STATUS_STATE]],
-    ['get', OH_IDX_PROPERTY],
-    ['+', ['get', OH_IDX_PROPERTY], 1],
+    'get',
+    ['to-string', ['get', OPENING_HOURS_PROPERTY]],
+    ['object', ['global-state', OH_STATUS_STATE], ['literal', {}]],
   ],
-  OH_STATUS.UNKNOWN,
+  ['match', ['get', OPENING_HOURS_PROPERTY], '24/7', OH_STATUS.OPEN, OH_STATUS.UNKNOWN],
 ];
 
 export const ohStatusIconExpression: ExpressionSpecification = [

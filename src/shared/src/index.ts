@@ -82,8 +82,8 @@ export {
   ohStatusColorExpression,
   ohStatusIconExpression,
 } from './map/opening-hours/expressions';
-export { indexSchedules, OH_IDX_PROPERTY } from './map/opening-hours/schedule-index';
-export { StatusTracker, statusAt } from './map/opening-hours/status';
+export { collectSchedules, OPENING_HOURS_PROPERTY } from './map/opening-hours/schedules';
+export { StatusTracker, statusAt, toStatusMap } from './map/opening-hours/status';
 export { minuteOfWeek, toIsoDate, WEEK_MINUTES, weekEnd, weekStart } from './map/opening-hours/time';
 export {
   type CompiledSchedule,
@@ -94,6 +94,7 @@ export {
   type MinuteOfWeek,
   OH_STATUS,
   type OpeningHoursStatus,
+  type OpeningHoursStatusMap,
 } from './map/opening-hours/types';
 export { type OpeningHoursWorker } from './map/opening-hours/worker-client';
 

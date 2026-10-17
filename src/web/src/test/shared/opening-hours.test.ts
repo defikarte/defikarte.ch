@@ -6,7 +6,7 @@ import {
   compileWeek,
   type CompiledWeek,
   hashSchedules,
-  indexSchedules,
+  collectSchedules,
   minuteOfWeek,
   OH_STATUS_STATE,
   OpeningHoursController,
@@ -14,6 +14,7 @@ import {
   type ScheduleCompiler,
   StatusTracker,
   statusAt,
+  toStatusMap,
   toIsoDate,
   WEEK_MINUTES,
   weekEnd,
@@ -142,37 +143,37 @@ describe('StatusTracker', () => {
   });
 });
 
-describe('indexSchedules', () => {
-  const feature = (properties: Feature['properties']): Feature => ({
-    type: 'Feature',
-    geometry: { type: 'Point', coordinates: [8, 47] },
-    properties,
+const feature = (properties: Feature['properties']): Feature => ({
+  type: 'Feature',
+  geometry: { type: 'Point', coordinates: [8, 47] },
+  properties,
+});
+
+describe('collectSchedules', () => {
+  it('returns the opening hours not seen before and remembers them', () => {
+    const known = new Set(['24/7']);
+    const features = [
+      feature({ opening_hours: '24/7' }),
+      feature({ opening_hours: 'Mo-Fr 08:00-18:00' }),
+      feature({ opening_hours: 'Mo-Fr 08:00-18:00' }),
+      feature({ opening_hours: ' Mo-Fr 08:00-18:00 ' }),
+      feature({ opening_hours: '' }),
+      feature({}),
+      feature(null),
+    ];
+
+    // raw values, since the map looks the status up by the exact value
+    expect(collectSchedules(features, known)).toEqual(['Mo-Fr 08:00-18:00', ' Mo-Fr 08:00-18:00 ']);
+    expect(collectSchedules(features, known)).toEqual([]);
   });
+});
 
-  it('deduplicates the trimmed opening hours and stores the index on each feature', () => {
-    const data: FeatureCollection = {
-      type: 'FeatureCollection',
-      features: [
-        feature({ opening_hours: '24/7' }),
-        feature({ opening_hours: ' Mo-Fr 08:00-18:00 ' }),
-        feature({}),
-        feature({ opening_hours: '24/7' }),
-        feature(null),
-      ],
-    };
-
-    expect(indexSchedules(data)).toEqual(['24/7', 'Mo-Fr 08:00-18:00', '']);
-    expect(data.features.map(f => f.properties?.oh_idx as number)).toEqual([0, 1, 2, 0, 2]);
-  });
-
-  it('keeps an existing index', () => {
-    const data: FeatureCollection = {
-      type: 'FeatureCollection',
-      features: [feature({ opening_hours: '24/7', oh_idx: 3 })],
-    };
-
-    expect(indexSchedules(data)).toBeNull();
-    expect(data.features[0].properties?.oh_idx).toBe(3);
+describe('toStatusMap', () => {
+  it('maps the opening hours to their status and leaves unknown out', () => {
+    expect(toStatusMap(['24/7', 'Mo-Fr 08:00-18:00', 'unknown'], '10?')).toEqual({
+      '24/7': '1',
+      'Mo-Fr 08:00-18:00': '0',
+    });
   });
 });
 
@@ -184,7 +185,11 @@ describe('hashSchedules', () => {
 });
 
 describe('OpeningHoursController', () => {
-  const schedules = ['Mo 00:00-01:00', '24/7'];
+  const MONDAY_ONLY = 'Mo 00:00-01:00';
+  const aeds: FeatureCollection = {
+    type: 'FeatureCollection',
+    features: [feature({ opening_hours: MONDAY_ONLY }), feature({ opening_hours: '24/7' })],
+  };
 
   const flush = async () => {
     for (let i = 0; i < 10; i++) {
@@ -193,22 +198,23 @@ describe('OpeningHoursController', () => {
   };
 
   let setGlobalStateProperty: ReturnType<typeof vi.fn>;
-  let setData: ReturnType<typeof vi.fn>;
+  let sourceFilter: unknown;
   let map: Map;
   let compiler: ScheduleCompiler & { getCompiledWeek: ReturnType<typeof vi.fn> };
-  let client: OpeningHoursWorker;
+  let request: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.useFakeTimers();
-    URL.createObjectURL = vi.fn(() => 'blob:indexed');
-    URL.revokeObjectURL = vi.fn();
 
     setGlobalStateProperty = vi.fn();
-    setData = vi.fn();
+    sourceFilter = undefined;
     map = {
       on: vi.fn(),
       off: vi.fn(),
-      getSource: vi.fn(() => ({ setData })),
+      getSource: vi.fn(() => ({
+        getData: () => Promise.resolve(aeds),
+        serialize: () => ({ type: 'geojson', data: 'url', filter: sourceFilter }),
+      })),
       isSourceLoaded: vi.fn(() => true),
       setGlobalStateProperty,
       getGlobalState: vi.fn(() => ({})),
@@ -220,10 +226,7 @@ describe('OpeningHoursController', () => {
           Promise.resolve(compileWeek(list, start.getTime()))
       ),
     };
-    client = {
-      request: vi.fn(() => Promise.resolve({ data: new Blob(['{}']), schedules })),
-      terminate: vi.fn(),
-    } as unknown as OpeningHoursWorker;
+    request = vi.fn(() => Promise.resolve(aeds));
   });
 
   afterEach(() => {
@@ -234,20 +237,24 @@ describe('OpeningHoursController', () => {
     new OpeningHoursController({
       map,
       getDataUrl: () => 'https://example.org/aed',
-      sourceIds: ['aed-source'],
-      client,
+      sourceId: 'aed-source',
+      client: { request, terminate: vi.fn() } as unknown as OpeningHoursWorker,
       compiler,
     });
 
-  it('sets the indexed data and the status once computed', async () => {
+  it('takes the opening hours from the map source and sets the status per value', async () => {
     vi.setSystemTime(at(14, 10));
     const controller = createController();
     controller.start();
     await flush();
 
-    expect(setData).toHaveBeenCalledWith('blob:indexed');
-    expect(controller.getSourceData()).toBe('blob:indexed');
-    expect(setGlobalStateProperty).toHaveBeenCalledWith(OH_STATUS_STATE, '01');
+    expect(compiler.getCompiledWeek).toHaveBeenCalledWith([MONDAY_ONLY, '24/7'], MONDAY);
+    expect(setGlobalStateProperty).toHaveBeenCalledWith(OH_STATUS_STATE, {
+      [MONDAY_ONLY]: '0',
+      '24/7': '1',
+    });
+    // the data comes from the map, nothing is loaded a second time
+    expect(request).not.toHaveBeenCalled();
 
     controller.dispose();
   });
@@ -270,7 +277,10 @@ describe('OpeningHoursController', () => {
     controller.start();
     await flush();
 
-    expect(setGlobalStateProperty).toHaveBeenLastCalledWith(OH_STATUS_STATE, '01');
+    expect(setGlobalStateProperty).toHaveBeenLastCalledWith(OH_STATUS_STATE, {
+      [MONDAY_ONLY]: '0',
+      '24/7': '1',
+    });
     expect(toIsoDate(compiler.getCompiledWeek.mock.calls[0][1] as Date)).toBe('2026-10-12');
 
     // Sunday 23:59 -> Monday 00:01
@@ -279,7 +289,50 @@ describe('OpeningHoursController', () => {
 
     expect(compiler.getCompiledWeek).toHaveBeenCalledTimes(2);
     expect(toIsoDate(compiler.getCompiledWeek.mock.calls[1][1] as Date)).toBe('2026-10-19');
-    expect(setGlobalStateProperty).toHaveBeenLastCalledWith(OH_STATUS_STATE, '11');
+    expect(setGlobalStateProperty).toHaveBeenLastCalledWith(OH_STATUS_STATE, {
+      [MONDAY_ONLY]: '1',
+      '24/7': '1',
+    });
+
+    controller.dispose();
+  });
+
+  it('provides the open AEDs from the data of the map', async () => {
+    vi.setSystemTime(at(14, 10));
+    const controller = createController();
+    controller.start();
+    await flush();
+
+    const listener = vi.fn();
+    controller.subscribeOpenData(listener);
+
+    expect(listener).toHaveBeenCalledWith({
+      type: 'FeatureCollection',
+      features: [aeds.features[1]],
+    });
+    expect(request).not.toHaveBeenCalled();
+
+    controller.dispose();
+  });
+
+  it('loads all AEDs for the open AEDs if the map source is filtered', async () => {
+    vi.setSystemTime(at(14, 10));
+    sourceFilter = ['==', ['get', 'opening_hours'], '24/7'];
+    const controller = createController();
+    controller.start();
+    await flush();
+
+    const listener = vi.fn();
+    controller.subscribeOpenData(listener);
+    await flush();
+
+    expect(request).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'load', url: 'https://example.org/aed' })
+    );
+    expect(listener).toHaveBeenLastCalledWith({
+      type: 'FeatureCollection',
+      features: [aeds.features[1]],
+    });
 
     controller.dispose();
   });

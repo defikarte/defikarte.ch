@@ -1,6 +1,7 @@
 import {
   type FilterSpecification,
   type GeoJSONSource,
+  type GeoJSONSourceSpecification,
   type LayerSpecification,
   type Map,
 } from 'maplibre-gl';
@@ -24,9 +25,15 @@ export class AedOverlayStrategy implements OverlayStrategy, RefreshableOverlaySt
   private filter: FilterSpecification | null = null;
   private aedPointLayers: LayerSpecification[] = [];
   private aedClusterLayers: LayerSpecification[] = [];
+  private map: Map;
   private openingHours: OpeningHoursController;
 
-  constructor(openingHours: OpeningHoursController, filter: FilterSpecification | null = null) {
+  constructor(
+    map: Map,
+    openingHours: OpeningHoursController,
+    filter: FilterSpecification | null = null
+  ) {
+    this.map = map;
     this.openingHours = openingHours;
     this.filter = filter;
   }
@@ -35,9 +42,19 @@ export class AedOverlayStrategy implements OverlayStrategy, RefreshableOverlaySt
     return MapConfiguration.aedSourceId;
   }
 
-  createSource() {
-    // the data carries the oh_idx of each AED once the opening hours are computed
-    return createAedSource(this.openingHours.getSourceData(), this.filter);
+  createSource(): GeoJSONSourceSpecification {
+    // On a base layer change the source already exists. maplibre keeps the loaded data instead
+    // of the URL, so passing the URL again would make the style diff reload all AEDs.
+    const source = this.map.getSource<GeoJSONSource>(this.getSourceId());
+    if (source) {
+      return source.serialize() as GeoJSONSourceSpecification;
+    }
+
+    // after a filter change, reuse the AEDs loaded before instead of downloading them again
+    return createAedSource(
+      this.openingHours.getAllAeds() ?? MapConfiguration.aedGeoJsonUrl,
+      this.filter
+    );
   }
 
   refreshSourceData(map: Map): Promise<void> {
@@ -47,8 +64,13 @@ export class AedOverlayStrategy implements OverlayStrategy, RefreshableOverlaySt
       return Promise.resolve();
     }
 
-    // reloads the data in the background and sets it on the source, like setData did before
-    void this.openingHours.refresh();
+    // Reloads all AEDs in the background, not only the filtered ones, so a later filter change
+    // still has every AED. Without web workers the source loads the URL itself, as before.
+    void this.openingHours.refresh().then(data => {
+      this.map.getSource<GeoJSONSource>(this.getSourceId())?.setData(
+        data ?? MapConfiguration.aedGeoJsonUrl
+      );
+    });
     return Promise.resolve();
   }
 

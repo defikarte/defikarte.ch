@@ -83,20 +83,20 @@ export class MapInstance {
     this.openingHours = new OpeningHoursController({
       map,
       getDataUrl: () => MapConfiguration.aedGeoJsonUrl,
-      sourceIds: [MapConfiguration.aedSourceId],
+      sourceId: MapConfiguration.aedSourceId,
     });
 
     this.overlayManager.registerOverlay(
       OverlayType.aedAll,
-      new AedOverlayStrategy(this.openingHours)
+      new AedOverlayStrategy(map, this.openingHours)
     );
     this.overlayManager.registerOverlay(
       OverlayType.aedWithOpeningHours,
-      new AedOverlayStrategy(this.openingHours, restrictedFilterOverride)
+      new AedOverlayStrategy(map, this.openingHours, restrictedFilterOverride)
     );
     this.overlayManager.registerOverlay(
       OverlayType.aedAlwaysAvailable,
-      new AedOverlayStrategy(this.openingHours, alwaysAvailableFilterOverride)
+      new AedOverlayStrategy(map, this.openingHours, alwaysAvailableFilterOverride)
     );
     this.overlayManager.registerOverlay(
       OverlayType.aedByCurrentAvailability,

@@ -1,11 +1,9 @@
 /**
- * Parses opening hours and prepares the AED data off the main thread: with ~17k features,
- * neither the GeoJSON handling nor opening_hours.js parsing may block the map.
+ * Parses opening hours off the main thread: compiling the ~2k unique values of all AEDs with
+ * opening_hours.js takes around a second and must not block the map.
  */
-import { type Feature, type FeatureCollection } from 'geojson';
+import { type FeatureCollection } from 'geojson';
 import { compileWeek } from './compile';
-import { indexSchedules, OH_IDX_PROPERTY } from './schedule-index';
-import { OH_STATUS } from './types';
 import {
   type WorkerRequest,
   type WorkerRequestMessage,
@@ -13,41 +11,20 @@ import {
   type WorkerResults,
 } from './worker-protocol';
 
-// the features of the last `index` request, used to build the "available now" data
-let indexedFeatures: Feature[] = [];
-
-const toJsonBlob = (features: Feature[]) => {
-  const data: FeatureCollection = { type: 'FeatureCollection', features };
-  return new Blob([JSON.stringify(data)], { type: 'application/json' });
-};
-
 const handleRequest = async (
   request: WorkerRequest
 ): Promise<WorkerResults[keyof WorkerResults]> => {
   switch (request.type) {
-    case 'index': {
+    case 'load': {
       const response = await fetch(request.url, { cache: request.cache });
       if (!response.ok) {
         throw new Error(`Request AED-data failed with status ${response.status}`);
       }
 
-      const data = (await response.json()) as FeatureCollection;
-      const schedules = indexSchedules(data);
-      indexedFeatures = data.features;
-
-      return { data: toJsonBlob(data.features), schedules };
+      return (await response.json()) as FeatureCollection;
     }
     case 'compile':
       return compileWeek(request.schedules, request.weekStartMs, request.region);
-    case 'filterOpen': {
-      const { status } = request;
-      const open = indexedFeatures.filter(feature => {
-        const index = feature.properties?.[OH_IDX_PROPERTY] as number;
-        return status[index] === OH_STATUS.OPEN;
-      });
-
-      return toJsonBlob(open);
-    }
   }
 };
 

@@ -18,7 +18,7 @@ export type CompiledSchedule = Interval[] | null;
 export interface CompiledWeek {
   /** ISO date of the Monday this data is valid for, e.g. "2026-10-12" */
   weekStart: string;
-  /** index = oh_idx */
+  /** same order as the opening_hours values they were compiled from */
   schedules: CompiledSchedule[];
 }
 
@@ -30,6 +30,12 @@ export const OH_STATUS = {
   CLOSED: '0',
   UNKNOWN: '?',
 } as const satisfies Record<string, OpeningHoursStatus>;
+
+/**
+ * Current status per `opening_hours` value; the map style looks up each feature's status here.
+ * Unknown values are left out.
+ */
+export type OpeningHoursStatusMap = Record<string, OpeningHoursStatus>;
 
 /**
  * Location passed to opening_hours.js. It decides which public holidays apply (`PH`) and is the
