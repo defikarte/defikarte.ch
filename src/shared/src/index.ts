@@ -30,7 +30,6 @@ export {
 } from './model/map';
 
 // Services
-export { requestAedDataByCurrentAvailability } from './services/aed-data.service';
 export { searchAed } from './services/aed-search.service';
 export { distanceBetweenPoints } from './services/coordinate-calculation.service';
 export {
@@ -60,6 +59,8 @@ export {
   MARKER_GREEN_IMAGE_ID,
   MARKER_ORANGE_IMAGE_ID,
   MARKER_PLUS_BLUE_IMAGE_ID,
+  MARKER_RED_IMAGE_ID,
+  OH_STATUS_STATE,
 } from './map/map-instance/configuration/constants';
 export {
   MapConfiguration,
@@ -71,6 +72,30 @@ export { default as ItemMoveInteraction } from './map/map-instance/interactions/
 export { default as ItemSelectInteraction } from './map/map-instance/interactions/item-select.interaction';
 export { MapInstance } from './map/map-instance/map-instance';
 export { OverlayManager } from './map/map-instance/overlay-manager/overlay-manager';
+
+// Opening hours
+export { compileSchedule, compileWeek } from './map/opening-hours/compile';
+export { hashSchedules, type ScheduleCompiler } from './map/opening-hours/compiler';
+export { OpeningHoursController } from './map/opening-hours/controller';
+export {
+  OH_STATUS_EXPRESSION,
+  ohStatusColorExpression,
+  ohStatusIconExpression,
+} from './map/opening-hours/expressions';
+export { indexSchedules, OH_IDX_PROPERTY } from './map/opening-hours/schedule-index';
+export { StatusTracker, statusAt } from './map/opening-hours/status';
+export { minuteOfWeek, toIsoDate, WEEK_MINUTES, weekEnd, weekStart } from './map/opening-hours/time';
+export {
+  type CompiledSchedule,
+  type CompiledWeek,
+  DEFAULT_HOLIDAY_REGION,
+  type HolidayRegion,
+  type Interval,
+  type MinuteOfWeek,
+  OH_STATUS,
+  type OpeningHoursStatus,
+} from './map/opening-hours/types';
+export { type OpeningHoursWorker } from './map/opening-hours/worker-client';
 
 // Map helper & utils
 export {

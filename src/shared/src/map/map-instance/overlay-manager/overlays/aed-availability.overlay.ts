@@ -4,14 +4,13 @@ import {
   type LayerSpecification,
   type Map,
 } from 'maplibre-gl';
-import { type ApiClient } from '../../../../api/api-client';
 import {
   type InteractionLayer,
   type MapEventCallback,
   type OverlayStrategy,
   type RefreshableOverlayStrategy,
 } from '../../../../model/map';
-import { requestAedDataByCurrentAvailability } from '../../../../services/aed-data.service';
+import { type OpeningHoursController } from '../../../opening-hours/controller';
 import { MapConfiguration } from '../../configuration/map.configuration';
 import ClusterZoomInteraction from '../../interactions/cluster-zoom.interaction';
 import CursorClickableInteraction from '../../interactions/cursor-clickable.interaction';
@@ -20,56 +19,43 @@ import { createAedAvailabilityPointLayers } from '../../layers/aed-availability-
 import { createAedClusterLayers } from '../../layers/aed-cluster.layer';
 import { createAedSource } from '../../sources/aed.source';
 
+/**
+ * Shows only the AEDs open right now. The open AEDs are a separate source (built in the opening
+ * hours worker) instead of a layer filter, so the clusters count only open AEDs as well.
+ */
 export class AedAvailabilityOverlayStrategy implements OverlayStrategy, RefreshableOverlayStrategy {
   private interactions: InteractionLayer[] = [];
   private aedPointLayers: LayerSpecification[] = [];
   private aedClusterLayers: LayerSpecification[] = [];
   private map: Map;
-  private abortController: AbortController | null = null;
-  private apiClient: ApiClient;
+  private openingHours: OpeningHoursController;
+  private unsubscribeOpenData: (() => void) | null = null;
 
-  constructor(map: Map, apiClient: ApiClient) {
+  constructor(map: Map, openingHours: OpeningHoursController) {
     this.map = map;
-    this.apiClient = apiClient;
+    this.openingHours = openingHours;
   }
 
   getSourceId() {
     return MapConfiguration.aedAvailabilitySourceId;
   }
 
-  async createSource(): Promise<GeoJSONSourceSpecification> {
-    // optimize performance when base-layer changes and source is already loaded
-    const source = this.map.getSource(this.getSourceId())!;
-    if (source) {
-      return source.serialize() as GeoJSONSourceSpecification;
-    }
-
-    // Abort any previous request
-    this.abortOngoingRequest();
-    this.abortController = new AbortController();
-
-    // takes long, but on the backend I am not able to filter by availability
-    const data = await requestAedDataByCurrentAvailability(this.apiClient, {
-      signal: this.abortController.signal,
+  createSource(): GeoJSONSourceSpecification {
+    // follow the open AEDs while the overlay is active, the set changes as time passes
+    this.unsubscribeOpenData ??= this.openingHours.subscribeOpenData(url => {
+      this.map.getSource<GeoJSONSource>(this.getSourceId())?.setData(url);
     });
-    return createAedSource(data);
+
+    // empty until the opening hours are computed
+    return createAedSource(
+      this.openingHours.getOpenSourceData() ?? { type: 'FeatureCollection', features: [] }
+    );
   }
 
-  async refreshSourceData(map: Map): Promise<void> {
-    const source = map.getSource<GeoJSONSource>(this.getSourceId())!;
-    if (!source) {
-      console.warn('Source not found', this.getSourceId());
-      return;
-    }
-
-    // Abort any previous request
-    this.abortOngoingRequest();
-    this.abortController = new AbortController();
-
-    const data = await requestAedDataByCurrentAvailability(this.apiClient, {
-      signal: this.abortController.signal,
-    });
-    source.setData(data);
+  refreshSourceData(): Promise<void> {
+    // reloads in the background, the open AEDs follow through the subscription
+    void this.openingHours.refresh();
+    return Promise.resolve();
   }
 
   createLayers(): LayerSpecification[] {
@@ -117,8 +103,8 @@ export class AedAvailabilityOverlayStrategy implements OverlayStrategy, Refresha
   }
 
   cleanup(map: Map) {
-    // Abort any ongoing request
-    this.abortOngoingRequest();
+    this.unsubscribeOpenData?.();
+    this.unsubscribeOpenData = null;
 
     const layers = [...this.aedPointLayers, ...this.aedClusterLayers];
     layers.forEach(layer => {
@@ -133,12 +119,5 @@ export class AedAvailabilityOverlayStrategy implements OverlayStrategy, Refresha
     this.interactions.forEach(interaction => {
       interaction.off();
     });
-  }
-
-  private abortOngoingRequest() {
-    if (this.abortController) {
-      this.abortController.abort();
-      this.abortController = null;
-    }
   }
 }

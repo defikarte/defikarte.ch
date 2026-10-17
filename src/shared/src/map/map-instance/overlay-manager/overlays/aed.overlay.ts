@@ -10,6 +10,7 @@ import {
   type OverlayStrategy,
   type RefreshableOverlayStrategy,
 } from '../../../../model/map';
+import { type OpeningHoursController } from '../../../opening-hours/controller';
 import { MapConfiguration } from '../../configuration/map.configuration';
 import ClusterZoomInteraction from '../../interactions/cluster-zoom.interaction';
 import CursorClickableInteraction from '../../interactions/cursor-clickable.interaction';
@@ -23,8 +24,10 @@ export class AedOverlayStrategy implements OverlayStrategy, RefreshableOverlaySt
   private filter: FilterSpecification | null = null;
   private aedPointLayers: LayerSpecification[] = [];
   private aedClusterLayers: LayerSpecification[] = [];
+  private openingHours: OpeningHoursController;
 
-  constructor(filter: FilterSpecification | null = null) {
+  constructor(openingHours: OpeningHoursController, filter: FilterSpecification | null = null) {
+    this.openingHours = openingHours;
     this.filter = filter;
   }
 
@@ -33,7 +36,8 @@ export class AedOverlayStrategy implements OverlayStrategy, RefreshableOverlaySt
   }
 
   createSource() {
-    return createAedSource(MapConfiguration.aedGeoJsonUrl, this.filter);
+    // the data carries the oh_idx of each AED once the opening hours are computed
+    return createAedSource(this.openingHours.getSourceData(), this.filter);
   }
 
   refreshSourceData(map: Map): Promise<void> {
@@ -43,7 +47,8 @@ export class AedOverlayStrategy implements OverlayStrategy, RefreshableOverlaySt
       return Promise.resolve();
     }
 
-    source.setData(MapConfiguration.aedGeoJsonUrl);
+    // reloads the data in the background and sets it on the source, like setData did before
+    void this.openingHours.refresh();
     return Promise.resolve();
   }
 

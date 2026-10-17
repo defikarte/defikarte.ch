@@ -1,10 +1,6 @@
 import { type FilterSpecification, type LayerSpecification } from 'maplibre-gl';
-import {
-  COLORS,
-  FEATURE_STATE,
-  IMAGE_SCALE,
-  MARKER_GREEN_IMAGE_ID,
-} from '../configuration/constants';
+import { ohStatusColorExpression, ohStatusIconExpression } from '../../opening-hours/expressions';
+import { COLORS, FEATURE_STATE, IMAGE_SCALE } from '../configuration/constants';
 
 const layerFilter: FilterSpecification = ['!', ['has', 'point_count']];
 
@@ -22,7 +18,8 @@ export const createAedAvailabilityPointLayers = (
     },
     layout: {
       'icon-allow-overlap': true,
-      'icon-image': MARKER_GREEN_IMAGE_ID,
+      // the source only holds open AEDs, the status keeps the colour in sync with the other layers
+      'icon-image': ohStatusIconExpression,
       'icon-size': IMAGE_SCALE,
       'icon-anchor': 'bottom',
     },
@@ -43,7 +40,7 @@ export const createAedAvailabilityPointLayers = (
           COLORS.SECONDARY_ORANGE_02, // the nearby AED currently shown
           COLORS.SECONDARY_ORANGE_01,
         ],
-        COLORS.SECONDARY_GREEN_01,
+        ohStatusColorExpression,
       ],
       'circle-radius': [
         'case',
@@ -62,7 +59,7 @@ export const createAedAvailabilityPointLayers = (
         ['case', ['boolean', ['feature-state', FEATURE_STATE.SELECTED], false], 0.8, 0.5],
         0.6,
       ],
-      // an outline, so the nearby ring also stands out on the orange ring of AEDs with opening hours
+      // an outline, so the nearby ring also stands out on the orange ring of AEDs with unknown availability
       'circle-stroke-width': [
         'case',
         ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],

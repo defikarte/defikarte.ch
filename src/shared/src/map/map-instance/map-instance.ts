@@ -7,17 +7,18 @@ import {
   type StyleSpecification,
 } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { type ApiClient } from '../../api/api-client';
 import markerBlue from '../../assets/icons/defi-map-marker-blue.svg';
 import markerGreen from '../../assets/icons/defi-map-marker-green.svg';
 import markerOrange from '../../assets/icons/defi-map-marker-orange.svg';
 import markerPlusBlue from '../../assets/icons/defi-map-marker-plus-blue.svg';
+import markerRed from '../../assets/icons/defi-map-marker-red.svg';
 import markerGradientM from '../../assets/icons/map-marker-count-gradient-m.svg';
 import markerGradientS from '../../assets/icons/map-marker-count-gradient-s.svg';
 import markerGradientXl from '../../assets/icons/map-marker-count-gradient-xl.svg';
 import markerGradientXs from '../../assets/icons/map-marker-count-gradient-xs.svg';
 import { type MapEventCallback, OverlayType } from '../../model/map';
 import { requestStyleSpecification } from '../../services/map-style.service';
+import { OpeningHoursController } from '../opening-hours/controller';
 import {
   MARKER_BLUE_IMAGE_ID,
   MARKER_GRADIENT_M_IMAGE_ID,
@@ -27,6 +28,7 @@ import {
   MARKER_GREEN_IMAGE_ID,
   MARKER_ORANGE_IMAGE_ID,
   MARKER_PLUS_BLUE_IMAGE_ID,
+  MARKER_RED_IMAGE_ID,
 } from './configuration/constants';
 import { MapConfiguration } from './configuration/map.configuration';
 import { alwaysAvailableFilterOverride, restrictedFilterOverride } from './filter/aed.filter';
@@ -41,13 +43,16 @@ interface MapInstanceProps {
   baseLayer: string;
   overlays: OverlayType[];
   hash: boolean;
-  apiClient: ApiClient;
   onEvent?: MapEventCallback;
 }
 
 export class MapInstance {
+  // set once the map has loaded
   private mapInstance: Map | null = null;
+  // the map from the start, so it can be removed even before it has loaded
+  private readonly map: Map;
   private overlayManager: OverlayManager;
+  private openingHours: OpeningHoursController;
   // ensures overlays are only applied once (map styledata may fire multiple times)
   private overlaysLoaded = false;
   private activeBaseLayer: string;
@@ -72,19 +77,30 @@ export class MapInstance {
       touchPitch: false,
       hash: props.hash,
     });
+    this.map = map;
 
-    this.overlayManager.registerOverlay(OverlayType.aedAll, new AedOverlayStrategy());
+    // computes the open/closed status of all AEDs, shared by the AED overlays
+    this.openingHours = new OpeningHoursController({
+      map,
+      getDataUrl: () => MapConfiguration.aedGeoJsonUrl,
+      sourceIds: [MapConfiguration.aedSourceId],
+    });
+
+    this.overlayManager.registerOverlay(
+      OverlayType.aedAll,
+      new AedOverlayStrategy(this.openingHours)
+    );
     this.overlayManager.registerOverlay(
       OverlayType.aedWithOpeningHours,
-      new AedOverlayStrategy(restrictedFilterOverride)
+      new AedOverlayStrategy(this.openingHours, restrictedFilterOverride)
     );
     this.overlayManager.registerOverlay(
       OverlayType.aedAlwaysAvailable,
-      new AedOverlayStrategy(alwaysAvailableFilterOverride)
+      new AedOverlayStrategy(this.openingHours, alwaysAvailableFilterOverride)
     );
     this.overlayManager.registerOverlay(
       OverlayType.aedByCurrentAvailability,
-      new AedAvailabilityOverlayStrategy(map, props.apiClient)
+      new AedAvailabilityOverlayStrategy(map, this.openingHours)
     );
     this.overlayManager.registerOverlay(
       OverlayType.userLocation,
@@ -121,6 +137,7 @@ export class MapInstance {
     const images = [
       { id: MARKER_GREEN_IMAGE_ID, url: markerGreen },
       { id: MARKER_ORANGE_IMAGE_ID, url: markerOrange },
+      { id: MARKER_RED_IMAGE_ID, url: markerRed },
       { id: MARKER_GRADIENT_XS_IMAGE_ID, url: markerGradientXs },
       { id: MARKER_GRADIENT_S_IMAGE_ID, url: markerGradientS },
       { id: MARKER_GRADIENT_M_IMAGE_ID, url: markerGradientM },
@@ -141,6 +158,8 @@ export class MapInstance {
     });
 
     this.mapInstance = map;
+    // the AEDs are already rendered (as unknown), the status follows once it is computed
+    this.openingHours.start();
     console.log('Map initialized');
     this.handleMapEvent('init', 'loaded');
   };
@@ -211,7 +230,20 @@ export class MapInstance {
   };
 
   public remove = () => {
-    this.mapInstance?.remove();
+    this.openingHours.dispose();
+
+    // not mapInstance: a map removed before its load event (e.g. React StrictMode's double
+    // mount) would otherwise keep running, loading its own data in the same container
+    if (this.mapInstance) {
+      this.mapInstance.remove();
+      return;
+    }
+
+    // removing a map also removes its position from the URL hash, which the map replacing
+    // this one still has to read
+    const href = window.location.href;
+    this.map.remove();
+    window.history.replaceState(window.history.state, '', href);
   };
 
   public getActiveMapInteractions = () => {
