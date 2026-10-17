@@ -116,8 +116,12 @@ export const DetailView = ({
         // max-h-full, not a 100vh calc: the sheet sits inside the map's safe-area layer, so 100%
         // is exactly the space it may use and it never grows into the status bar.
         ['left-1/2', '-translate-x-1/2', 'w-[calc(100%-2rem)]', 'max-w-[768px]', 'max-h-full']
-      : [
-          'max-h-[calc(100vh-143px)]',
+      : // The max height is relative to the map area (100%), not the viewport: on mobile browsers
+        // 100vh includes the collapsible address bar, so a 100vh calc let the sheet grow past the
+        // top of the map and hid the title and the close button (#92). Keeps a gap of 1rem
+        // (mobile) / 1.5rem (md+) above the sheet.
+        [
+          'max-h-[calc(100%-2rem)]',
           'md:bottom-16',
           'md:right-6',
           'mx-4',
@@ -127,8 +131,7 @@ export const DetailView = ({
           'md:w-[304px]',
           'md:h-[500px]',
           'xl:h-[576px]',
-          'md:max-h-[calc(100vh-215px)]',
-          'lg:max-h-[calc(100vh-227px)]',
+          'md:max-h-[calc(100%-5.5rem)]',
         ]
   );
   return (
