@@ -5,6 +5,7 @@ import {
   IMAGE_SCALE,
   MARKER_GREEN_IMAGE_ID,
   MARKER_ORANGE_IMAGE_ID,
+  MARKER_RED_IMAGE_ID,
 } from '../configuration/constants';
 
 const noClusterFilter: FilterSpecification = ['!', ['has', 'point_count']];
@@ -21,11 +22,14 @@ export const createAedPointLayers = (baseId: string, source: string): LayerSpeci
     },
     layout: {
       'icon-allow-overlap': true,
+      // `availability` is computed on the client, see addAedAvailability
       'icon-image': [
         'match',
-        ['get', 'opening_hours'],
-        '24/7',
+        ['get', 'availability'],
+        'open',
         MARKER_GREEN_IMAGE_ID,
+        'closed',
+        MARKER_RED_IMAGE_ID,
         MARKER_ORANGE_IMAGE_ID,
       ],
       'icon-size': IMAGE_SCALE,
@@ -50,9 +54,11 @@ export const createAedPointLayers = (baseId: string, source: string): LayerSpeci
         ],
         [
           'match',
-          ['get', 'opening_hours'],
-          '24/7',
+          ['get', 'availability'],
+          'open',
           COLORS.SECONDARY_GREEN_01,
+          'closed',
+          COLORS.SECONDARY_RED_01,
           COLORS.SECONDARY_ORANGE_02,
         ],
       ],
@@ -71,9 +77,9 @@ export const createAedPointLayers = (baseId: string, source: string): LayerSpeci
         'case',
         ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
         ['case', ['boolean', ['feature-state', FEATURE_STATE.SELECTED], false], 0.8, 0.5],
-        ['match', ['get', 'opening_hours'], '24/7', 0.6, 0.4],
+        ['match', ['get', 'availability'], 'open', 0.6, 0.4],
       ],
-      // an outline, so the nearby ring also stands out on the orange ring of AEDs with opening hours
+      // an outline, so the nearby ring also stands out on the orange and red rings
       'circle-stroke-width': [
         'case',
         ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],

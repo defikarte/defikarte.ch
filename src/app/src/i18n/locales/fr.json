@@ -30,6 +30,7 @@
   "indoor": "Intérieur",
   "open": "Ouvert",
   "closed": "Fermé",
+  "notAccessible": "Pas accessible au public",
   "openingHours": "Heures d'ouverture",
   "access": "Accès",
   "isIndoor": "Est à l'intérieur",

@@ -1,11 +1,21 @@
+import { type GeoJsonProperties } from 'geojson';
 import opening_hours from 'opening_hours';
+import { type AedAvailability } from '../model/aed';
+
+// Without a location the library evaluates public holidays (PH) with the German calendar.
+// All AEDs are in Switzerland, so a fixed position in the middle of the country is precise enough.
+const SWISS_NOMINATIM = {
+  lat: 46.8,
+  lon: 8.2,
+  address: { country_code: 'ch', state: '' },
+};
 
 // Cache for parsed opening hours to avoid expensive re-parsing
 const openingHoursCache = new Map<string, opening_hours>();
 const validationCache = new Map<string, boolean>();
 
 // Cache size limit to prevent memory leaks
-const MAX_CACHE_SIZE = 1000;
+const MAX_CACHE_SIZE = 5000;
 
 const getOrCreateOpeningHours = (value: string): opening_hours | null => {
   if (!value || value === '') {
@@ -17,7 +27,7 @@ const getOrCreateOpeningHours = (value: string): opening_hours | null => {
   }
 
   try {
-    const oh = new opening_hours(value);
+    const oh = new opening_hours(value, SWISS_NOMINATIM);
 
     // Clear cache if it gets too large
     if (openingHoursCache.size >= MAX_CACHE_SIZE) {
@@ -69,4 +79,25 @@ export const isOpenNow = (openingHours: string) => {
   }
 
   return oh.getState();
+};
+
+export const getAedAvailability = (
+  properties: GeoJsonProperties,
+  now: Date = new Date()
+): AedAvailability => {
+  if (properties?.access === 'no') {
+    return 'closed';
+  }
+
+  const openingHours = properties?.opening_hours as string | undefined;
+  if (openingHours === '24/7') {
+    return 'open';
+  }
+
+  const oh = openingHours ? getOrCreateOpeningHours(openingHours) : null;
+  if (!oh || oh.getUnknown(now)) {
+    return 'unknown';
+  }
+
+  return oh.getState(now) ? 'open' : 'closed';
 };

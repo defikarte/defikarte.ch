@@ -21,6 +21,7 @@
   "indoor": "Im Gebäude",
   "open": "Geöffnet",
   "closed": "Geschlossen",
+  "notAccessible": "Nicht öffentlich zugänglich",
   "openingHours": "Öffnungszeiten",
   "access": "Zugang",
   "isIndoor": "Befindet sich im Gebäude",

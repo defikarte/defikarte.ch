@@ -21,6 +21,7 @@
   "indoor": "Indoor",
   "open": "Open",
   "closed": "Closed",
+  "notAccessible": "Not publicly accessible",
   "openingHours": "Opening Hours",
   "access": "Access",
   "isIndoor": "Is indoors",

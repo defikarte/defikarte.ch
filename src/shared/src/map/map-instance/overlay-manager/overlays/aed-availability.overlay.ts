@@ -1,3 +1,4 @@
+import { type FeatureCollection } from 'geojson';
 import {
   type GeoJSONSource,
   type GeoJSONSourceSpecification,
@@ -11,7 +12,7 @@ import {
   type OverlayStrategy,
   type RefreshableOverlayStrategy,
 } from '../../../../model/map';
-import { requestAedDataByCurrentAvailability } from '../../../../services/aed-data.service';
+import { filterAedDataByCurrentAvailability } from '../../../../services/aed-data.service';
 import { MapConfiguration } from '../../configuration/map.configuration';
 import ClusterZoomInteraction from '../../interactions/cluster-zoom.interaction';
 import CursorClickableInteraction from '../../interactions/cursor-clickable.interaction';
@@ -19,6 +20,7 @@ import ItemSelectInteraction from '../../interactions/item-select.interaction';
 import { createAedAvailabilityPointLayers } from '../../layers/aed-availability-point.layer';
 import { createAedClusterLayers } from '../../layers/aed-cluster.layer';
 import { createAedSource } from '../../sources/aed.source';
+import { AvailabilityTicker } from '../availability-ticker';
 
 export class AedAvailabilityOverlayStrategy implements OverlayStrategy, RefreshableOverlayStrategy {
   private interactions: InteractionLayer[] = [];
@@ -27,6 +29,10 @@ export class AedAvailabilityOverlayStrategy implements OverlayStrategy, Refresha
   private map: Map;
   private abortController: AbortController | null = null;
   private apiClient: ApiClient;
+  // raw data from the backend, kept to re-filter by the current time without a new request
+  private rawData: FeatureCollection | null = null;
+  private availabilityKey = '';
+  private ticker = new AvailabilityTicker(() => this.updateAvailability());
 
   constructor(map: Map, apiClient: ApiClient) {
     this.map = map;
@@ -44,14 +50,8 @@ export class AedAvailabilityOverlayStrategy implements OverlayStrategy, Refresha
       return source.serialize() as GeoJSONSourceSpecification;
     }
 
-    // Abort any previous request
-    this.abortOngoingRequest();
-    this.abortController = new AbortController();
-
     // takes long, but on the backend I am not able to filter by availability
-    const data = await requestAedDataByCurrentAvailability(this.apiClient, {
-      signal: this.abortController.signal,
-    });
+    const data = await this.requestData();
     return createAedSource(data);
   }
 
@@ -62,14 +62,7 @@ export class AedAvailabilityOverlayStrategy implements OverlayStrategy, Refresha
       return;
     }
 
-    // Abort any previous request
-    this.abortOngoingRequest();
-    this.abortController = new AbortController();
-
-    const data = await requestAedDataByCurrentAvailability(this.apiClient, {
-      signal: this.abortController.signal,
-    });
-    source.setData(data);
+    source.setData(await this.requestData());
   }
 
   createLayers(): LayerSpecification[] {
@@ -110,6 +103,9 @@ export class AedAvailabilityOverlayStrategy implements OverlayStrategy, Refresha
     cursorClickableInteraction.on();
     clusterZoomInteraction.on();
     itemSelectInteraction.on();
+
+    // started here, as this only runs once the overlay is actually applied
+    this.ticker.start();
   }
 
   getInteractions() {
@@ -119,6 +115,8 @@ export class AedAvailabilityOverlayStrategy implements OverlayStrategy, Refresha
   cleanup(map: Map) {
     // Abort any ongoing request
     this.abortOngoingRequest();
+    this.ticker.stop();
+    this.rawData = null;
 
     const layers = [...this.aedPointLayers, ...this.aedClusterLayers];
     layers.forEach(layer => {
@@ -133,6 +131,35 @@ export class AedAvailabilityOverlayStrategy implements OverlayStrategy, Refresha
     this.interactions.forEach(interaction => {
       interaction.off();
     });
+  }
+
+  private async requestData(): Promise<FeatureCollection> {
+    // Abort any previous request
+    this.abortOngoingRequest();
+    this.abortController = new AbortController();
+
+    this.rawData = await this.apiClient.requestAedData({ signal: this.abortController.signal });
+    return this.filterByAvailability(this.rawData);
+  }
+
+  // re-filters for the current time and only updates the map if the visible AEDs changed
+  private updateAvailability() {
+    const source = this.map.getSource<GeoJSONSource>(this.getSourceId());
+    if (!source || !this.rawData) {
+      return;
+    }
+
+    const previousKey = this.availabilityKey;
+    const data = this.filterByAvailability(this.rawData);
+    if (this.availabilityKey !== previousKey) {
+      source.setData(data);
+    }
+  }
+
+  private filterByAvailability(rawData: FeatureCollection): FeatureCollection {
+    const data = filterAedDataByCurrentAvailability(rawData);
+    this.availabilityKey = data.features.map(f => f.id).join();
+    return data;
   }
 
   private abortOngoingRequest() {

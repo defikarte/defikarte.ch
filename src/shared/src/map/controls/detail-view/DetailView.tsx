@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
 import iconAccessDarkGreen from '../../../assets/icons/icon-access-dark-green.svg';
 import iconAccessGrey from '../../../assets/icons/icon-access-grey.svg';
+import iconAccessWhite from '../../../assets/icons/icon-access-white.svg';
 import iconCloseDarkGreen from '../../../assets/icons/icon-close-dark-green.svg';
 import iconEditDarkGreen from '../../../assets/icons/icon-edit-dark-green.svg';
 import iconHouseDarkGreen from '../../../assets/icons/icon-house-dark-green.svg';
@@ -17,7 +18,7 @@ import { Button } from '../../../components/ui/button/Button';
 import { IconButton } from '../../../components/ui/icon-button/IconButton';
 import { Tag } from '../../../components/ui/tag/Tag';
 import { distanceBetweenPoints } from '../../../services/coordinate-calculation.service';
-import { isOpenNow } from '../../../services/opening-hours.service';
+import { getAedAvailability } from '../../../services/opening-hours.service';
 import { FeaturePropsList } from './property-list/FeaturePropsList';
 
 const GOOGLE_MAPS_DIRECTIONS_URL = 'https://www.google.com/maps/dir/?api=1';
@@ -55,7 +56,11 @@ export const DetailView = ({
   const coords = (feature?.geometry as Point)?.coordinates;
 
   // Memoize expensive opening hours check
-  const isOpen = useMemo(() => isOpenNow(props.opening_hours as string), [props.opening_hours]);
+  const isOpen = useMemo(
+    () =>
+      getAedAvailability({ opening_hours: props.opening_hours, access: props.access }) === 'open',
+    [props.opening_hours, props.access]
+  );
 
   // Memoize distance calculation
   const distance = useMemo(
@@ -81,6 +86,7 @@ export const DetailView = ({
 
   const isOutdoor = props.indoor === 'no';
   const isAccess = props.access === 'yes';
+  const isNotAccessible = props.access === 'no';
 
   const isSmallerThan1000 = distance && distance < 1000;
   const distanceText =
@@ -93,7 +99,7 @@ export const DetailView = ({
     (props['defibrillator:location'] as string) ?? props.description ?? props.operator ?? 'n/A';
 
   const hasTags =
-    (isOpen || (props.opening_hours !== undefined && !isOpen)) ??
+    (isOpen || isNotAccessible || (props.opening_hours !== undefined && !isOpen)) ??
     distance ??
     props.access ??
     props.indoor;
@@ -168,7 +174,12 @@ export const DetailView = ({
                 {t('open')}
               </Tag>
             )}
-            {props.opening_hours !== undefined && !isOpen && (
+            {isNotAccessible && (
+              <Tag variant="red" icon={iconAccessWhite}>
+                {t('notAccessible')}
+              </Tag>
+            )}
+            {props.opening_hours !== undefined && !isOpen && !isNotAccessible && (
               <Tag variant="orange" icon={iconTimeWhite}>
                 {t('closed')}
               </Tag>
@@ -181,7 +192,7 @@ export const DetailView = ({
                 {distanceText}
               </Tag>
             )}
-            {props.access && (
+            {props.access && !isNotAccessible && (
               <Tag
                 variant={isOpen ? 'tint' : 'secondary'}
                 icon={isOpen ? iconAccessDarkGreen : iconAccessGrey}

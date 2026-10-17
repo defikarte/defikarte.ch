@@ -12,6 +12,7 @@ import markerBlue from '../../assets/icons/defi-map-marker-blue.svg';
 import markerGreen from '../../assets/icons/defi-map-marker-green.svg';
 import markerOrange from '../../assets/icons/defi-map-marker-orange.svg';
 import markerPlusBlue from '../../assets/icons/defi-map-marker-plus-blue.svg';
+import markerRed from '../../assets/icons/defi-map-marker-red.svg';
 import markerGradientM from '../../assets/icons/map-marker-count-gradient-m.svg';
 import markerGradientS from '../../assets/icons/map-marker-count-gradient-s.svg';
 import markerGradientXl from '../../assets/icons/map-marker-count-gradient-xl.svg';
@@ -27,6 +28,7 @@ import {
   MARKER_GREEN_IMAGE_ID,
   MARKER_ORANGE_IMAGE_ID,
   MARKER_PLUS_BLUE_IMAGE_ID,
+  MARKER_RED_IMAGE_ID,
 } from './configuration/constants';
 import { MapConfiguration } from './configuration/map.configuration';
 import { alwaysAvailableFilterOverride, restrictedFilterOverride } from './filter/aed.filter';
@@ -73,14 +75,17 @@ export class MapInstance {
       hash: props.hash,
     });
 
-    this.overlayManager.registerOverlay(OverlayType.aedAll, new AedOverlayStrategy());
+    this.overlayManager.registerOverlay(
+      OverlayType.aedAll,
+      new AedOverlayStrategy(map, props.apiClient)
+    );
     this.overlayManager.registerOverlay(
       OverlayType.aedWithOpeningHours,
-      new AedOverlayStrategy(restrictedFilterOverride)
+      new AedOverlayStrategy(map, props.apiClient, restrictedFilterOverride)
     );
     this.overlayManager.registerOverlay(
       OverlayType.aedAlwaysAvailable,
-      new AedOverlayStrategy(alwaysAvailableFilterOverride)
+      new AedOverlayStrategy(map, props.apiClient, alwaysAvailableFilterOverride)
     );
     this.overlayManager.registerOverlay(
       OverlayType.aedByCurrentAvailability,
@@ -121,6 +126,7 @@ export class MapInstance {
     const images = [
       { id: MARKER_GREEN_IMAGE_ID, url: markerGreen },
       { id: MARKER_ORANGE_IMAGE_ID, url: markerOrange },
+      { id: MARKER_RED_IMAGE_ID, url: markerRed },
       { id: MARKER_GRADIENT_XS_IMAGE_ID, url: markerGradientXs },
       { id: MARKER_GRADIENT_S_IMAGE_ID, url: markerGradientS },
       { id: MARKER_GRADIENT_M_IMAGE_ID, url: markerGradientM },

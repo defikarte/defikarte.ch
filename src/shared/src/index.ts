@@ -11,7 +11,7 @@ export {
 } from './model/common';
 
 // Model types
-export { type AedAccess, type AedData, type AedIndoor } from './model/aed';
+export { type AedAccess, type AedAvailability, type AedData, type AedIndoor } from './model/aed';
 export { type LocationProvider } from './model/location-provider';
 export {
   CreateMode,
@@ -30,7 +30,11 @@ export {
 } from './model/map';
 
 // Services
-export { requestAedDataByCurrentAvailability } from './services/aed-data.service';
+export {
+  addAedAvailability,
+  filterAedDataByCurrentAvailability,
+  requestAedDataByCurrentAvailability,
+} from './services/aed-data.service';
 export { searchAed } from './services/aed-search.service';
 export { distanceBetweenPoints } from './services/coordinate-calculation.service';
 export {
@@ -44,7 +48,11 @@ export {
   NEARBY_AED_RADIUS_METERS,
   type NearbyAed,
 } from './services/nearby-aed.service';
-export { isOpeningHourValid, isOpenNow } from './services/opening-hours.service';
+export {
+  getAedAvailability,
+  isOpeningHourValid,
+  isOpenNow,
+} from './services/opening-hours.service';
 export { isMobileAgent } from './services/user-agent.service';
 
 // Map instance & configuration
@@ -60,6 +68,7 @@ export {
   MARKER_GREEN_IMAGE_ID,
   MARKER_ORANGE_IMAGE_ID,
   MARKER_PLUS_BLUE_IMAGE_ID,
+  MARKER_RED_IMAGE_ID,
 } from './map/map-instance/configuration/constants';
 export {
   MapConfiguration,

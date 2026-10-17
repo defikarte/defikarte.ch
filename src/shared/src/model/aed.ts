@@ -2,6 +2,8 @@ import { type Feature } from 'geojson';
 
 export type AedAccess = 'yes' | 'permissive' | 'private';
 export type AedIndoor = 'yes' | 'no';
+// availability at the current time, derived from `access` and `opening_hours`
+export type AedAvailability = 'open' | 'closed' | 'unknown';
 
 export interface AedData {
   id?: string;
