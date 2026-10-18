@@ -1,0 +1,47 @@
+{
+  "skill_name": "defikarte-maplibre",
+  "evals": [
+    {
+      "id": 3,
+      "name": "map-indoor-filter",
+      "prompt": "Add a filter option so users can show only indoor AEDs on the map (OSM tag indoor=yes).",
+      "expected_output": "",
+      "files": [],
+      "assertions": [
+        "Adds no new HTTP request / fetch / axios call",
+        "Filters AEDs already in memory (source filter on aedAll + same rule for aedByStatus), no re-download",
+        "Extends the existing AedOverlayStrategy / AedStatusOverlayStrategy instead of a new overlay architecture",
+        "UI toggle reuses FilterControl/FilterItem",
+        "New strings added to all 8 locale files (app + web, de/fr/it/en)"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "map-heatmap-low-zoom",
+      "prompt": "At low zoom levels (whole Switzerland view) show a heatmap of AED density instead of the cluster bubbles, switch to the normal clusters/markers when zooming in.",
+      "expected_output": "",
+      "files": [],
+      "assertions": [
+        "Adds no new source; heatmap layer uses the existing AED source",
+        "Adds no new HTTP request / fetch / axios call",
+        "Zoom switching is done with layer minzoom/maxzoom or zoom expressions, not a JS zoom listener",
+        "Touches at most 3 files",
+        "Heatmap colours come from existing COLORS constants / design palette, not new ad-hoc hex values"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "map-highlight-near-user",
+      "prompt": "When GPS is active, highlight the AEDs within 500 m of the user's location on the map so you can spot the closest ones quickly.",
+      "expected_output": "",
+      "files": [],
+      "assertions": [
+        "Adds no new HTTP request (uses already-loaded source data)",
+        "Highlights via setFeatureState / FEATURE_STATE, not a new copied source",
+        "Reuses existing distance helpers (findNearbyAeds / distanceBetweenPoints)",
+        "Guards against recomputing on every GPS tick (e.g. only when position moved / memoized)",
+        "Clears the highlight when GPS is turned off or the overlay changes"
+      ]
+    }
+  ]
+}
