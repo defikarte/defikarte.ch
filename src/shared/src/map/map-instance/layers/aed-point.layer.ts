@@ -1,11 +1,11 @@
 import { type FilterSpecification, type LayerSpecification } from 'maplibre-gl';
 import {
-  COLORS,
-  FEATURE_STATE,
-  IMAGE_SCALE,
-  MARKER_GREEN_IMAGE_ID,
-  MARKER_ORANGE_IMAGE_ID,
-} from '../configuration/constants';
+  OH_STATUS_EXPRESSION,
+  ohStatusColorExpression,
+  ohStatusIconExpression,
+} from '../../opening-hours/expressions';
+import { OH_STATUS } from '../../opening-hours/types';
+import { COLORS, FEATURE_STATE, IMAGE_SCALE } from '../configuration/constants';
 
 const noClusterFilter: FilterSpecification = ['!', ['has', 'point_count']];
 
@@ -21,13 +21,8 @@ export const createAedPointLayers = (baseId: string, source: string): LayerSpeci
     },
     layout: {
       'icon-allow-overlap': true,
-      'icon-image': [
-        'match',
-        ['get', 'opening_hours'],
-        '24/7',
-        MARKER_GREEN_IMAGE_ID,
-        MARKER_ORANGE_IMAGE_ID,
-      ],
+      // green = open, red = closed, orange = unknown
+      'icon-image': ohStatusIconExpression,
       'icon-size': IMAGE_SCALE,
       'icon-anchor': 'bottom',
     },
@@ -48,13 +43,7 @@ export const createAedPointLayers = (baseId: string, source: string): LayerSpeci
           COLORS.SECONDARY_ORANGE_02, // the nearby AED currently shown
           COLORS.SECONDARY_ORANGE_01,
         ],
-        [
-          'match',
-          ['get', 'opening_hours'],
-          '24/7',
-          COLORS.SECONDARY_GREEN_01,
-          COLORS.SECONDARY_ORANGE_02,
-        ],
+        ohStatusColorExpression,
       ],
       'circle-radius': [
         'case',
@@ -71,9 +60,9 @@ export const createAedPointLayers = (baseId: string, source: string): LayerSpeci
         'case',
         ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
         ['case', ['boolean', ['feature-state', FEATURE_STATE.SELECTED], false], 0.8, 0.5],
-        ['match', ['get', 'opening_hours'], '24/7', 0.6, 0.4],
+        ['match', OH_STATUS_EXPRESSION, OH_STATUS.OPEN, 0.6, 0.4],
       ],
-      // an outline, so the nearby ring also stands out on the orange ring of AEDs with opening hours
+      // an outline, so the nearby ring also stands out on the orange ring of AEDs with unknown availability
       'circle-stroke-width': [
         'case',
         ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],

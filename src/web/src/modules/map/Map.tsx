@@ -173,6 +173,7 @@ const MapControls = ({ mapState, setIsFullscreen, t }: MapControlsProps) => {
           <AttributionControl activeBaseLayer={activeBaseLayer} />
           {selectedFeature && (
             <DetailView
+              map={mapInstance}
               feature={selectedFeature.data}
               userLocation={userLocation}
               onCenterFeature={() => handleSelectOrCenterFeatureOnMap(selectedFeature)}

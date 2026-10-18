@@ -27,7 +27,7 @@ export const FilterItem = ({ checked, label, icon, onChange, compact = false }: 
         checked={checked}
         onChange={e => onChange(e)}
       />
-      <img src={icon} alt={label} className="ms-4 me-2" />
+      <img src={icon} alt="" className="ms-4 me-2" />
       <p className="leading-6 text-sm">{label}</p>
     </label>
   );

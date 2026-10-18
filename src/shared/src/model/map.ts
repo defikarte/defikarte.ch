@@ -5,19 +5,19 @@ import {
   type MapGeoJSONFeature,
   type SourceSpecification,
 } from 'maplibre-gl';
+import { type OpeningHoursStatus } from '../map/opening-hours/types';
 
+// the AEDs shown by their current status; the values are the opening hours status characters
 export const FilterType = {
-  alwaysAvailable: 0,
-  withOpeningHours: 1,
-  byAvailability: 2,
-} as const;
+  available: '1',
+  notAvailable: '0',
+  unknown: '?',
+} as const satisfies Record<string, OpeningHoursStatus>;
 export type FilterType = (typeof FilterType)[keyof typeof FilterType];
 
 export const OverlayType = {
   aedAll: 'aedAll',
-  aedAlwaysAvailable: 'aedAlwaysAvailable',
-  aedWithOpeningHours: 'aedWithOpeningHours',
-  aedByCurrentAvailability: 'aedByCurrentAvailability',
+  aedByStatus: 'aedByStatus',
   userLocation: 'userLocation',
   aedCreate: 'aedCreate',
 } as const;

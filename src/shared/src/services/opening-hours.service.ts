@@ -1,4 +1,5 @@
 import opening_hours from 'opening_hours';
+import { DEFAULT_HOLIDAY_REGION } from '../map/opening-hours/types';
 
 // Cache for parsed opening hours to avoid expensive re-parsing
 const openingHoursCache = new Map<string, opening_hours>();
@@ -17,7 +18,8 @@ const getOrCreateOpeningHours = (value: string): opening_hours | null => {
   }
 
   try {
-    const oh = new opening_hours(value);
+    // without a region, public holidays (PH) are evaluated with the German calendar
+    const oh = new opening_hours(value, DEFAULT_HOLIDAY_REGION);
 
     // Clear cache if it gets too large
     if (openingHoursCache.size >= MAX_CACHE_SIZE) {
@@ -56,17 +58,4 @@ export const isOpeningHourValid = (value: string) => {
 
   validationCache.set(value, valid);
   return valid;
-};
-
-export const isOpenNow = (openingHours: string) => {
-  if (!openingHours || openingHours === '') {
-    return false;
-  }
-
-  const oh = getOrCreateOpeningHours(openingHours);
-  if (!oh) {
-    return false;
-  }
-
-  return oh.getState();
 };

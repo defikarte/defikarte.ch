@@ -143,7 +143,6 @@ export const SharedMap = ({
         overlays: [defaultActiveOverlay, OverlayType.userLocation],
         onEvent: onMapEvent,
         hash: isHash,
-        apiClient: apiClient,
       });
       mapInstanceRef.current = map;
       // Clearing the ref matters: without it a re-run of this effect (StrictMode's double invoke,
@@ -153,7 +152,7 @@ export const SharedMap = ({
         mapInstanceRef.current = null;
       };
     }
-  }, [isHash, onMapEvent, apiClient]);
+  }, [isHash, onMapEvent]);
 
   // A base layer picked elsewhere (e.g. a settings screen that stays mounted next to the map)
   // arrives as a prop change and has to reach the running instance.

@@ -56,7 +56,8 @@ export class MapConfiguration {
       [this.swisstopoImageryBaseMapId]: {
         ...imagerybasemap,
         glyphs: `https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=${options.maptilerApiKey}`,
-      } as StyleSpecification,
+        // JSON imports widen tuples (e.g. center) to arrays, which the style types reject
+      } as unknown as StyleSpecification,
     };
   }
 }

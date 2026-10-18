@@ -207,6 +207,7 @@ export const CreateAedControl = ({
     <>
       {previewAed && (
         <DetailView
+          map={map}
           feature={previewAed}
           userLocation={userLocation ?? null}
           onCenterFeature={() => centerOnFeature(previewAed)}
