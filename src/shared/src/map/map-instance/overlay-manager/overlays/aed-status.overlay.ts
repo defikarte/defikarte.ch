@@ -11,6 +11,7 @@ import {
   type RefreshableOverlayStrategy,
 } from '../../../../model/map';
 import { type OpeningHoursController } from '../../../opening-hours/controller';
+import { OH_STATUS, type OpeningHoursStatus } from '../../../opening-hours/types';
 import { MapConfiguration } from '../../configuration/map.configuration';
 import ClusterZoomInteraction from '../../interactions/cluster-zoom.interaction';
 import CursorClickableInteraction from '../../interactions/cursor-clickable.interaction';
@@ -20,20 +21,31 @@ import { createAedClusterLayers } from '../../layers/aed-cluster.layer';
 import { createAedSource } from '../../sources/aed.source';
 
 /**
- * Shows only the AEDs open right now. The open AEDs are a separate source instead of a layer
- * filter, so the clusters count only open AEDs as well.
+ * Shows only the AEDs with one of the selected statuses right now. They are a separate source
+ * instead of a layer filter, so the clusters count only these AEDs as well.
  */
-export class AedAvailabilityOverlayStrategy implements OverlayStrategy, RefreshableOverlayStrategy {
+export class AedStatusOverlayStrategy implements OverlayStrategy, RefreshableOverlayStrategy {
   private interactions: InteractionLayer[] = [];
   private aedPointLayers: LayerSpecification[] = [];
   private aedClusterLayers: LayerSpecification[] = [];
   private map: Map;
   private openingHours: OpeningHoursController;
-  private unsubscribeOpenData: (() => void) | null = null;
+  private statuses: readonly OpeningHoursStatus[] = [OH_STATUS.OPEN];
+  private unsubscribeData: (() => void) | null = null;
 
   constructor(map: Map, openingHours: OpeningHoursController) {
     this.map = map;
     this.openingHours = openingHours;
+  }
+
+  /** Changes the shown statuses; while the overlay is active, only its data is replaced. */
+  setStatuses(statuses: readonly OpeningHoursStatus[]) {
+    this.statuses = statuses;
+    if (this.unsubscribeData) {
+      this.unsubscribeData();
+      this.unsubscribeData = null;
+      this.subscribe();
+    }
   }
 
   getSourceId() {
@@ -41,19 +53,25 @@ export class AedAvailabilityOverlayStrategy implements OverlayStrategy, Refresha
   }
 
   createSource(): GeoJSONSourceSpecification {
-    // follow the open AEDs while the overlay is active, the set changes as time passes
-    this.unsubscribeOpenData ??= this.openingHours.subscribeOpenData(data => {
-      this.map.getSource<GeoJSONSource>(this.getSourceId())?.setData(data);
-    });
+    // follow the AEDs while the overlay is active, the set changes as time passes
+    if (!this.unsubscribeData) {
+      this.subscribe();
+    }
 
     // empty until the opening hours are computed
     return createAedSource(
-      this.openingHours.getOpenData() ?? { type: 'FeatureCollection', features: [] }
+      this.openingHours.getData(this.statuses) ?? { type: 'FeatureCollection', features: [] }
     );
   }
 
+  private subscribe() {
+    this.unsubscribeData = this.openingHours.subscribeData(this.statuses, data => {
+      this.map.getSource<GeoJSONSource>(this.getSourceId())?.setData(data);
+    });
+  }
+
   refreshSourceData(): Promise<void> {
-    // reloads in the background, the open AEDs follow through the subscription
+    // reloads in the background, the AEDs follow through the subscription
     void this.openingHours.refresh();
     return Promise.resolve();
   }
@@ -103,8 +121,8 @@ export class AedAvailabilityOverlayStrategy implements OverlayStrategy, Refresha
   }
 
   cleanup(map: Map) {
-    this.unsubscribeOpenData?.();
-    this.unsubscribeOpenData = null;
+    this.unsubscribeData?.();
+    this.unsubscribeData = null;
 
     const layers = [...this.aedPointLayers, ...this.aedClusterLayers];
     layers.forEach(layer => {

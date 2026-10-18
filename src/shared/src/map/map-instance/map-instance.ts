@@ -19,7 +19,7 @@ import markerGradientXs from '../../assets/icons/map-marker-count-gradient-xs.sv
 import { type MapEventCallback, OverlayType } from '../../model/map';
 import { requestStyleSpecification } from '../../services/map-style.service';
 import { OpeningHoursController } from '../opening-hours/controller';
-import { type OpeningHoursStatusMap } from '../opening-hours/types';
+import { type OpeningHoursStatus, type OpeningHoursStatusMap } from '../opening-hours/types';
 import {
   MARKER_BLUE_IMAGE_ID,
   MARKER_GRADIENT_M_IMAGE_ID,
@@ -32,10 +32,9 @@ import {
   MARKER_RED_IMAGE_ID,
 } from './configuration/constants';
 import { MapConfiguration } from './configuration/map.configuration';
-import { alwaysAvailableFilterOverride, restrictedFilterOverride } from './filter/aed.filter';
 import { OverlayManager } from './overlay-manager/overlay-manager';
-import { AedAvailabilityOverlayStrategy } from './overlay-manager/overlays/aed-availability.overlay';
 import { AedCreateOverlayStrategy } from './overlay-manager/overlays/aed-create.overlay';
+import { AedStatusOverlayStrategy } from './overlay-manager/overlays/aed-status.overlay';
 import { AedOverlayStrategy } from './overlay-manager/overlays/aed.overlay';
 import { UserLocationOverlayStrategy } from './overlay-manager/overlays/user-location.overlay';
 
@@ -54,6 +53,7 @@ export class MapInstance {
   private readonly map: Map;
   private overlayManager: OverlayManager;
   private openingHours: OpeningHoursController;
+  private aedStatusOverlay: AedStatusOverlayStrategy;
   // ensures overlays are only applied once (map styledata may fire multiple times)
   private overlaysLoaded = false;
   private activeBaseLayer: string;
@@ -91,18 +91,8 @@ export class MapInstance {
       OverlayType.aedAll,
       new AedOverlayStrategy(map, this.openingHours)
     );
-    this.overlayManager.registerOverlay(
-      OverlayType.aedWithOpeningHours,
-      new AedOverlayStrategy(map, this.openingHours, restrictedFilterOverride)
-    );
-    this.overlayManager.registerOverlay(
-      OverlayType.aedAlwaysAvailable,
-      new AedOverlayStrategy(map, this.openingHours, alwaysAvailableFilterOverride)
-    );
-    this.overlayManager.registerOverlay(
-      OverlayType.aedByCurrentAvailability,
-      new AedAvailabilityOverlayStrategy(map, this.openingHours)
-    );
+    this.aedStatusOverlay = new AedStatusOverlayStrategy(map, this.openingHours);
+    this.overlayManager.registerOverlay(OverlayType.aedByStatus, this.aedStatusOverlay);
     this.overlayManager.registerOverlay(
       OverlayType.userLocation,
       new UserLocationOverlayStrategy(map)
@@ -255,6 +245,11 @@ export class MapInstance {
   /** Calls the listener whenever the opening status changes, returns a function to unsubscribe. */
   public subscribeOpeningHoursStatus = (listener: (statusMap: OpeningHoursStatusMap) => void) => {
     return this.openingHours.subscribeStatus(listener);
+  };
+
+  /** The statuses the `aedByStatus` overlay shows. */
+  public setAedStatusFilter = (statuses: readonly OpeningHoursStatus[]) => {
+    this.aedStatusOverlay.setStatuses(statuses);
   };
 
   public getActiveMapInteractions = () => {

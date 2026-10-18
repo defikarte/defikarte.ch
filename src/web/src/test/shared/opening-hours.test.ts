@@ -223,6 +223,7 @@ describe('OpeningHoursController', () => {
       feature({ opening_hours: '24/7' }),
       feature({ opening_hours: '24/7', access: 'no' }),
       feature({ opening_hours: '24/7', access: 'private' }),
+      feature({ opening_hours: 'garbage' }),
     ],
   };
 
@@ -283,7 +284,7 @@ describe('OpeningHoursController', () => {
     controller.start();
     await flush();
 
-    expect(compiler.getCompiledWeek).toHaveBeenCalledWith([MONDAY_ONLY, '24/7'], MONDAY);
+    expect(compiler.getCompiledWeek).toHaveBeenCalledWith([MONDAY_ONLY, '24/7', 'garbage'], MONDAY);
     expect(setGlobalStateProperty).toHaveBeenCalledWith(OH_STATUS_STATE, {
       [MONDAY_ONLY]: '0',
       '24/7': '1',
@@ -332,6 +333,24 @@ describe('OpeningHoursController', () => {
     controller.dispose();
   });
 
+  it('provides the AEDs of the requested statuses', async () => {
+    vi.setSystemTime(at(14, 10));
+    const controller = createController();
+    controller.start();
+    await flush();
+
+    const [mondayOnly, open, notAccessible, openPrivate, garbage] = aeds.features;
+    expect(controller.getData([OH_STATUS.CLOSED])?.features).toEqual([mondayOnly, notAccessible]);
+    expect(controller.getData([OH_STATUS.UNKNOWN])?.features).toEqual([garbage]);
+    expect(controller.getData([OH_STATUS.OPEN, OH_STATUS.UNKNOWN])?.features).toEqual([
+      open,
+      openPrivate,
+      garbage,
+    ]);
+
+    controller.dispose();
+  });
+
   it('provides the open AEDs from the data of the map', async () => {
     vi.setSystemTime(at(14, 10));
     const controller = createController();
@@ -339,7 +358,7 @@ describe('OpeningHoursController', () => {
     await flush();
 
     const listener = vi.fn();
-    controller.subscribeOpenData(listener);
+    controller.subscribeData([OH_STATUS.OPEN], listener);
 
     expect(listener).toHaveBeenCalledWith({
       type: 'FeatureCollection',
@@ -379,7 +398,7 @@ describe('OpeningHoursController', () => {
     await flush();
 
     const listener = vi.fn();
-    controller.subscribeOpenData(listener);
+    controller.subscribeData([OH_STATUS.OPEN], listener);
     await flush();
 
     expect(request).toHaveBeenCalledWith(

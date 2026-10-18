@@ -14,14 +14,14 @@ import { toIsoDate, weekStart } from './time';
 import {
   DEFAULT_HOLIDAY_REGION,
   type HolidayRegion,
-  OH_STATUS,
+  type OpeningHoursStatus,
   type OpeningHoursStatusMap,
 } from './types';
 import { type OpeningHoursWorker, OpeningHoursWorkerClient } from './worker-client';
 
 const TICK_INTERVAL_MS = 60_000;
 
-type OpenDataListener = (data: FeatureCollection) => void;
+type DataListener = (data: FeatureCollection) => void;
 type StatusListener = (statusMap: OpeningHoursStatusMap) => void;
 
 interface OpeningHoursControllerOptions {
@@ -56,7 +56,7 @@ export class OpeningHoursController {
   // all opening_hours values seen so far, the order matches the compiled schedules
   private schedules: string[] = [];
   private readonly knownSchedules = new Set<string>();
-  // all AEDs, from the last load without filter; needed for the open AEDs
+  // all AEDs, from the last load without filter; needed for the AEDs by status
   private features: Feature[] | null = null;
   private loadingFeatures: Promise<void> | null = null;
   // the source data last read, to skip the many sourcedata events of the same data
@@ -68,8 +68,11 @@ export class OpeningHoursController {
   private status: string | null = null;
   private statusMap: OpeningHoursStatusMap | null = null;
 
-  private openData: FeatureCollection | null = null;
-  private readonly openDataListeners = new Set<OpenDataListener>();
+  // the statuses each data listener wants the AEDs of (globalThis: `Map` is the maplibre map here)
+  private readonly dataListeners = new globalThis.Map<
+    DataListener,
+    readonly OpeningHoursStatus[]
+  >();
   private readonly statusListeners = new Set<StatusListener>();
 
   // a newer compilation supersedes older ones still running
@@ -107,25 +110,34 @@ export class OpeningHoursController {
     return this.features ? { type: 'FeatureCollection', features: this.features } : null;
   }
 
-  /** The AEDs open right now, null until it is computed. */
-  public getOpenData(): FeatureCollection | null {
-    return this.openData;
+  /** The AEDs with one of the statuses right now, null until the status is computed. */
+  public getData(statuses: readonly OpeningHoursStatus[]): FeatureCollection | null {
+    const statusMap = this.statusMap;
+    if (!this.features || !statusMap) {
+      return null;
+    }
+
+    return {
+      type: 'FeatureCollection',
+      features: this.features.filter(feature =>
+        statuses.includes(featureStatus(feature.properties, statusMap))
+      ),
+    };
   }
 
   /**
-   * Calls the listener with new data whenever the set of open AEDs changes.
+   * Calls the listener with new data whenever the AEDs with one of the statuses change.
    * Returns a function to unsubscribe.
    */
-  public subscribeOpenData(listener: OpenDataListener): () => void {
-    this.openDataListeners.add(listener);
-    if (this.openData) {
-      listener(this.openData);
-    } else {
-      this.updateOpenData();
-    }
+  public subscribeData(
+    statuses: readonly OpeningHoursStatus[],
+    listener: DataListener
+  ): () => void {
+    this.dataListeners.set(listener, statuses);
+    this.updateData(listener);
 
     return () => {
-      this.openDataListeners.delete(listener);
+      this.dataListeners.delete(listener);
     };
   }
 
@@ -186,7 +198,7 @@ export class OpeningHoursController {
     if (this.tickInterval) clearInterval(this.tickInterval);
 
     this.client?.terminate();
-    this.openDataListeners.clear();
+    this.dataListeners.clear();
     this.statusListeners.clear();
   }
 
@@ -244,7 +256,7 @@ export class OpeningHoursController {
   private addData(features: Feature[], isComplete: boolean) {
     if (isComplete) {
       this.features = features;
-      this.invalidateOpenData();
+      this.updateData();
     }
 
     const added = collectSchedules(features, this.knownSchedules);
@@ -305,7 +317,7 @@ export class OpeningHoursController {
       this.status = status;
       this.statusMap = toStatusMap(this.trackedSchedules, status);
       this.applyGlobalState();
-      this.invalidateOpenData();
+      this.updateData();
       const statusMap = this.statusMap;
       this.statusListeners.forEach(listener => listener(statusMap));
     }
@@ -345,14 +357,9 @@ export class OpeningHoursController {
     }
   };
 
-  private invalidateOpenData() {
-    this.openData = null;
-    this.updateOpenData();
-  }
-
-  // the open AEDs are only computed while someone shows them
-  private updateOpenData() {
-    if (this.openDataListeners.size === 0) {
+  // the data is only computed while someone shows it; without a listener, for all listeners
+  private updateData(listener?: DataListener) {
+    if (this.dataListeners.size === 0) {
       return;
     }
 
@@ -362,16 +369,12 @@ export class OpeningHoursController {
       return;
     }
 
-    const statusMap = this.statusMap;
-    if (!statusMap) {
-      return;
-    }
-
-    const open = this.features.filter(
-      feature => featureStatus(feature.properties, statusMap) === OH_STATUS.OPEN
-    );
-    const data: FeatureCollection = { type: 'FeatureCollection', features: open };
-    this.openData = data;
-    this.openDataListeners.forEach(listener => listener(data));
+    const listeners = listener ? [listener] : [...this.dataListeners.keys()];
+    listeners.forEach(current => {
+      const data = this.getData(this.dataListeners.get(current) ?? []);
+      if (data) {
+        current(data);
+      }
+    });
   }
 }

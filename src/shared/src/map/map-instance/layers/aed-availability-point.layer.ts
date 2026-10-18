@@ -18,7 +18,7 @@ export const createAedAvailabilityPointLayers = (
     },
     layout: {
       'icon-allow-overlap': true,
-      // the source only holds open AEDs, the status keeps the colour in sync with the other layers
+      // the source only holds the AEDs of the selected statuses, the colour follows their status
       'icon-image': ohStatusIconExpression,
       'icon-size': IMAGE_SCALE,
       'icon-anchor': 'bottom',
