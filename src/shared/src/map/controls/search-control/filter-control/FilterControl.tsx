@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { FilterType } from '../../../../model/map';
 import iconDefiGreen from './../../../../assets/icons/icon-defi-circle-green.svg';
 import iconDefiOrange from './../../../../assets/icons/icon-defi-circle-orange.svg';
-import iconOpeningHours from './../../../../assets/icons/icon-opening-times-circle-green.svg';
+import iconDefiRed from './../../../../assets/icons/icon-defi-circle-red.svg';
 import { FilterItem } from './filter-item/FilterItem';
 
 interface FilterControlProps {
@@ -20,48 +20,37 @@ export const FilterControl = ({
 }: FilterControlProps & { ref?: React.RefObject<HTMLDivElement | null> }) => {
   const { t } = useTranslation();
 
+  // in the colours of the markers on the map, so the filters double as its legend
+  const filters = [
+    { value: FilterType.available, label: t('availableNow'), icon: iconDefiGreen },
+    { value: FilterType.notAvailable, label: t('notAvailable'), icon: iconDefiRed },
+    { value: FilterType.unknown, label: t('availabilityUnknown'), icon: iconDefiOrange },
+  ];
+
   const onFilterChange = (e: React.ChangeEvent<HTMLInputElement>, value: FilterType) => {
-    setActiveOverlays(a => {
-      if (value === FilterType.byAvailability && e.target.checked) {
-        return [FilterType.byAvailability];
+    setActiveOverlays(active => {
+      if (e.target.checked) {
+        return active.includes(value) ? active : [...active, value];
       }
 
-      if (value === FilterType.byAvailability && !e.target.checked) {
-        return [FilterType.alwaysAvailable, FilterType.withOpeningHours];
-      }
-
-      let result = a;
-      if (result.includes(FilterType.byAvailability)) {
-        result = result.filter(x => x !== FilterType.byAvailability);
-      }
-
-      return e.target.checked ? [...result, value] : [...result.filter(x => x !== value)];
+      // at least one status stays selected, so the map never shows no AEDs at all
+      const result = active.filter(x => x !== value);
+      return result.length > 0 ? result : active;
     });
   };
 
   return (
     <div className={cn(!compact && 'mx-4 md:mx-0')} ref={ref}>
-      <FilterItem
-        label={t('247Available')}
-        checked={activeOverlays?.includes(FilterType.alwaysAvailable)}
-        onChange={e => onFilterChange(e, FilterType.alwaysAvailable)}
-        icon={iconDefiGreen}
-        compact={compact}
-      />
-      <FilterItem
-        label={t('withOpeningHours')}
-        checked={activeOverlays?.includes(FilterType.withOpeningHours)}
-        onChange={e => onFilterChange(e, FilterType.withOpeningHours)}
-        icon={iconDefiOrange}
-        compact={compact}
-      />
-      <FilterItem
-        label={t('availableNow')}
-        checked={activeOverlays.includes(FilterType.byAvailability)}
-        onChange={e => onFilterChange(e, FilterType.byAvailability)}
-        icon={iconOpeningHours}
-        compact={compact}
-      />
+      {filters.map(filter => (
+        <FilterItem
+          key={filter.value}
+          label={filter.label}
+          checked={activeOverlays.includes(filter.value)}
+          onChange={e => onFilterChange(e, filter.value)}
+          icon={filter.icon}
+          compact={compact}
+        />
+      ))}
     </div>
   );
 };

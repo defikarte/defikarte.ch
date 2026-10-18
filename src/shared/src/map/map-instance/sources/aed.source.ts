@@ -13,6 +13,7 @@ export const createAedSource = (
     clusterMaxZoom: 14,
     attribution:
       '<a href="https://www.openstreetmap.org" target="_blank">© OpenStreetMap contributors</a>',
-    filter: filter,
+    // maplibre rejects a source with `filter: null`, so it is only set when there is one
+    ...(filter ? { filter } : {}),
   } as GeoJSONSourceSpecification;
 };

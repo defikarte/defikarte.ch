@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
 import iconAccessDarkGreen from '../../../assets/icons/icon-access-dark-green.svg';
 import iconAccessGrey from '../../../assets/icons/icon-access-grey.svg';
+import iconAccessWhite from '../../../assets/icons/icon-access-white.svg';
 import iconCloseDarkGreen from '../../../assets/icons/icon-close-dark-green.svg';
 import iconEditDarkGreen from '../../../assets/icons/icon-edit-dark-green.svg';
 import iconHouseDarkGreen from '../../../assets/icons/icon-house-dark-green.svg';
@@ -17,8 +18,10 @@ import { Button } from '../../../components/ui/button/Button';
 import { IconButton } from '../../../components/ui/icon-button/IconButton';
 import { Tag } from '../../../components/ui/tag/Tag';
 import { distanceBetweenPoints } from '../../../services/coordinate-calculation.service';
-import { isOpenNow } from '../../../services/opening-hours.service';
+import { type MapInstance } from '../../map-instance/map-instance';
+import { OH_STATUS } from '../../opening-hours/types';
 import { FeaturePropsList } from './property-list/FeaturePropsList';
+import { useAedStatus } from './useAedStatus';
 
 const GOOGLE_MAPS_DIRECTIONS_URL = 'https://www.google.com/maps/dir/?api=1';
 
@@ -29,6 +32,8 @@ const generateGoogleMapsWalkingLink = (lon: number, lat: number): string => {
 };
 
 interface DetailViewProps {
+  // provides the opening status, the same one the markers on the map show
+  map: MapInstance | null;
   feature: Feature | null;
   userLocation: GeolocationPosition | null;
   onCenterFeature: () => void;
@@ -39,6 +44,7 @@ interface DetailViewProps {
 }
 
 export const DetailView = ({
+  map,
   feature,
   userLocation,
   onCenterFeature,
@@ -54,8 +60,10 @@ export const DetailView = ({
   const props = feature?.properties ?? {};
   const coords = (feature?.geometry as Point)?.coordinates;
 
-  // Memoize expensive opening hours check
-  const isOpen = useMemo(() => isOpenNow(props.opening_hours as string), [props.opening_hours]);
+  const status = useAedStatus(map, props);
+  const isOpen = status === OH_STATUS.OPEN;
+  const isClosed = status === OH_STATUS.CLOSED;
+  const isUnknown = status === OH_STATUS.UNKNOWN;
 
   // Memoize distance calculation
   const distance = useMemo(
@@ -81,6 +89,7 @@ export const DetailView = ({
 
   const isOutdoor = props.indoor === 'no';
   const isAccess = props.access === 'yes';
+  const isNotAccessible = props.access === 'no';
 
   const isSmallerThan1000 = distance && distance < 1000;
   const distanceText =
@@ -92,11 +101,6 @@ export const DetailView = ({
   const name =
     (props['defibrillator:location'] as string) ?? props.description ?? props.operator ?? 'n/A';
 
-  const hasTags =
-    (isOpen || (props.opening_hours !== undefined && !isOpen)) ??
-    distance ??
-    props.access ??
-    props.indoor;
   const directionsUrl = generateGoogleMapsWalkingLink(coords[0], coords[1]);
   const containerClass = cn(
     'z-10',
@@ -116,8 +120,12 @@ export const DetailView = ({
         // max-h-full, not a 100vh calc: the sheet sits inside the map's safe-area layer, so 100%
         // is exactly the space it may use and it never grows into the status bar.
         ['left-1/2', '-translate-x-1/2', 'w-[calc(100%-2rem)]', 'max-w-[768px]', 'max-h-full']
-      : [
-          'max-h-[calc(100vh-143px)]',
+      : // The max height is relative to the map area (100%), not the viewport: on mobile browsers
+        // 100vh includes the collapsible address bar, so a 100vh calc let the sheet grow past the
+        // top of the map and hid the title and the close button (#92). Keeps a gap of 1rem
+        // (mobile) / 1.5rem (md+) above the sheet.
+        [
+          'max-h-[calc(100%-2rem)]',
           'md:bottom-16',
           'md:right-6',
           'mx-4',
@@ -127,8 +135,7 @@ export const DetailView = ({
           'md:w-[304px]',
           'md:h-[500px]',
           'xl:h-[576px]',
-          'md:max-h-[calc(100vh-215px)]',
-          'lg:max-h-[calc(100vh-227px)]',
+          'md:max-h-[calc(100%-5.5rem)]',
         ]
   );
   return (
@@ -161,44 +168,53 @@ export const DetailView = ({
           'border-b border-primary-05-green-05': (propsVisible && isMobile) || !isMobile,
         })}
       >
-        {hasTags && (
-          <div className="flex flex-wrap items-start justify-start gap-1.5">
-            {isOpen && (
-              <Tag variant="primary" icon={iconTimeWhite}>
-                {t('open')}
-              </Tag>
-            )}
-            {props.opening_hours !== undefined && !isOpen && (
-              <Tag variant="orange" icon={iconTimeWhite}>
-                {t('closed')}
-              </Tag>
-            )}
-            {distance && (
-              <Tag
-                variant={isOpen ? 'tint' : 'secondary'}
-                icon={isOpen ? iconNavigationDarkGreen : iconNavigationGrey}
-              >
-                {distanceText}
-              </Tag>
-            )}
-            {props.access && (
-              <Tag
-                variant={isOpen ? 'tint' : 'secondary'}
-                icon={isOpen ? iconAccessDarkGreen : iconAccessGrey}
-              >
-                {isAccess ? t('public') : t('private')}
-              </Tag>
-            )}
-            {props.indoor && (
-              <Tag
-                variant={isOpen ? 'tint' : 'secondary'}
-                icon={isOpen ? iconHouseDarkGreen : iconHouseGrey}
-              >
-                {isOutdoor ? t('outdoor') : t('indoor')}
-              </Tag>
-            )}
-          </div>
-        )}
+        <div className="flex flex-wrap items-start justify-start gap-1.5">
+          {/* the status tags have the colour of the marker on the map */}
+          {isOpen && (
+            <Tag variant="green" icon={iconTimeWhite}>
+              {t('open')}
+            </Tag>
+          )}
+          {isNotAccessible && (
+            <Tag variant="red" icon={iconAccessWhite}>
+              {t('notAccessible')}
+            </Tag>
+          )}
+          {isClosed && !isNotAccessible && (
+            <Tag variant="red" icon={iconTimeWhite}>
+              {t('closed')}
+            </Tag>
+          )}
+          {isUnknown && (
+            <Tag variant="orange" icon={iconTimeWhite}>
+              {t('unknown')}
+            </Tag>
+          )}
+          {distance && (
+            <Tag
+              variant={isOpen ? 'tint' : 'secondary'}
+              icon={isOpen ? iconNavigationDarkGreen : iconNavigationGrey}
+            >
+              {distanceText}
+            </Tag>
+          )}
+          {props.access && !isNotAccessible && (
+            <Tag
+              variant={isOpen ? 'tint' : 'secondary'}
+              icon={isOpen ? iconAccessDarkGreen : iconAccessGrey}
+            >
+              {isAccess ? t('public') : t('private')}
+            </Tag>
+          )}
+          {props.indoor && (
+            <Tag
+              variant={isOpen ? 'tint' : 'secondary'}
+              icon={isOpen ? iconHouseDarkGreen : iconHouseGrey}
+            >
+              {isOutdoor ? t('outdoor') : t('indoor')}
+            </Tag>
+          )}
+        </div>
         <FeaturePropsList
           feature={feature}
           isOpen={isOpen}

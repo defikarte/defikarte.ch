@@ -1,0 +1,47 @@
+{
+  "skill_name": "defikarte-ui",
+  "evals": [
+    {
+      "id": 0,
+      "name": "ui-share-action",
+      "prompt": "In the AED detail view (the sheet that opens when you tap a marker) I want users to be able to share the AED - native share sheet on mobile, copy link on desktop. Please build it.",
+      "expected_output": "",
+      "files": [],
+      "assertions": [
+        "Reuses existing IconButton/Button in the DetailView action row (no new button primitive)",
+        "Diff contains no raw hex colours or arbitrary [#...] Tailwind values",
+        "New strings added to all 8 locale files (app + web, de/fr/it/en)",
+        "Uses navigator.share with a clipboard fallback",
+        "Answer states the component-reuse decision explicitly"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "ui-faq-collapsible-card",
+      "prompt": "On the knowledge page of the website we need a FAQ section with 5 questions about defibrillators. Create a nice new collapsible card component for it so it looks modern.",
+      "expected_output": "",
+      "files": [],
+      "assertions": [
+        "Reuses the existing web Accordion instead of creating a new collapsible card component",
+        "Answer explains why no new component was created (or flags it as a new element)",
+        "Section built with existing ContentWrapper/Text",
+        "Diff contains no raw hex colours or arbitrary [#...] Tailwind values",
+        "FAQ texts go through i18n in all 4 web locales"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "ui-discard-confirm-modal",
+      "prompt": "When someone cancels the create-AED flow while they're already in the form step, show a confirmation modal 'Discard changes?' with Discard / Keep editing buttons so they don't lose their input by accident.",
+      "expected_output": "",
+      "files": [],
+      "assertions": [
+        "Answer flags the modal as a new UI element and names the closest existing option",
+        "Does not silently add a generic new Modal/Dialog primitive",
+        "Actions use existing Button variants",
+        "Diff contains no raw hex colours or arbitrary [#...] Tailwind values",
+        "New strings added to all 8 locale files (app + web, de/fr/it/en)"
+      ]
+    }
+  ]
+}

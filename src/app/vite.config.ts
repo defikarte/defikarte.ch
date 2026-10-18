@@ -27,5 +27,9 @@ export default defineConfig({
     watch: {
       usePolling: true,
     },
+    // web workers of @defikarte/shared are requested by URL, outside of this app's root
+    fs: {
+      allow: [".", "../shared"],
+    },
   },
 });
