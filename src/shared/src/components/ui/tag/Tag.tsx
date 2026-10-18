@@ -3,7 +3,7 @@ import React, { type ParamHTMLAttributes } from 'react';
 
 interface TagProps extends ParamHTMLAttributes<HTMLElement> {
   icon: string;
-  variant?: 'primary' | 'tint' | 'secondary' | 'orange';
+  variant?: 'primary' | 'tint' | 'secondary' | 'orange' | 'red';
   children: React.ReactNode;
 }
 
@@ -26,12 +26,13 @@ export const Tag: React.FC<TagProps> = React.memo(({ children, icon, variant = '
     'cursor-default',
     {
       'bg-primary-100-green-02': variant === 'primary',
-      'text-primary-100-white': variant === 'primary' || variant === 'orange',
+      'text-primary-100-white': variant === 'primary' || variant === 'orange' || variant === 'red',
       'bg-primary-20-green-02': variant === 'tint',
       'text-primary-100-green-04': variant === 'tint',
       'bg-graustufen-grau-disabled': variant === 'secondary',
       'text-graustufen-grau-d': variant === 'secondary',
       'bg-secondary-orange-03': variant === 'orange',
+      'bg-secondary-red-02': variant === 'red',
     }
   );
 

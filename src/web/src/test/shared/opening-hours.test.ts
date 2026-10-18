@@ -4,10 +4,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   compileSchedule,
   compileWeek,
+  featureStatus,
   type CompiledWeek,
   hashSchedules,
   collectSchedules,
   minuteOfWeek,
+  OH_STATUS,
   OH_STATUS_STATE,
   OpeningHoursController,
   type OpeningHoursWorker,
@@ -102,6 +104,7 @@ describe('statusAt', () => {
     // Swiss National Day, Saturday 2026-08-01
     ['Mo-Sa 09:00-12:00,13:30-18:00; PH off', new Date(2026, 7, 1, 10), '0'],
     ['Mo-Sa 09:00-12:00,13:30-18:00; PH off', new Date(2026, 7, 8, 10), '1'],
+    ['Mo-Su 08:00-18:00; PH off', new Date(2026, 7, 1, 12), '0'],
     ['Mo-Fr 08:00-17:00 "by appointment"', at(12, 10), '?'],
     ['Mo-Fr 08:00-17:00 "by appointment"', at(12, 18), '0'],
     ['unknown', at(12, 10), '?'],
@@ -177,6 +180,33 @@ describe('toStatusMap', () => {
   });
 });
 
+describe('featureStatus', () => {
+  const statusMap = { '24/7': OH_STATUS.OPEN, 'Mo-Fr 08:00-18:00': OH_STATUS.CLOSED };
+
+  it('treats access=no as closed, whatever the opening hours', () => {
+    expect(featureStatus({ access: 'no', opening_hours: '24/7' }, statusMap)).toBe(OH_STATUS.CLOSED);
+    expect(featureStatus({ access: 'no', opening_hours: '24/7' }, null)).toBe(OH_STATUS.CLOSED);
+  });
+
+  it('evaluates access=private by its opening hours', () => {
+    expect(featureStatus({ access: 'private', opening_hours: '24/7' }, statusMap)).toBe(
+      OH_STATUS.OPEN
+    );
+  });
+
+  it('looks the status up by the opening hours', () => {
+    expect(featureStatus({ opening_hours: 'Mo-Fr 08:00-18:00' }, statusMap)).toBe(OH_STATUS.CLOSED);
+    expect(featureStatus({ opening_hours: 'unknown' }, statusMap)).toBe(OH_STATUS.UNKNOWN);
+    expect(featureStatus({}, statusMap)).toBe(OH_STATUS.UNKNOWN);
+    expect(featureStatus(null, statusMap)).toBe(OH_STATUS.UNKNOWN);
+  });
+
+  it('treats 24/7 as open until the status is computed', () => {
+    expect(featureStatus({ opening_hours: '24/7' }, null)).toBe(OH_STATUS.OPEN);
+    expect(featureStatus({ opening_hours: 'Mo-Fr 08:00-18:00' }, null)).toBe(OH_STATUS.UNKNOWN);
+  });
+});
+
 describe('hashSchedules', () => {
   it('depends on the boundaries between the schedules', () => {
     expect(hashSchedules(['ab', 'c'])).not.toBe(hashSchedules(['a', 'bc']));
@@ -188,7 +218,12 @@ describe('OpeningHoursController', () => {
   const MONDAY_ONLY = 'Mo 00:00-01:00';
   const aeds: FeatureCollection = {
     type: 'FeatureCollection',
-    features: [feature({ opening_hours: MONDAY_ONLY }), feature({ opening_hours: '24/7' })],
+    features: [
+      feature({ opening_hours: MONDAY_ONLY }),
+      feature({ opening_hours: '24/7' }),
+      feature({ opening_hours: '24/7', access: 'no' }),
+      feature({ opening_hours: '24/7', access: 'private' }),
+    ],
   };
 
   const flush = async () => {
@@ -308,9 +343,30 @@ describe('OpeningHoursController', () => {
 
     expect(listener).toHaveBeenCalledWith({
       type: 'FeatureCollection',
-      features: [aeds.features[1]],
+      // not the one with access=no
+      features: [aeds.features[1], aeds.features[3]],
     });
     expect(request).not.toHaveBeenCalled();
+
+    controller.dispose();
+  });
+
+  it('notifies the status subscribers when the status changes', async () => {
+    vi.setSystemTime(at(18, 23, 59));
+    const controller = createController();
+    const listener = vi.fn();
+    controller.subscribeStatus(listener);
+    controller.start();
+    await flush();
+
+    expect(listener).toHaveBeenLastCalledWith({ [MONDAY_ONLY]: '0', '24/7': '1' });
+    expect(controller.getStatusMap()).toEqual({ [MONDAY_ONLY]: '0', '24/7': '1' });
+
+    // Sunday 23:59 -> Monday 00:01
+    await vi.advanceTimersByTimeAsync(2 * 60_000);
+    await flush();
+
+    expect(listener).toHaveBeenLastCalledWith({ [MONDAY_ONLY]: '1', '24/7': '1' });
 
     controller.dispose();
   });
@@ -331,7 +387,8 @@ describe('OpeningHoursController', () => {
     );
     expect(listener).toHaveBeenLastCalledWith({
       type: 'FeatureCollection',
-      features: [aeds.features[1]],
+      // not the one with access=no
+      features: [aeds.features[1], aeds.features[3]],
     });
 
     controller.dispose();

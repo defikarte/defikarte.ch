@@ -43,7 +43,7 @@ export {
   NEARBY_AED_RADIUS_METERS,
   type NearbyAed,
 } from './services/nearby-aed.service';
-export { isOpeningHourValid, isOpenNow } from './services/opening-hours.service';
+export { isOpeningHourValid } from './services/opening-hours.service';
 export { isMobileAgent } from './services/user-agent.service';
 
 // Map instance & configuration
@@ -82,6 +82,7 @@ export {
   ohStatusColorExpression,
   ohStatusIconExpression,
 } from './map/opening-hours/expressions';
+export { ACCESS_PROPERTY, featureStatus } from './map/opening-hours/feature-status';
 export { collectSchedules, OPENING_HOURS_PROPERTY } from './map/opening-hours/schedules';
 export { StatusTracker, statusAt, toStatusMap } from './map/opening-hours/status';
 export { minuteOfWeek, toIsoDate, WEEK_MINUTES, weekEnd, weekStart } from './map/opening-hours/time';

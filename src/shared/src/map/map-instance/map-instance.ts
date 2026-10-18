@@ -19,6 +19,7 @@ import markerGradientXs from '../../assets/icons/map-marker-count-gradient-xs.sv
 import { type MapEventCallback, OverlayType } from '../../model/map';
 import { requestStyleSpecification } from '../../services/map-style.service';
 import { OpeningHoursController } from '../opening-hours/controller';
+import { type OpeningHoursStatusMap } from '../opening-hours/types';
 import {
   MARKER_BLUE_IMAGE_ID,
   MARKER_GRADIENT_M_IMAGE_ID,
@@ -244,6 +245,16 @@ export class MapInstance {
     const href = window.location.href;
     this.map.remove();
     window.history.replaceState(window.history.state, '', href);
+  };
+
+  /** The current status per opening_hours value, null until it is computed. */
+  public getOpeningHoursStatusMap = () => {
+    return this.openingHours.getStatusMap();
+  };
+
+  /** Calls the listener whenever the opening status changes, returns a function to unsubscribe. */
+  public subscribeOpeningHoursStatus = (listener: (statusMap: OpeningHoursStatusMap) => void) => {
+    return this.openingHours.subscribeStatus(listener);
   };
 
   public getActiveMapInteractions = () => {

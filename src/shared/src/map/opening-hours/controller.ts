@@ -7,7 +7,8 @@ import {
 } from 'maplibre-gl';
 import { OH_STATUS_STATE } from '../map-instance/configuration/constants';
 import { CachedCompiler, type ScheduleCompiler, WorkerCompiler } from './compiler';
-import { collectSchedules, OPENING_HOURS_PROPERTY } from './schedules';
+import { featureStatus } from './feature-status';
+import { collectSchedules } from './schedules';
 import { StatusTracker, toStatusMap } from './status';
 import { toIsoDate, weekStart } from './time';
 import {
@@ -21,6 +22,7 @@ import { type OpeningHoursWorker, OpeningHoursWorkerClient } from './worker-clie
 const TICK_INTERVAL_MS = 60_000;
 
 type OpenDataListener = (data: FeatureCollection) => void;
+type StatusListener = (statusMap: OpeningHoursStatusMap) => void;
 
 interface OpeningHoursControllerOptions {
   map: Map;
@@ -68,6 +70,7 @@ export class OpeningHoursController {
 
   private openData: FeatureCollection | null = null;
   private readonly openDataListeners = new Set<OpenDataListener>();
+  private readonly statusListeners = new Set<StatusListener>();
 
   // a newer compilation supersedes older ones still running
   private compileVersion = 0;
@@ -126,6 +129,22 @@ export class OpeningHoursController {
     };
   }
 
+  /** The current status per opening_hours value, null until it is computed. */
+  public getStatusMap(): OpeningHoursStatusMap | null {
+    return this.statusMap;
+  }
+
+  /**
+   * Calls the listener whenever the status of any opening_hours value changes.
+   * Returns a function to unsubscribe.
+   */
+  public subscribeStatus(listener: StatusListener): () => void {
+    this.statusListeners.add(listener);
+    return () => {
+      this.statusListeners.delete(listener);
+    };
+  }
+
   public start() {
     if (this.started || this.disposed || !this.compiler) {
       return;
@@ -168,6 +187,7 @@ export class OpeningHoursController {
 
     this.client?.terminate();
     this.openDataListeners.clear();
+    this.statusListeners.clear();
   }
 
   private onSourceData = (event: MapSourceDataEvent) => {
@@ -286,6 +306,8 @@ export class OpeningHoursController {
       this.statusMap = toStatusMap(this.trackedSchedules, status);
       this.applyGlobalState();
       this.invalidateOpenData();
+      const statusMap = this.statusMap;
+      this.statusListeners.forEach(listener => listener(statusMap));
     }
   };
 
@@ -345,10 +367,9 @@ export class OpeningHoursController {
       return;
     }
 
-    const open = this.features.filter(feature => {
-      const value: unknown = feature.properties?.[OPENING_HOURS_PROPERTY];
-      return typeof value === 'string' && statusMap[value] === OH_STATUS.OPEN;
-    });
+    const open = this.features.filter(
+      feature => featureStatus(feature.properties, statusMap) === OH_STATUS.OPEN
+    );
     const data: FeatureCollection = { type: 'FeatureCollection', features: open };
     this.openData = data;
     this.openDataListeners.forEach(listener => listener(data));

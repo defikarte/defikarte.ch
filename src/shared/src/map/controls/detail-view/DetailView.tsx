@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
 import iconAccessDarkGreen from '../../../assets/icons/icon-access-dark-green.svg';
 import iconAccessGrey from '../../../assets/icons/icon-access-grey.svg';
+import iconAccessWhite from '../../../assets/icons/icon-access-white.svg';
 import iconCloseDarkGreen from '../../../assets/icons/icon-close-dark-green.svg';
 import iconEditDarkGreen from '../../../assets/icons/icon-edit-dark-green.svg';
 import iconHouseDarkGreen from '../../../assets/icons/icon-house-dark-green.svg';
@@ -17,8 +18,10 @@ import { Button } from '../../../components/ui/button/Button';
 import { IconButton } from '../../../components/ui/icon-button/IconButton';
 import { Tag } from '../../../components/ui/tag/Tag';
 import { distanceBetweenPoints } from '../../../services/coordinate-calculation.service';
-import { isOpenNow } from '../../../services/opening-hours.service';
+import { type MapInstance } from '../../map-instance/map-instance';
+import { OH_STATUS } from '../../opening-hours/types';
 import { FeaturePropsList } from './property-list/FeaturePropsList';
+import { useAedStatus } from './useAedStatus';
 
 const GOOGLE_MAPS_DIRECTIONS_URL = 'https://www.google.com/maps/dir/?api=1';
 
@@ -29,6 +32,8 @@ const generateGoogleMapsWalkingLink = (lon: number, lat: number): string => {
 };
 
 interface DetailViewProps {
+  // provides the opening status, the same one the markers on the map show
+  map: MapInstance | null;
   feature: Feature | null;
   userLocation: GeolocationPosition | null;
   onCenterFeature: () => void;
@@ -39,6 +44,7 @@ interface DetailViewProps {
 }
 
 export const DetailView = ({
+  map,
   feature,
   userLocation,
   onCenterFeature,
@@ -54,8 +60,9 @@ export const DetailView = ({
   const props = feature?.properties ?? {};
   const coords = (feature?.geometry as Point)?.coordinates;
 
-  // Memoize expensive opening hours check
-  const isOpen = useMemo(() => isOpenNow(props.opening_hours as string), [props.opening_hours]);
+  const status = useAedStatus(map, props);
+  const isOpen = status === OH_STATUS.OPEN;
+  const isClosed = status === OH_STATUS.CLOSED;
 
   // Memoize distance calculation
   const distance = useMemo(
@@ -81,6 +88,7 @@ export const DetailView = ({
 
   const isOutdoor = props.indoor === 'no';
   const isAccess = props.access === 'yes';
+  const isNotAccessible = props.access === 'no';
 
   const isSmallerThan1000 = distance && distance < 1000;
   const distanceText =
@@ -92,11 +100,7 @@ export const DetailView = ({
   const name =
     (props['defibrillator:location'] as string) ?? props.description ?? props.operator ?? 'n/A';
 
-  const hasTags =
-    (isOpen || (props.opening_hours !== undefined && !isOpen)) ??
-    distance ??
-    props.access ??
-    props.indoor;
+  const hasTags = isOpen || isClosed || !!distance || !!props.access || !!props.indoor;
   const directionsUrl = generateGoogleMapsWalkingLink(coords[0], coords[1]);
   const containerClass = cn(
     'z-10',
@@ -168,7 +172,12 @@ export const DetailView = ({
                 {t('open')}
               </Tag>
             )}
-            {props.opening_hours !== undefined && !isOpen && (
+            {isNotAccessible && (
+              <Tag variant="red" icon={iconAccessWhite}>
+                {t('notAccessible')}
+              </Tag>
+            )}
+            {isClosed && !isNotAccessible && (
               <Tag variant="orange" icon={iconTimeWhite}>
                 {t('closed')}
               </Tag>
@@ -181,7 +190,7 @@ export const DetailView = ({
                 {distanceText}
               </Tag>
             )}
-            {props.access && (
+            {props.access && !isNotAccessible && (
               <Tag
                 variant={isOpen ? 'tint' : 'secondary'}
                 icon={isOpen ? iconAccessDarkGreen : iconAccessGrey}

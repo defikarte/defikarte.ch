@@ -21,6 +21,7 @@
   "indoor": "Al coperto",
   "open": "Aperto",
   "closed": "Chiuso",
+  "notAccessible": "Non accessibile al pubblico",
   "openingHours": "Orari di apertura",
   "access": "Accesso",
   "isIndoor": "È al chiuso",
