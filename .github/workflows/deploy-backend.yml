@@ -17,11 +17,12 @@ env:
   AZURE_FUNCTIONAPP_NAME: defikarte-backend # set this to your application's name
   AZURE_FUNCTIONAPP_PACKAGE_PATH: "./backend/" # set this to the path to your web app project, defaults to the repository root
   DOTNET_VERSION: "10.0.x" # set this to the dotnet version to use
-  SLOT_NAME: "${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}"
 
 jobs:
   build-and-deploy:
     runs-on: windows-latest
+    # Secrets and variables come from the GitHub environment (Settings > Environments)
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
     steps:
       - name: "Checkout GitHub Action"
         uses: actions/checkout@v4
@@ -50,11 +51,11 @@ jobs:
           pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
           dotnet build './DefikarteBackend/DefikarteBackend.csproj' --configuration Release --output ./output
           popd
-      - name: Deploy Function to ${{ env.SLOT_NAME }}
+      - name: Deploy Function to ${{ vars.AZURE_FUNCTIONAPP_SLOT_NAME }}
         uses: Azure/functions-action@v1
         id: fa
         with:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
           package: "${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output"
-          publish-profile: ${{ github.ref == 'refs/heads/main' && secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE || secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE_STAGING }}
-          slot-name: ${{ env.SLOT_NAME }}
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          slot-name: ${{ vars.AZURE_FUNCTIONAPP_SLOT_NAME }}
