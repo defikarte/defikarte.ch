@@ -21,12 +21,13 @@
     "basemap": "Base map",
     "osm": "Open Street",
     "satellite": "Satellite",
-    "emergency": "Emergency view",
+    "emergency": "Nearest AED",
     "emergencyDefaultOn": "Show on start",
     "emergencyDefaultOff": "Only on demand"
   },
   "emergency": {
     "toggle": "Show nearest defibrillators",
+    "fab": "Nearest AED",
     "title": "Nearest defibrillators",
     "locating": "Finding your location…",
     "locationUnavailable": "Location unavailable",

@@ -21,12 +21,13 @@
     "basemap": "Base Map",
     "osm": "Open Street",
     "satellite": "Satellit",
-    "emergency": "Notfallansicht",
+    "emergency": "Nächster AED",
     "emergencyDefaultOn": "Beim Start anzeigen",
     "emergencyDefaultOff": "Nur auf Knopfdruck"
   },
   "emergency": {
     "toggle": "Nächste Defibrillatoren anzeigen",
+    "fab": "Nächster AED",
     "title": "Nächste Defibrillatoren",
     "locating": "Standort wird ermittelt…",
     "locationUnavailable": "Standort nicht verfügbar",

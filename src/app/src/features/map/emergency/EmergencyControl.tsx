@@ -3,7 +3,6 @@ import {
   featureStatus,
   getActiveAedOverlay,
   IconButton,
-  MapIconButton,
   type MapEvent,
   type MapInstance,
   type NearbyAed,
@@ -172,19 +171,22 @@ export const EmergencyControl = ({
   // While the view is on, the list takes the FAB's place - it has its own close button.
   if (!isActive) {
     return (
-      // FAB: bottom right, in thumb reach. A map button like GPS and compass (white ring around the
-      // icon), only bigger; the shadow sits on the wrapper like on the compass.
-      <div className="absolute bottom-4 right-4 z-10 w-fit rounded-full shadow-custom-lg shadow-green-shadow-64">
-        <MapIconButton
-          title={t('emergency.toggle')}
-          aria-label={t('emergency.toggle')}
-          active={false}
-          icon={iconDefiCircleOrange}
-          onClick={onToggle}
-          // `!` because MapIconButton sizes the icon with size-max
-          className="size-12! p-1.5"
-        />
-      </div>
+      // Extended FAB: bottom right, in thumb reach. The label is recognised at a glance, the large
+      // orange AED icon (as on the map buttons) makes it stand out from the green controls. Not a
+      // Button: that puts a small icon before the text, here the icon sits large at the thumb side.
+      <button
+        type="button"
+        title={t('emergency.toggle')}
+        onClick={onToggle}
+        className={classNames(
+          'absolute bottom-4 right-4 z-10 flex items-center gap-3 ps-5 pe-1.5 py-1.5 cursor-pointer',
+          'rounded-full bg-primary-100-white shadow-custom-lg shadow-green-shadow-64',
+          'font-semibold leading-[150%] text-primary-100-green-03 hover:text-primary-100-green-04'
+        )}
+      >
+        {t('emergency.fab')}
+        <img src={iconDefiCircleOrange} alt="" className="size-12" />
+      </button>
     );
   }
 

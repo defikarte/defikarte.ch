@@ -21,12 +21,13 @@
     "basemap": "Carte de base",
     "osm": "Open Street",
     "satellite": "Satellite",
-    "emergency": "Vue d’urgence",
+    "emergency": "DAE le plus proche",
     "emergencyDefaultOn": "Afficher au démarrage",
     "emergencyDefaultOff": "Seulement sur demande"
   },
   "emergency": {
     "toggle": "Afficher les défibrillateurs les plus proches",
+    "fab": "DAE le plus proche",
     "title": "Défibrillateurs les plus proches",
     "locating": "Localisation en cours…",
     "locationUnavailable": "Position non disponible",
