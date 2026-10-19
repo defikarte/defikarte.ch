@@ -341,3 +341,5 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 local.settings.json
+# CI build output (deploy-backend.yml)
+output/

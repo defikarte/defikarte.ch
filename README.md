@@ -50,11 +50,12 @@ Wir untersützen folgende Open Source Initiativen:
 
 ## Development Setup
 
-This is a monorepo with three packages, wired together with pnpm workspaces:
+This is a monorepo with three frontend packages, wired together with pnpm workspaces, and a .NET backend:
 
 - **`/src/app`** - React + Vite app, packaged as a native iOS & Android app with [Capacitor](https://capacitorjs.com)
 - **`/src/web`** - React web application
 - **`/src/shared`** - Shared code between app and web
+- **`/src/backend`** - Azure Functions backend (.NET 10, isolated worker) that serves the AED data and address search to app and web
 
 `src/app` and `src/web` each link `../shared` as a workspace package, so dependencies are installed
 per package.
@@ -64,6 +65,7 @@ per package.
 - Node.js 24
 - pnpm 10
 - For mobile builds: Android Studio + JDK 21 (Android), macOS with Xcode (iOS)
+- For the backend: .NET 10 SDK and [Azure Functions Core Tools v4](https://learn.microsoft.com/azure/azure-functions/functions-run-local)
 
 ### Installation
 
@@ -100,6 +102,25 @@ pnpm run dev        # Start development server
 pnpm run build      # Build for production
 ```
 
+**Backend:**
+
+```bash
+cd src/backend
+dotnet test                       # NUnit tests (DefikarteBackend.Tests)
+cd DefikarteBackend
+func start                        # run the functions locally (http://localhost:7071/api)
+```
+
+The backend reads its settings from `src/backend/DefikarteBackend/local.settings.json` (not committed).
+It needs `AzureWebJobsStorage` (Azure Storage connection string, or Azurite locally), the Overpass/OSM
+settings (`OVERPASS_URL`, `OSM_API_URL`, `OSM_USER_NAME`, `OSM_API_TOKEN`), the blob names
+(`BLOB_STORAGE_CONTAINER_NAME`, `BLOB_STORAGE_BLOB_NAME`, `BLOB_STORAGE_BLOB_NAME_V2`,
+`BLOB_STORAGE_BLOB_NAME_LOCAL_V2`, `BLOB_STORAGE_SWISSBOUNDARIES`) and the address search
+(`ADDRESS_SEARCH_URL`, `MAPTILER_API_KEY`); see
+[ServiceConfiguration.cs](src/backend/DefikarteBackend/Configuration/ServiceConfiguration.cs).
+The current API is `v3` (`/api/v3/aed`, `/api/v3/search/{searchText}`), and the app and web point to
+it via `VITE_BACKEND_API` in their `.env`.
+
 ### Mobile (Capacitor)
 
 The app is not React Native - Capacitor wraps the built web bundle (`src/app/dist`) in a native
@@ -118,6 +139,10 @@ Because the native shells load the production build, `pnpm run build` has to run
 | **Web: Build and Deploy** (`deploy-web.yml`) | push to `main` / `dev` touching `src/web` | builds the web app and deploys it to defikarte.ch (`main` → production, `dev` → staging) |
 | **Mobile: Build** (`build-mobile.yml`) | push to `main` touching `src/app` / `src/shared`, or manual on any branch | builds signed `.apk`, `.aab` and `.ipa`, creates the version tag and a GitHub release (prerelease `-beta` off `main`) |
 | **Mobile: Deploy to Stores** (`deploy-mobile.yml`) | after a release-producing mobile build, or manual with a release tag | uploads the `.aab` to the Play internal track and the `.ipa` to TestFlight |
+| **Defikarte-Backend** (`deploy-backend.yml`) | push to `main` / `development` touching `src/backend`, or manual | runs the backend tests, builds and deploys the Azure Function `defikarte-backend` (`main` → production slot, otherwise staging slot) |
+
+The backend deployment uses the GitHub environments `production` and `staging`. Each one needs the
+secret `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` and the variable `AZURE_FUNCTIONAPP_SLOT_NAME`.
 
 Mobile versions are `MAJOR.MINOR.<build number>` (e.g. `1.0.52` = Android `versionCode` 52 = iOS
 build 52). Bump `MAJOR.MINOR` via `version` in `src/app/package.json`. The tags are created by the
