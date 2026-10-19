@@ -104,6 +104,9 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
   const [emergencyDefault] = useEmergencyDefault();
   // the setting turns the view on at app start, together with its GPS request (below)
   const [isEmergencyActive, setIsEmergencyActive] = useState(() => emergencyDefault === 'on');
+  // Here, not in the control: it unmounts during a create flow, the FAB stays collapsed for the session.
+  const [isEmergencyFabCollapsed, setIsEmergencyFabCollapsed] = useState(false);
+  const collapseEmergencyFab = useCallback(() => setIsEmergencyFabCollapsed(true), []);
   const emergencyGpsStartedRef = useRef(false);
 
   // The emergency view is useless without the user's position, so turning it on always starts the
@@ -287,6 +290,8 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
             onFeatureSelect={handleSelectOrCenterFeatureOnMap}
             // closing the detail view leaves an item-select event without data, not null
             showList={!selectedFeature?.data}
+            isCollapsed={isEmergencyFabCollapsed}
+            onCollapse={collapseEmergencyFab}
           />
           {selectedFeature && (
             <DetailView

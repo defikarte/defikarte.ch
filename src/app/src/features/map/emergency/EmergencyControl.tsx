@@ -15,7 +15,7 @@ import { type LngLatBoundsLike, type MapGeoJSONFeature } from 'maplibre-gl';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import iconCloseDarkGreen from '../../../assets/icons/icon-close-dark-green.svg';
-import iconDefiCircleOrange from '../../../assets/icons/icon-defi-circle-orange.svg';
+import iconDefiCircleGreen from '../../../assets/icons/icon-defi-circle-green.svg';
 import iconNavigationDarkGreen from '../../../assets/icons/icon-navigation-dark-green.svg';
 import iconTimeWhite from '../../../assets/icons/icon-time-white.svg';
 import { getWalkingDirectionsUrl } from '../../../services/navigation.service';
@@ -30,6 +30,9 @@ interface EmergencyControlProps {
   onFeatureSelect: (event: MapEvent) => void;
   // false while the detail view of an AED covers the bottom of the map - hides the FAB and list
   showList: boolean;
+  // the FAB shows only its icon, no label
+  isCollapsed: boolean;
+  onCollapse: () => void;
 }
 
 /**
@@ -45,10 +48,21 @@ export const EmergencyControl = ({
   onRetryLocation,
   onFeatureSelect,
   showList,
+  isCollapsed,
+  onCollapse,
 }: EmergencyControlProps) => {
   const { t } = useTranslation();
   const listRef = useRef<HTMLDivElement | null>(null);
   const { bestAeds } = useBestAeds({ map, isActive, userLocation });
+
+  // The first touch anywhere - map, search, any button - collapses the FAB to its icon. Captured
+  // on the document, so it also sees touches the map or a control stops from bubbling.
+  useEffect(() => {
+    if (isCollapsed) return;
+
+    document.addEventListener('pointerdown', onCollapse, { capture: true, once: true });
+    return () => document.removeEventListener('pointerdown', onCollapse, { capture: true });
+  }, [isCollapsed, onCollapse]);
 
   // Fits the user and the AEDs once per new set of AEDs, and again when the list comes back after
   // the detail view of one of them (which zoomed in on it) was closed. Not on every GPS tick, so
@@ -171,21 +185,35 @@ export const EmergencyControl = ({
   // While the view is on, the list takes the FAB's place - it has its own close button.
   if (!isActive) {
     return (
-      // Extended FAB: bottom right, in thumb reach. The label is recognised at a glance, the large
-      // orange AED icon (as on the map buttons) makes it stand out from the green controls. Not a
-      // Button: that puts a small icon before the text, here the icon sits large at the thumb side.
+      // Extended FAB: bottom right, in thumb reach, with the large AED icon of the map buttons. Not
+      // a Button: that only has a small icon. The label introduces the button and is dropped after
+      // the first interaction, then only the icon is left.
       <button
         type="button"
         title={t('emergency.toggle')}
+        aria-label={isCollapsed ? t('emergency.toggle') : undefined}
         onClick={onToggle}
         className={classNames(
-          'absolute bottom-4 right-4 z-10 flex items-center gap-3 ps-5 pe-1.5 py-1.5 cursor-pointer',
+          'absolute bottom-4 right-4 z-10 flex items-center p-1.5 cursor-pointer',
           'rounded-full bg-primary-100-white shadow-custom-lg shadow-green-shadow-64',
-          'font-semibold leading-[150%] text-primary-100-green-03 hover:text-primary-100-green-04'
+          'font-semibold leading-[150%] text-primary-100-green-03 hover:text-primary-100-green-04',
+          // collapsing shrinks the pill to the round icon button
+          'transition-[padding] duration-300 ease-out motion-reduce:transition-none',
+          isCollapsed ? 'pe-1.5' : 'pe-5'
         )}
       >
-        {t('emergency.fab')}
-        <img src={iconDefiCircleOrange} alt="" className="size-12" />
+        <img src={iconDefiCircleGreen} alt="" className="size-12 shrink-0" />
+        {/* stays in the DOM, so it can slide shut instead of disappearing at once */}
+        <span
+          aria-hidden={isCollapsed}
+          className={classNames(
+            'overflow-hidden whitespace-nowrap',
+            'transition-[max-width,opacity,margin] duration-300 ease-out motion-reduce:transition-none',
+            isCollapsed ? 'max-w-0 opacity-0 ms-0' : 'max-w-48 opacity-100 ms-3'
+          )}
+        >
+          {t('emergency.fab')}
+        </span>
       </button>
     );
   }
