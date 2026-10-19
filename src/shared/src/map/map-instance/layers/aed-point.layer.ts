@@ -1,5 +1,6 @@
 import { type FilterSpecification, type LayerSpecification } from 'maplibre-gl';
 import {
+  EMERGENCY_DIMMED_EXPRESSION,
   OH_STATUS_EXPRESSION,
   ohStatusColorExpression,
   ohStatusIconExpression,
@@ -17,7 +18,14 @@ export const createAedPointLayers = (baseId: string, source: string): LayerSpeci
     source: source,
     type: 'symbol',
     paint: {
-      'icon-opacity': ['case', ['boolean', ['feature-state', FEATURE_STATE.EDITING], false], 0, 1],
+      'icon-opacity': [
+        'case',
+        ['boolean', ['feature-state', FEATURE_STATE.EDITING], false],
+        0,
+        EMERGENCY_DIMMED_EXPRESSION,
+        0.3,
+        1,
+      ],
     },
     layout: {
       'icon-allow-overlap': true,
@@ -58,19 +66,34 @@ export const createAedPointLayers = (baseId: string, source: string): LayerSpeci
       ],
       'circle-opacity': [
         'case',
+        EMERGENCY_DIMMED_EXPRESSION,
+        0.1,
         ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
         ['case', ['boolean', ['feature-state', FEATURE_STATE.SELECTED], false], 0.8, 0.5],
         ['match', OH_STATUS_EXPRESSION, OH_STATUS.OPEN, 0.6, 0.4],
       ],
-      // an outline, so the nearby ring also stands out on the orange ring of AEDs with unknown availability
+      // an outline, so the nearby ring also stands out on the orange ring of AEDs with unknown
+      // availability - and a dark one marks the AEDs of the emergency view
       'circle-stroke-width': [
         'case',
         ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
         2,
+        ['boolean', ['feature-state', FEATURE_STATE.EMERGENCY], false],
+        3,
         0,
       ],
-      'circle-stroke-color': COLORS.SECONDARY_ORANGE_02,
-      'circle-stroke-opacity': 0.6,
+      'circle-stroke-color': [
+        'case',
+        ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
+        COLORS.SECONDARY_ORANGE_02,
+        COLORS.PRIMARY_100_GREEN_04,
+      ],
+      'circle-stroke-opacity': [
+        'case',
+        ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
+        0.6,
+        1,
+      ],
       'circle-translate': [0, -18],
       'circle-translate-anchor': 'viewport',
     },
