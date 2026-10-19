@@ -38,6 +38,7 @@
   "clear": "Cancella",
   "filter": "Filtra",
   "showLocation": "Mostra la tua posizione",
+  "resetNorth": "Orientare la mappa verso nord",
   "layers": "Livelli",
   "zoomIn": "Ingrandisci +",
   "zoomOut": "Riduci -",

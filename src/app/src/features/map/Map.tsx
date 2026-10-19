@@ -1,5 +1,6 @@
 import {
   AttributionControl,
+  CompassControl,
   CreateAedControl,
   CreateMode,
   DetailView,
@@ -223,6 +224,8 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
             compact
           />
           <AttributionControl activeBaseLayer={activeBaseLayer} />
+          {/* under the search bar (top-4 + 52px), right gutter independent of the search bar width */}
+          <CompassControl map={mapInstance} className="absolute top-20 right-4 z-4" large />
           {selectedFeature && (
             <DetailView
               map={mapInstance}

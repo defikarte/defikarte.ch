@@ -56,6 +56,7 @@
   "clear": "Cancella",
   "filter": "Filtra",
   "showLocation": "Mostra la tua posizione",
+  "resetNorth": "Orientare la mappa verso nord",
   "locationErrorTitle": "Posizione non disponibile",
   "locationPermissionDenied": "Per utilizzare la posizione, attiva l'accesso nelle impostazioni del tuo dispositivo.",
   "locationUnavailable": "Per utilizzare la posizione, attiva l'accesso nelle impostazioni del tuo dispositivo.",

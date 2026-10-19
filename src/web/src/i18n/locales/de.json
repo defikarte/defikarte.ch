@@ -38,6 +38,7 @@
   "clear": "Löschen",
   "filter": "Filter",
   "showLocation": "Deinen Standort anzeigen",
+  "resetNorth": "Karte nach Norden ausrichten",
   "layers": "Layer",
   "zoomIn": "Zoom +",
   "zoomOut": "Zoom -",
