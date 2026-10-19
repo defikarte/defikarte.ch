@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DefikarteBackend", "DefikarteBackend\DefikarteBackend.csproj", "{5391DED1-23DC-47A1-9DDA-485DB0396FB6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DefikarteBackend.Tests", "DefikarteBackend.Tests\DefikarteBackend.Tests.csproj", "{9E45FF69-D535-4679-BBD6-844BE39CE8F1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5391DED1-23DC-47A1-9DDA-485DB0396FB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5391DED1-23DC-47A1-9DDA-485DB0396FB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5391DED1-23DC-47A1-9DDA-485DB0396FB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5391DED1-23DC-47A1-9DDA-485DB0396FB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E45FF69-D535-4679-BBD6-844BE39CE8F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E45FF69-D535-4679-BBD6-844BE39CE8F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E45FF69-D535-4679-BBD6-844BE39CE8F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E45FF69-D535-4679-BBD6-844BE39CE8F1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0B2A3451-DBB2-4EBE-A7C4-02341128A909}
+	EndGlobalSection
+EndGlobal
