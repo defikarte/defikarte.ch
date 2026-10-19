@@ -216,6 +216,23 @@ export class MapInstance {
     this.mapInstance?.zoomOut();
   }
 
+  public resetNorth() {
+    this.mapInstance?.resetNorth();
+  }
+
+  /** Calls the listener with the bearing now and on every rotation, returns a function to unsubscribe. */
+  public subscribeBearing = (listener: (bearing: number) => void) => {
+    // not mapInstance: works before the map has loaded
+    const map = this.map;
+    const onRotate = () => listener(map.getBearing());
+    onRotate();
+    map.on('rotate', onRotate);
+
+    return () => {
+      map.off('rotate', onRotate);
+    };
+  };
+
   public getCenter = () => {
     return this.mapInstance?.getCenter().toArray() ?? MapConfiguration.defaultCenter;
   };

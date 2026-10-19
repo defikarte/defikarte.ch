@@ -56,6 +56,7 @@
   "clear": "Löschen",
   "filter": "Filter",
   "showLocation": "Deinen Standort anzeigen",
+  "resetNorth": "Karte nach Norden ausrichten",
   "locationErrorTitle": "Standort nicht verfügbar",
   "locationPermissionDenied": "Um den Standort zu nutzen, aktiviere den Zugriff in den Einstellungen deines Geräts.",
   "locationUnavailable": "Um den Standort zu nutzen, aktiviere den Zugriff in den Einstellungen deines Geräts.",

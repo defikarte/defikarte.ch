@@ -56,6 +56,7 @@
   "clear": "Effacer",
   "filter": "Filtrer",
   "showLocation": "Afficher votre position",
+  "resetNorth": "Orienter la carte vers le nord",
   "locationErrorTitle": "Localisation indisponible",
   "locationPermissionDenied": "Pour utiliser la localisation, activez l'accès dans les paramètres de votre appareil.",
   "locationUnavailable": "Pour utiliser la localisation, activez l'accès dans les paramètres de votre appareil.",

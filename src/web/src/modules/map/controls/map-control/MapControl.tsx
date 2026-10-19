@@ -1,4 +1,5 @@
 import {
+  CompassControl,
   CreateMode,
   MapConfiguration,
   MapIconButton,
@@ -122,6 +123,8 @@ export const MapControl = (props: Props) => {
             />
           </>
         )}
+        {/* mobile: above the layer button, desktop: below the zoom buttons */}
+        <CompassControl map={map} className="order-first md:order-last" />
       </div>
     </div>
   );
