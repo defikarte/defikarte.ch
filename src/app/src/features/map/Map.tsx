@@ -11,7 +11,7 @@ import {
   usePrevious,
 } from '@defikarte/shared';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import backend from '../../api/backend';
@@ -22,8 +22,11 @@ import { CustomToast } from '../../components/ui/custom-toast/CustomToast';
 import AppConfiguration from '../../configuration/app.configuration';
 import { useAppReady } from '../../hooks/useAppReady';
 import { useBaseLayer } from '../../hooks/useBaseLayer';
+import { useEmergencyDefault } from '../../hooks/useEmergencyDefault';
 import type { MapSearch } from '../../routes/index';
 import { CapacitorGeolocationService } from '../../services/capacitor-geolocation.service';
+import { getWalkingDirectionsUrl } from '../../services/navigation.service';
+import { EmergencyControl } from './emergency/EmergencyControl';
 
 const mapConfig = {
   baseUrl: AppConfiguration.baseUrl,
@@ -98,6 +101,54 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
   // Editing is started from the detail view, which only renders while createMode is none - so an
   // edit never carries the ?create=true param and never highlights the create nav button.
   const isCreatingNew = createMode !== CreateMode.none && !editFeature;
+  const [emergencyDefault] = useEmergencyDefault();
+  // the setting turns the view on at app start, together with its GPS request (below)
+  const [isEmergencyActive, setIsEmergencyActive] = useState(() => emergencyDefault === 'on');
+  const emergencyGpsStartedRef = useRef(false);
+
+  // The emergency view is useless without the user's position, so turning it on always starts the
+  // location request right away (a no-op if GPS is already on).
+  const toggleEmergency = () => {
+    if (isEmergencyActive) {
+      // GPS stays on, the user keeps seeing their position
+      setIsEmergencyActive(false);
+      return;
+    }
+
+    setIsEmergencyActive(true);
+    setIsGpsActive(true);
+  };
+
+  // Right at start, not after isInitialized: that only flips once every map source has loaded,
+  // which can take long after the splash is gone (or never, e.g. offline). useUserLocation waits
+  // for the map instance itself before it requests the permission and the position.
+  useEffect(() => {
+    if (emergencyGpsStartedRef.current) {
+      return;
+    }
+
+    emergencyGpsStartedRef.current = true;
+    if (isEmergencyActive) {
+      setIsGpsActive(true);
+    }
+  }, [isEmergencyActive, setIsGpsActive]);
+
+  // GPS turned off with the search bar button also ends the emergency view: without a position its
+  // list would be stale. (A failed request turns GPS off too, but the view stays to offer a retry.)
+  const setIsGpsActiveFromSearch: typeof setIsGpsActive = value => {
+    const next = typeof value === 'function' ? value(isGpsActive) : value;
+    if (!next) {
+      setIsEmergencyActive(false);
+    }
+    setIsGpsActive(next);
+  };
+
+  // Requests the position again. A fatal error has already turned GPS off; an inaccurate fix keeps
+  // it on, so it is turned off first - in a later tick, or React would batch both into a no-op.
+  const retryLocation = () => {
+    setIsGpsActive(false);
+    setTimeout(() => setIsGpsActive(true));
+  };
 
   // The splash covers everything until here, so the user never sees the empty map container while
   // maplibre boots. AppReadyProvider holds a timeout that gives up if the map never initialises.
@@ -217,7 +268,7 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
             map={mapInstance}
             apiClient={apiClient}
             isGpsActive={isGpsActive}
-            setIsGpsActive={setIsGpsActive}
+            setIsGpsActive={setIsGpsActiveFromSearch}
             onFeatureSelect={handleSelectOrCenterFeatureOnMap}
             activeOverlays={activeOverlays}
             setActiveOverlays={setActiveOverlays}
@@ -226,6 +277,17 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
           <AttributionControl activeBaseLayer={activeBaseLayer} />
           {/* under the search bar (top-4 + 52px), right gutter independent of the search bar width */}
           <CompassControl map={mapInstance} className="absolute top-20 right-4 z-4" large />
+          <EmergencyControl
+            map={mapInstance}
+            isActive={isEmergencyActive}
+            onToggle={toggleEmergency}
+            userLocation={userLocation}
+            locationError={locationError}
+            onRetryLocation={retryLocation}
+            onFeatureSelect={handleSelectOrCenterFeatureOnMap}
+            // closing the detail view leaves an item-select event without data, not null
+            showList={!selectedFeature?.data}
+          />
           {selectedFeature && (
             <DetailView
               map={mapInstance}
@@ -234,6 +296,7 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
               onCenterFeature={() => handleSelectOrCenterFeatureOnMap(selectedFeature)}
               onClose={() => deselectAll()}
               onEdit={() => handleEditFeature(selectedFeature)}
+              getDirectionsUrl={getWalkingDirectionsUrl}
               compact
             />
           )}

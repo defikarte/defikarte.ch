@@ -20,7 +20,20 @@
     "mapdesign": "Map design",
     "basemap": "Base map",
     "osm": "Open Street",
-    "satellite": "Satellite"
+    "satellite": "Satellite",
+    "emergency": "Nearest AED",
+    "emergencyDefaultOn": "Show on start",
+    "emergencyDefaultOff": "Only on demand"
+  },
+  "emergency": {
+    "toggle": "Show nearest defibrillators",
+    "fab": "Nearest AED",
+    "title": "Nearest defibrillators",
+    "locating": "Finding your location…",
+    "locationUnavailable": "Location unavailable",
+    "retry": "Try again",
+    "none": "No available defibrillator found",
+    "navigate": "Walking directions"
   },
   "navigate": "Navigate",
   "distanceAway": "{{distance}}{{unit}} away",

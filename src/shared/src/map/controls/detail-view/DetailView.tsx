@@ -41,6 +41,8 @@ interface DetailViewProps {
   // without it the edit buttons are hidden, e.g. while the AED is previewed during a create flow
   onEdit?: () => void;
   compact?: boolean;
+  // the walking route link of the navigate button, Google Maps by default
+  getDirectionsUrl?: (lon: number, lat: number) => string;
 }
 
 export const DetailView = ({
@@ -51,6 +53,7 @@ export const DetailView = ({
   onClose,
   onEdit,
   compact = false,
+  getDirectionsUrl = generateGoogleMapsWalkingLink,
 }: DetailViewProps) => {
   const { t } = useTranslation();
   const responsiveMobile = useMediaQuery({ maxWidth: 768 });
@@ -101,7 +104,7 @@ export const DetailView = ({
   const name =
     (props['defibrillator:location'] as string) ?? props.description ?? props.operator ?? 'n/A';
 
-  const directionsUrl = generateGoogleMapsWalkingLink(coords[0], coords[1]);
+  const directionsUrl = getDirectionsUrl(coords[0], coords[1]);
   const containerClass = cn(
     'z-10',
     'absolute',
