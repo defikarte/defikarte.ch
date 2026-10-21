@@ -66,7 +66,7 @@ namespace DefikarteBackend.Services
                                 timestampStr,
                                 "yyyy-MM-dd HH:mm:ssZ",
                                 System.Globalization.CultureInfo.InvariantCulture,
-                                System.Globalization.DateTimeStyles.AssumeUniversal,
+                                System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal,
                                 out var timestamp))
                         {
                             return timestamp < oneHourAgo;
