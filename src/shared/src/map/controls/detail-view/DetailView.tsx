@@ -19,6 +19,7 @@ import { IconButton } from '../../../components/ui/icon-button/IconButton';
 import { Tag } from '../../../components/ui/tag/Tag';
 import { distanceBetweenPoints } from '../../../services/coordinate-calculation.service';
 import { type MapInstance } from '../../map-instance/map-instance';
+import { NOT_ACCESSIBLE_VALUES } from '../../opening-hours/feature-status';
 import { OH_STATUS } from '../../opening-hours/types';
 import { FeaturePropsList } from './property-list/FeaturePropsList';
 import { useAedStatus } from './useAedStatus';
@@ -95,7 +96,7 @@ export const DetailView = ({
 
   const isOutdoor = props.indoor === 'no';
   const isAccess = props.access === 'yes';
-  const isNotAccessible = props.access === 'no';
+  const isNotAccessible = NOT_ACCESSIBLE_VALUES.includes(props.access as string);
 
   const isSmallerThan1000 = distance && distance < 1000;
   const distanceText =
