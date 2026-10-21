@@ -19,7 +19,7 @@
     "language": "Language",
     "mapdesign": "Map design",
     "basemap": "Base map",
-    "osm": "Open Street",
+    "osm": "OpenStreetMap",
     "satellite": "Satellite",
     "emergency": "Nearest AED",
     "emergencyDefaultOn": "Show on start",

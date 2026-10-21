@@ -19,7 +19,7 @@
     "language": "Langue",
     "mapdesign": "Style de carte",
     "basemap": "Carte de base",
-    "osm": "Open Street",
+    "osm": "OpenStreetMap",
     "satellite": "Satellite",
     "emergency": "DAE le plus proche",
     "emergencyDefaultOn": "Afficher au démarrage",

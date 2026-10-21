@@ -24,7 +24,7 @@ frames are named `App - media md 320x568`, so use the node id, not the name, to 
 | `3010:132965` | Settings menu — *Sprache* + *Kartendesign* | [settings.index.tsx](../src/app/src/routes/settings.index.tsx) |
 | `3010:133056` | Settings menu variant — *Kartendesign* only | [settings.index.tsx](../src/app/src/routes/settings.index.tsx) |
 | `3010:133413` | Settings > Sprache — Deutsch / Français / Italiano / English, check mark on active | [settings.language.tsx](../src/app/src/routes/settings.language.tsx) |
-| `3010:133704` | Settings > Kartendesign — Base Map / Open Street / Satellit, 48x48 thumbnails | [settings.mapdesign.tsx](../src/app/src/routes/settings.mapdesign.tsx) |
+| `3010:133704` | Settings > Kartendesign — Base Map / OpenStreetMap / Satellit, 48x48 thumbnails | [settings.mapdesign.tsx](../src/app/src/routes/settings.mapdesign.tsx) |
 | `2969:138820` | Create AED step 1 — tap position on map, hint banner, confirm/cancel | [CreateAedControl.tsx](../src/shared/src/map/controls/create-aed-control/CreateAedControl.tsx), [MapButtons.tsx](../src/shared/src/map/controls/create-aed-control/map-buttons/MapButtons.tsx) |
 | `3010:63970` | Infos — *Das Projekt*, *Sponsoren* (tall, 320x1739) | [about.tsx](../src/app/src/routes/about.tsx) |
 
