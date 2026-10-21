@@ -20,7 +20,20 @@
     "mapdesign": "Map design",
     "basemap": "Base map",
     "osm": "Open Street",
-    "satellite": "Satellite"
+    "satellite": "Satellite",
+    "emergency": "Nearest AED",
+    "emergencyDefaultOn": "Show on start",
+    "emergencyDefaultOff": "Only on demand"
+  },
+  "emergency": {
+    "toggle": "Show nearest AEDs",
+    "fab": "Nearest AED",
+    "title": "Nearest AEDs",
+    "locating": "Finding your location…",
+    "locationUnavailable": "Location unavailable",
+    "retry": "Try again",
+    "none": "No available AED found",
+    "navigate": "Walking directions"
   },
   "navigate": "Navigate",
   "distanceAway": "{{distance}}{{unit}} away",
@@ -56,6 +69,7 @@
   "clear": "Clear",
   "filter": "Filter",
   "showLocation": "Show your location",
+  "resetNorth": "Reset map to north",
   "locationErrorTitle": "Location unavailable",
   "locationPermissionDenied": "To use location, enable access in your device settings.",
   "locationUnavailable": "To use location, enable access in your device settings.",

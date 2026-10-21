@@ -4,6 +4,8 @@ import {
   type LngLatBoundsLike,
   type LngLatLike,
   Map,
+  type MapSourceDataEvent,
+  type PaddingOptions,
   type StyleSpecification,
 } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -21,6 +23,7 @@ import { requestStyleSpecification } from '../../services/map-style.service';
 import { OpeningHoursController } from '../opening-hours/controller';
 import { type OpeningHoursStatus, type OpeningHoursStatusMap } from '../opening-hours/types';
 import {
+  EMERGENCY_MODE_STATE,
   MARKER_BLUE_IMAGE_ID,
   MARKER_GRADIENT_M_IMAGE_ID,
   MARKER_GRADIENT_S_IMAGE_ID,
@@ -58,6 +61,7 @@ export class MapInstance {
   private overlaysLoaded = false;
   private activeBaseLayer: string;
   private onEvent: MapEventCallback | undefined;
+  private emergencyMode = false;
 
   constructor(props: MapInstanceProps) {
     this.onEvent = props.onEvent;
@@ -149,6 +153,7 @@ export class MapInstance {
     });
 
     this.mapInstance = map;
+    map.setGlobalStateProperty(EMERGENCY_MODE_STATE, this.emergencyMode);
     // the AEDs are already rendered (as unknown), the status follows once it is computed
     this.openingHours.start();
     console.log('Map initialized');
@@ -201,9 +206,9 @@ export class MapInstance {
     });
   }
 
-  public fitBounds(bounds: LngLatBoundsLike) {
+  public fitBounds(bounds: LngLatBoundsLike, padding: number | PaddingOptions = 10) {
     this.mapInstance?.fitBounds(bounds, {
-      padding: 10,
+      padding,
       maxZoom: 18,
     });
   }
@@ -215,6 +220,41 @@ export class MapInstance {
   public zoomOut() {
     this.mapInstance?.zoomOut();
   }
+
+  public resetNorth() {
+    this.mapInstance?.resetNorth();
+  }
+
+  /** Calls the listener with the bearing now and on every rotation, returns a function to unsubscribe. */
+  public subscribeBearing = (listener: (bearing: number) => void) => {
+    // not mapInstance: works before the map has loaded
+    const map = this.map;
+    const onRotate = () => listener(map.getBearing());
+    onRotate();
+    map.on('rotate', onRotate);
+
+    return () => {
+      map.off('rotate', onRotate);
+    };
+  };
+
+  /**
+   * Calls the listener with the source id whenever a source is (re-)added, e.g. after a filter
+   * change swapped the AED source - its feature state is gone then. Returns a function to unsubscribe.
+   */
+  public subscribeSourceAdded = (listener: (sourceId: string) => void) => {
+    const map = this.map;
+    const onSourceData = (e: MapSourceDataEvent) => {
+      if (e.sourceDataType === 'metadata') {
+        listener(e.sourceId);
+      }
+    };
+    map.on('sourcedata', onSourceData);
+
+    return () => {
+      map.off('sourcedata', onSourceData);
+    };
+  };
 
   public getCenter = () => {
     return this.mapInstance?.getCenter().toArray() ?? MapConfiguration.defaultCenter;
@@ -245,6 +285,19 @@ export class MapInstance {
   /** Calls the listener whenever the opening status changes, returns a function to unsubscribe. */
   public subscribeOpeningHoursStatus = (listener: (statusMap: OpeningHoursStatusMap) => void) => {
     return this.openingHours.subscribeStatus(listener);
+  };
+
+  /** All AEDs from memory, whichever AED overlay is active. Null until they are loaded. */
+  public getAllAeds = () => {
+    return this.openingHours.getAllAeds();
+  };
+
+  /** Dims all AEDs except those with the `emergency` feature state, see `EMERGENCY_MODE_STATE`. */
+  public setEmergencyMode = (on: boolean) => {
+    // Kept and applied on load: before that maplibre throws "Style is not done loading", e.g.
+    // when the emergency view is turned on at app start.
+    this.emergencyMode = on;
+    this.mapInstance?.setGlobalStateProperty(EMERGENCY_MODE_STATE, on);
   };
 
   /** The statuses the `aedByStatus` overlay shows. */

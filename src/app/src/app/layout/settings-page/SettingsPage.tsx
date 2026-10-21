@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import iconArrowLeftWhite from '../../../assets/icons/icon-arrow-left-white.svg';
+import { useEdgeSwipeBack } from '../../../hooks/useEdgeSwipeBack';
 
 interface SettingsPageProps extends React.PropsWithChildren {
   title: string;
@@ -7,10 +8,14 @@ interface SettingsPageProps extends React.PropsWithChildren {
 }
 
 export const SettingsPage = ({ backTo, children, title }: SettingsPageProps) => {
+  const swipeBackHandlers = useEdgeSwipeBack(backTo);
+
   return (
     // The gradient stays full-bleed under the status bar; only the content is pushed down by the
     // top inset.
-    <div className="relative min-h-full flex gap-2 flex-col pl-[calc(1rem+var(--sa-left))] pr-[calc(1rem+var(--sa-right))] pt-[calc(4rem+var(--sa-top))] bg-linear-to-b from-primary-100-green-04 to-[#487745]">
+    <div
+      {...swipeBackHandlers}
+      className="relative min-h-full flex gap-2 flex-col pl-[calc(1rem+var(--sa-left))] pr-[calc(1rem+var(--sa-right))] pt-[calc(4rem+var(--sa-top))] bg-linear-to-b from-primary-100-green-04 to-[#487745]">
       {/* The back link sits in the top-left corner of the page, outside the flex flow, so it
           neither shifts the title down nor pushes it off centre. Being absolutely positioned, it
           resolves against the padding box and so is not moved by the padding above - it has to

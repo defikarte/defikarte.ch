@@ -1,6 +1,8 @@
 import { type ExpressionSpecification } from 'maplibre-gl';
 import {
   COLORS,
+  EMERGENCY_MODE_STATE,
+  FEATURE_STATE,
   MARKER_GREEN_IMAGE_ID,
   MARKER_ORANGE_IMAGE_ID,
   MARKER_RED_IMAGE_ID,
@@ -29,6 +31,13 @@ export const OH_STATUS_EXPRESSION: ExpressionSpecification = [
     ],
     ['match', ['get', OPENING_HOURS_PROPERTY], '24/7', OH_STATUS.OPEN, OH_STATUS.UNKNOWN],
   ],
+];
+
+/** True for the AEDs the emergency view dims: all except its highlighted ones, while it is on. */
+export const EMERGENCY_DIMMED_EXPRESSION: ExpressionSpecification = [
+  'all',
+  ['boolean', ['global-state', EMERGENCY_MODE_STATE], false],
+  ['!', ['boolean', ['feature-state', FEATURE_STATE.EMERGENCY], false]],
 ];
 
 export const ohStatusIconExpression: ExpressionSpecification = [

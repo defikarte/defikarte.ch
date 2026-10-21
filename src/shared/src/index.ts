@@ -31,6 +31,10 @@ export {
 
 // Services
 export { searchAed } from './services/aed-search.service';
+export {
+  BEST_AED_COUNT,
+  findBestAeds,
+} from './services/best-aed.service';
 export { distanceBetweenPoints } from './services/coordinate-calculation.service';
 export {
   areOpeningHoursValid,
@@ -110,6 +114,7 @@ export {
 export { calculateBounds, createUserLocationData } from './map/location-utils';
 
 // Hooks
+export { useBestAeds } from './map/hooks/useBestAeds';
 export { useHandleCreateMode } from './map/hooks/useHandleCreateMode';
 export { useMapEvents } from './map/hooks/useMapEvents';
 export { usePrevious } from './map/hooks/usePrevious';
@@ -128,6 +133,7 @@ export { Tooltip } from './components/ui/tooltip/Tooltip';
 
 // SharedMap component
 export { AttributionControl } from './map/controls/attribution-control/AttributionControl';
+export { CompassControl } from './map/controls/compass-control/CompassControl';
 export { CreateAedControl } from './map/controls/create-aed-control/CreateAedControl';
 export { PositionHint } from './map/controls/create-aed-control/position-hint/PositionHint';
 export { DetailView } from './map/controls/detail-view/DetailView';

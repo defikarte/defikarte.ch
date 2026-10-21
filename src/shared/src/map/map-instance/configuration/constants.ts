@@ -12,6 +12,7 @@ export const IMAGE_SCALE = 0.25;
 
 export const COLORS = {
   PRIMARY_100_WHITE: '#FFF',
+  PRIMARY_100_GREEN_04: '#154430',
   SECONDARY_GREEN_01: '#93C460',
   SECONDARY_ORANGE_01: '#FFB875',
   SECONDARY_ORANGE_02: '#FB8F01',
@@ -24,9 +25,16 @@ export const COLORS = {
 // global state property holding the opening status of all features, see map/opening-hours
 export const OH_STATUS_STATE = 'oh_status';
 
+// global state flag: the emergency view is on, so all AEDs except its highlighted ones are dimmed
+export const EMERGENCY_MODE_STATE = 'emergency_mode';
+
 export const FEATURE_STATE = {
   SELECTED: 'selected',
   EDITING: 'editing',
   // existing AED close to the position of a new one - a potential duplicate
   NEARBY: 'nearby',
+  // one of the best AEDs around the user, shown by the emergency view
+  EMERGENCY: 'emergency',
+  // the one of them the emergency view currently shows - drawn like a selected AED
+  EMERGENCY_SELECTED: 'emergencySelected',
 };

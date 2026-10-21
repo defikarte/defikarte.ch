@@ -20,7 +20,20 @@
     "mapdesign": "Style de carte",
     "basemap": "Carte de base",
     "osm": "Open Street",
-    "satellite": "Satellite"
+    "satellite": "Satellite",
+    "emergency": "DAE le plus proche",
+    "emergencyDefaultOn": "Afficher au démarrage",
+    "emergencyDefaultOff": "Seulement sur demande"
+  },
+  "emergency": {
+    "toggle": "Afficher les défibrillateurs les plus proches",
+    "fab": "DAE le plus proche",
+    "title": "Défibrillateurs les plus proches",
+    "locating": "Localisation en cours…",
+    "locationUnavailable": "Position non disponible",
+    "retry": "Réessayer",
+    "none": "Aucun défibrillateur disponible trouvé",
+    "navigate": "Itinéraire à pied"
   },
   "navigate": "Naviguer",
   "distanceAway": "{{distance}}{{unit}} éloigné",
@@ -56,6 +69,7 @@
   "clear": "Effacer",
   "filter": "Filtrer",
   "showLocation": "Afficher votre position",
+  "resetNorth": "Orienter la carte vers le nord",
   "locationErrorTitle": "Localisation indisponible",
   "locationPermissionDenied": "Pour utiliser la localisation, activez l'accès dans les paramètres de votre appareil.",
   "locationUnavailable": "Pour utiliser la localisation, activez l'accès dans les paramètres de votre appareil.",

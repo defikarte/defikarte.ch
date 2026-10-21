@@ -1,8 +1,11 @@
 import {
   AttributionControl,
+  CompassControl,
   CreateAedControl,
   CreateMode,
   DetailView,
+  FEATURE_STATE,
+  FilterType,
   type Notification,
   SearchControl,
   SharedMap,
@@ -20,9 +23,13 @@ import iconGpsWarningCircleRed from '../../assets/icons/icon-gps-warning-circle-
 import { CustomToast } from '../../components/ui/custom-toast/CustomToast';
 import AppConfiguration from '../../configuration/app.configuration';
 import { useAppReady } from '../../hooks/useAppReady';
+import { useBackHandler } from '../../hooks/useBackHandler';
 import { useBaseLayer } from '../../hooks/useBaseLayer';
 import type { MapSearch } from '../../routes/index';
 import { CapacitorGeolocationService } from '../../services/capacitor-geolocation.service';
+import { getWalkingDirectionsUrl } from '../../services/navigation.service';
+import { EmergencyControl } from './emergency/EmergencyControl';
+import { useEmergencyView } from './emergency/useEmergencyView';
 
 const mapConfig = {
   baseUrl: AppConfiguration.baseUrl,
@@ -97,6 +104,53 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
   // Editing is started from the detail view, which only renders while createMode is none - so an
   // edit never carries the ?create=true param and never highlights the create nav button.
   const isCreatingNew = createMode !== CreateMode.none && !editFeature;
+  const emergency = useEmergencyView({
+    map: mapInstance,
+    isAvailable: createMode === CreateMode.none,
+    userLocation,
+    isGpsActive,
+    setIsGpsActive,
+    selectedFeature,
+    deselectAll,
+  });
+  // closing the detail view leaves an item-select event without data, not null - and a tap on one
+  // of the emergency view's AEDs is shown in that view instead
+  const showDetailView = !!selectedFeature?.data && !emergency.isViewAedTapped;
+
+  // The emergency view is about AEDs usable now, so turning it on always shows them on the map.
+  // The other filters stay as the user set them.
+  useEffect(() => {
+    if (!emergency.isActive) {
+      return;
+    }
+
+    setActiveOverlays(prev =>
+      prev.includes(FilterType.available) ? prev : [...prev, FilterType.available]
+    );
+  }, [emergency.isActive, setActiveOverlays]);
+
+  // Android back closes the detail view before it leaves the map
+  useBackHandler(() => {
+    deselectAll();
+    return true;
+  }, isActive && showDetailView && createMode === CreateMode.none);
+
+  // ...and the emergency view, while it is the one on screen (GPS stays on, as with its close button)
+  useBackHandler(() => {
+    emergency.toggle();
+    return true;
+  }, isActive && emergency.isActive && !showDetailView && createMode === CreateMode.none);
+
+  // ...and cancels an edit, the way the form's cancel button does. A create-new flow needs nothing
+  // here: back drops its ?create param, and the effect below cancels it.
+  useBackHandler(() => {
+    mapInstance?.setFeatureState(editFeature?.source ?? '', editFeature?.data?.id, {
+      [FEATURE_STATE.EDITING]: false,
+    });
+    setEditFeature(null);
+    setCreateMode(CreateMode.none);
+    return true;
+  }, isActive && createMode !== CreateMode.none && !!editFeature);
 
   // The splash covers everything until here, so the user never sees the empty map container while
   // maplibre boots. AppReadyProvider holds a timeout that gives up if the map never initialises.
@@ -177,7 +231,7 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
       return;
     }
 
-    // param removed (hardware back, or the "home" nav item) -> cancel the flow
+    // param removed (Android back via useAndroidBackButton, or the "home" nav item) -> cancel the flow
     if (isCreatingNew) {
       setCreateMode(CreateMode.none);
     }
@@ -216,14 +270,31 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
             map={mapInstance}
             apiClient={apiClient}
             isGpsActive={isGpsActive}
-            setIsGpsActive={setIsGpsActive}
+            setIsGpsActive={emergency.setIsGpsActiveFromSearch}
             onFeatureSelect={handleSelectOrCenterFeatureOnMap}
             activeOverlays={activeOverlays}
             setActiveOverlays={setActiveOverlays}
             compact
           />
           <AttributionControl activeBaseLayer={activeBaseLayer} />
-          {selectedFeature && (
+          {/* under the search bar (top-4 + 52px), right gutter independent of the search bar width */}
+          <CompassControl map={mapInstance} className="absolute top-20 right-4 z-4" large />
+          <EmergencyControl
+            map={mapInstance}
+            isActive={emergency.isActive}
+            onToggle={emergency.toggle}
+            userLocation={userLocation}
+            locationError={locationError}
+            onRetryLocation={emergency.retryLocation}
+            bestAeds={emergency.bestAeds}
+            selectedAed={emergency.selectedAed}
+            onSelect={emergency.select}
+            onEdit={handleEditFeature}
+            isVisible={!showDetailView}
+            isCollapsed={emergency.isFabCollapsed}
+            onCollapse={emergency.collapseFab}
+          />
+          {selectedFeature && showDetailView && (
             <DetailView
               map={mapInstance}
               feature={selectedFeature.data}
@@ -231,6 +302,7 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
               onCenterFeature={() => handleSelectOrCenterFeatureOnMap(selectedFeature)}
               onClose={() => deselectAll()}
               onEdit={() => handleEditFeature(selectedFeature)}
+              getDirectionsUrl={getWalkingDirectionsUrl}
               compact
             />
           )}

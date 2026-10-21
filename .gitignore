@@ -20,7 +20,6 @@ dist-ssr
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
 *.sw?
 
 .env
@@ -29,3 +28,5 @@ web-statistics
 
 .vscode
 .vite
+
+requirements
