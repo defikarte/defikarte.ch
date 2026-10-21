@@ -230,6 +230,20 @@ export const AedForm = ({
           />
           <TextField
             autoComplete="off"
+            label={t('openingHours')}
+            type="text"
+            placeholder={t('openingHoursPlaceholder')}
+            tooltip={{
+              title: t('openingHoursTooltipTitle'),
+              content: t('openingHoursTooltipContent'),
+              link: 'https://wiki.openstreetmap.org/wiki/Key:opening_hours',
+            }}
+            error={errors.openingHours?.message}
+            {...register('openingHours', { validate: value => areOpeningHoursValid(value, t) })}
+            disabled={isSubmitting}
+          />
+          <TextField
+            autoComplete="off"
             label={t('description')}
             type="text"
             placeholder={t('descriptionPlaceholder')}
@@ -244,20 +258,6 @@ export const AedForm = ({
               required: false,
               maxLength: { value: 200, message: t('descriptionMaxLength') },
             })}
-            disabled={isSubmitting}
-          />
-          <TextField
-            autoComplete="off"
-            label={t('openingHours')}
-            type="text"
-            placeholder={t('openingHoursPlaceholder')}
-            tooltip={{
-              title: t('openingHoursTooltipTitle'),
-              content: t('openingHoursTooltipContent'),
-              link: 'https://wiki.openstreetmap.org/wiki/Key:opening_hours',
-            }}
-            error={errors.openingHours?.message}
-            {...register('openingHours', { validate: value => areOpeningHoursValid(value, t) })}
             disabled={isSubmitting}
           />
           <TextField
