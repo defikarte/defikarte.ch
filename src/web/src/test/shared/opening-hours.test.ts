@@ -6,7 +6,9 @@ import {
   compileWeek,
   featureStatus,
   type CompiledWeek,
+  FilterType,
   hashSchedules,
+  matchesAvailabilityFilters,
   collectSchedules,
   minuteOfWeek,
   OH_STATUS,
@@ -411,5 +413,25 @@ describe('OpeningHoursController', () => {
     });
 
     controller.dispose();
+  });
+});
+
+describe('matchesAvailabilityFilters', () => {
+  const statusMap = { '24/7': OH_STATUS.OPEN, 'Mo-Fr 08:00-18:00': OH_STATUS.OPEN };
+  const matches = (access: string | undefined, openingHours: string, filters: FilterType[]) =>
+    matchesAvailabilityFilters({ access, opening_hours: openingHours }, statusMap, filters);
+
+  it('matches only AEDs with opening_hours=24/7 and access=yes', () => {
+    const always = [FilterType.alwaysAvailable];
+    expect(matches('yes', '24/7', always)).toBe(true);
+    expect(matches(undefined, '24/7', always)).toBe(false);
+    expect(matches('private', '24/7', always)).toBe(false);
+    expect(matches('yes', 'Mo-Fr 08:00-18:00', always)).toBe(false);
+  });
+
+  it('adds the 24h AEDs to the selected statuses', () => {
+    const filters = [FilterType.alwaysAvailable, FilterType.notAvailable];
+    expect(matches('no', '24/7', filters)).toBe(true);
+    expect(matches('yes', 'Mo-Fr 08:00-18:00', filters)).toBe(false);
   });
 });

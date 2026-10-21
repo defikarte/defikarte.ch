@@ -3,6 +3,7 @@
   "satellite": "Satellitare",
   "osm": "OSM",
   "availableNow": "Disponibile ora",
+  "available24h": "Disponibile 24 ore su 24",
   "notAvailable": "Chiuso o non accessibile al pubblico",
   "availabilityUnknown": "Disponibilità sconosciuta",
   "enterLocationOrAddress": "Inserisci la posizione o l'indirizzo...",

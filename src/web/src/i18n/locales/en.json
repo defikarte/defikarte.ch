@@ -3,6 +3,7 @@
   "satellite": "Satellite",
   "osm": "OSM",
   "availableNow": "Available now",
+  "available24h": "Available 24/7",
   "notAvailable": "Closed or not publicly accessible",
   "availabilityUnknown": "Availability unknown",
   "enterLocationOrAddress": "Enter location or address...",
