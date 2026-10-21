@@ -322,18 +322,9 @@ namespace DefikarteBackend.Functions
                     return new BadRequestObjectResult(new { Message = $"Node with Id: {id} is not an AED." });
                 }
 
+                // only the reason goes to OSM, no names or other personal data
                 var removal = validationResult.Value;
-                var comment = $"Remove AED, permanently gone ({removal.Reason}). Reported by {removal.Reporter}.";
-                if (!string.IsNullOrWhiteSpace(removal.Comment))
-                {
-                    comment += $" {removal.Comment}";
-                }
-
-                // OSM tag values are limited to 255 characters
-                comment = StringHelper.RemoveDuplicatedWhitespace(comment) ?? comment;
-                comment = comment.Length > 255 ? comment[..255] : comment;
-
-                var changeSetTags = new TagsCollection() { new Tag("created_by", username), new Tag("comment", comment) };
+                var changeSetTags = new TagsCollection() { new Tag("created_by", username), new Tag("comment", $"Remove AED ({removal.Reason})") };
                 var changeSetId = await osmClient.CreateChangeset(changeSetTags);
 
                 currentNode.ChangeSetId = changeSetId;
