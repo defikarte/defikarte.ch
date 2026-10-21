@@ -13,6 +13,7 @@ import { CreateMode } from '../../../../model/map';
 import {
   areOpeningHoursValid,
   formatPhoneNumber,
+  isDescriptionRedundant,
   isPhoneNumberValid,
 } from '../../../../services/custom-validation.service';
 import { type MapInstance } from '../../../map-instance/map-instance';
@@ -113,6 +114,10 @@ export const AedForm = ({
 
   const longitude = watch('longitude');
   const latitude = watch('latitude');
+  const isDescriptionRedundantHint = isDescriptionRedundant(
+    watch('description'),
+    watch('openingHours')
+  );
   const title = watch('id') ? t('editAed') : t('createAed');
 
   const containerClass = cn(
@@ -225,23 +230,6 @@ export const AedForm = ({
           />
           <TextField
             autoComplete="off"
-            label={t('description')}
-            type="text"
-            placeholder={t('descriptionPlaceholder')}
-            tooltip={{
-              title: t('descriptionTooltipTitle'),
-              content: t('descriptionTooltipContent'),
-              link: 'https://wiki.openstreetmap.org/wiki/Key:description',
-            }}
-            error={errors.description?.message}
-            {...register('description', {
-              required: false,
-              maxLength: { value: 200, message: t('descriptionMaxLength') },
-            })}
-            disabled={isSubmitting}
-          />
-          <TextField
-            autoComplete="off"
             label={t('openingHours')}
             type="text"
             placeholder={t('openingHoursPlaceholder')}
@@ -252,6 +240,24 @@ export const AedForm = ({
             }}
             error={errors.openingHours?.message}
             {...register('openingHours', { validate: value => areOpeningHoursValid(value, t) })}
+            disabled={isSubmitting}
+          />
+          <TextField
+            autoComplete="off"
+            label={t('description')}
+            type="text"
+            placeholder={t('descriptionPlaceholder')}
+            tooltip={{
+              title: t('descriptionTooltipTitle'),
+              content: t('descriptionTooltipContent'),
+              link: 'https://wiki.openstreetmap.org/wiki/Key:description',
+            }}
+            error={errors.description?.message}
+            hint={isDescriptionRedundantHint ? t('descriptionRedundant') : undefined}
+            {...register('description', {
+              required: false,
+              maxLength: { value: 200, message: t('descriptionMaxLength') },
+            })}
             disabled={isSubmitting}
           />
           <TextField

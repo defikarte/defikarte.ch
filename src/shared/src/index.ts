@@ -39,6 +39,7 @@ export { distanceBetweenPoints } from './services/coordinate-calculation.service
 export {
   areOpeningHoursValid,
   formatPhoneNumber,
+  isDescriptionRedundant,
   isPhoneNumberValid,
 } from './services/custom-validation.service';
 export { requestStyleSpecification } from './services/map-style.service';

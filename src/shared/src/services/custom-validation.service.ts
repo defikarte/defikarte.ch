@@ -27,6 +27,16 @@ export const areOpeningHoursValid = (
   return msg === '' || value === null || value === '' ? true : msg;
 };
 
+// "nur während Öffnungszeiten" and the like, in de, fr, it and en
+const OPENING_HOURS_MENTION =
+  /öffnungszeit|(heures|horaires?) d['’]ouverture|orari\w* d['’i ]+apertura|opening hours/i;
+
+/** Whether the description mentions the opening hours although they are already set. */
+export const isDescriptionRedundant = (
+  description: string | undefined,
+  openingHours: string | undefined
+): boolean => !!openingHours?.trim() && !!description && OPENING_HOURS_MENTION.test(description);
+
 export const isPhoneNumberValid = (value: string | undefined, t: Translate): string | boolean => {
   if (value === undefined) {
     return true;

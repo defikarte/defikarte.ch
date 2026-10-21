@@ -10,9 +10,11 @@ interface TextFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   type: HTMLInputTypeAttribute;
   tooltip?: TooltipData;
   error?: string;
+  // a note that does not block the form, e.g. about redundant data
+  hint?: string;
 }
 
-export const TextField = ({ label, type, tooltip, error, ...props }: TextFieldProps) => {
+export const TextField = ({ label, type, tooltip, error, hint, ...props }: TextFieldProps) => {
   const { t } = useTranslation();
   const id = useId();
   const isMobile = isMobileAgent();
@@ -43,6 +45,7 @@ export const TextField = ({ label, type, tooltip, error, ...props }: TextFieldPr
         </span>
       )}
       {error && <span className="ps-1 text-secondary-red-02 text-xs">{error}</span>}
+      {hint && !error && <span className="ps-1 text-primary-100-green-04 text-xs">{hint}</span>}
     </div>
   );
 };
