@@ -355,7 +355,7 @@ describe('OpeningHoursController', () => {
       privateAed,
     ]);
     expect(controller.getData([OH_STATUS.UNKNOWN])?.features).toEqual([garbage]);
-    expect(controller.getData([OH_STATUS.OPEN, OH_STATUS.UNKNOWN])?.features).toEqual([
+    expect(controller.getData([FilterType.alwaysAvailable, OH_STATUS.UNKNOWN])?.features).toEqual([
       open,
       garbage,
     ]);
@@ -370,7 +370,7 @@ describe('OpeningHoursController', () => {
     await flush();
 
     const listener = vi.fn();
-    controller.subscribeData([OH_STATUS.OPEN], listener);
+    controller.subscribeData([FilterType.alwaysAvailable], listener);
 
     expect(listener).toHaveBeenCalledWith({
       type: 'FeatureCollection',
@@ -402,6 +402,27 @@ describe('OpeningHoursController', () => {
     controller.dispose();
   });
 
+  it('notifies the data subscribers only when their AEDs change', async () => {
+    vi.setSystemTime(at(18, 23, 59));
+    const controller = createController();
+    controller.start();
+    await flush();
+
+    const closed = vi.fn();
+    const unknown = vi.fn();
+    controller.subscribeData([OH_STATUS.CLOSED], closed);
+    controller.subscribeData([OH_STATUS.UNKNOWN], unknown);
+
+    // Sunday 23:59 -> Monday 00:01, the Monday-only AED opens
+    await vi.advanceTimersByTimeAsync(2 * 60_000);
+    await flush();
+
+    expect(closed).toHaveBeenCalledTimes(2);
+    expect(unknown).toHaveBeenCalledTimes(1);
+
+    controller.dispose();
+  });
+
   it('loads all AEDs for the open AEDs if the map source is filtered', async () => {
     vi.setSystemTime(at(14, 10));
     sourceFilter = ['==', ['get', 'opening_hours'], '24/7'];
@@ -410,7 +431,7 @@ describe('OpeningHoursController', () => {
     await flush();
 
     const listener = vi.fn();
-    controller.subscribeData([OH_STATUS.OPEN], listener);
+    controller.subscribeData([FilterType.alwaysAvailable], listener);
     await flush();
 
     expect(request).toHaveBeenCalledWith(
@@ -431,17 +452,31 @@ describe('matchesAvailabilityFilters', () => {
   const matches = (access: string | undefined, openingHours: string, filters: FilterType[]) =>
     matchesAvailabilityFilters({ access, opening_hours: openingHours }, statusMap, filters);
 
-  it('matches only AEDs with opening_hours=24/7 and access=yes', () => {
+  it('matches the open AEDs with opening_hours=24/7 as 24h', () => {
     const always = [FilterType.alwaysAvailable];
     expect(matches('yes', '24/7', always)).toBe(true);
-    expect(matches(undefined, '24/7', always)).toBe(false);
+    expect(matches(undefined, '24/7', always)).toBe(true);
     expect(matches('private', '24/7', always)).toBe(false);
     expect(matches('yes', 'Mo-Fr 08:00-18:00', always)).toBe(false);
   });
 
-  it('adds the 24h AEDs to the selected statuses', () => {
-    const filters = [FilterType.alwaysAvailable, FilterType.notAvailable];
-    expect(matches('no', '24/7', filters)).toBe(true);
-    expect(matches('yes', 'Mo-Fr 08:00-18:00', filters)).toBe(false);
+  it('puts every AED in exactly one group', () => {
+    const groups = Object.values(FilterType);
+    const cases: [string | undefined, string][] = [
+      ['yes', '24/7'],
+      [undefined, '24/7'],
+      ['no', '24/7'],
+      ['yes', 'Mo-Fr 08:00-18:00'],
+      ['yes', 'garbage'],
+    ];
+    cases.forEach(([access, openingHours]) => {
+      const matching = groups.filter(group => matches(access, openingHours, [group]));
+      expect(matching).toHaveLength(1);
+    });
+  });
+
+  it('shows the open AEDs with other opening hours as available now, not 24h', () => {
+    expect(matches('yes', 'Mo-Fr 08:00-18:00', [FilterType.available])).toBe(true);
+    expect(matches('yes', '24/7', [FilterType.available])).toBe(false);
   });
 });

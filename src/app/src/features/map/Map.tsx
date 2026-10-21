@@ -124,11 +124,12 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
       return;
     }
 
-    // (instead of only the 24h ones, which are a part of them)
+    // (the 24h ones and the other open ones)
+    const usableNow = [FilterType.alwaysAvailable, FilterType.available];
     setActiveOverlays(prev =>
-      prev.includes(FilterType.available)
+      usableNow.every(filter => prev.includes(filter))
         ? prev
-        : [...prev.filter(x => x !== FilterType.alwaysAvailable), FilterType.available]
+        : [...prev.filter(x => !usableNow.includes(x)), ...usableNow]
     );
   }, [emergency.isActive, setActiveOverlays]);
 

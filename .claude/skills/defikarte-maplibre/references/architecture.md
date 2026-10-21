@@ -18,7 +18,9 @@ All paths are relative to `src/shared/src/map/`.
    when a status flips.
 4. **Filter change.** `useOverlays`: all statuses selected → `aedAll`, otherwise
    `setAedStatusFilter(statuses)` + `aedByStatus`. The `aedByStatus` source is built from
-   `openingHours.getData(statuses)` (in memory) and follows changes via `subscribeData` → `setData`.
+   `openingHours.getData(statuses)` (in memory) and follows changes via `subscribeData` → `setData`
+   (only when its AEDs really changed). The filters are groups that never overlap (`availabilityGroup`):
+   `ALWAYS_AVAILABLE` = open with `opening_hours=24/7`, `OH_STATUS.OPEN` = the other open ones, closed, unknown.
    Switching back to `aedAll` rebuilds its source from `openingHours.getAllAeds()`. Nothing is downloaded again.
 5. **Base-layer switch.** `setActiveBaseLayer(id)` → fetch or reuse the style → `applyActiveOverlaysOnStyle`
    merges every active overlay's `createSource()` + `createLayers()` into the style →

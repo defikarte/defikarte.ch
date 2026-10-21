@@ -32,7 +32,7 @@ SharedMap.tsx (React state, hooks)          src/shared/src/map/
 configuration/map.configuration.ts          all source/layer ids, data URL, base-layer styles
 configuration/constants.ts                  COLORS, FEATURE_STATE, OH_STATUS_STATE, marker image ids
 opening-hours/expressions.ts                OH_STATUS_EXPRESSION + icon/colour expressions for layers
-hooks/useOverlays.tsx                       FilterType[] (UI statuses) → aedAll | aedByStatus
+hooks/useOverlays.tsx                       FilterType[] (UI statuses + 24h) → aedAll | aedByStatus
 ```
 
 Overlays today: `aedAll` (`AedOverlayStrategy`, clustered `aed-source`), `aedByStatus`
