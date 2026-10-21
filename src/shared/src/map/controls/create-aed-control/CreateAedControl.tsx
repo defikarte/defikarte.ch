@@ -6,7 +6,7 @@ import { type ApiClient } from '../../../api/api-client';
 import { type AedAccess, type AedData, type AedIndoor } from '../../../model/aed';
 import { type NotificationHandler } from '../../../model/common';
 import { CreateMode, type MapInteractionEvent } from '../../../model/map';
-import { getActiveAedOverlay, getMoveInteraction } from '../../helper';
+import { deselectAllFeatures, getActiveAedOverlay, getMoveInteraction } from '../../helper';
 import { FEATURE_STATE } from '../../map-instance/configuration/constants';
 import { MapConfiguration } from '../../map-instance/configuration/map.configuration';
 import { type MapInstance } from '../../map-instance/map-instance';
@@ -180,6 +180,17 @@ export const CreateAedControl = ({
     setCreateMode(CreateMode.position);
   };
 
+  // the removed AED is gone from the map, so nothing stays selected or in edit mode
+  const handleOnRemoved = () => {
+    if (feature) {
+      map?.setFeatureState(feature.source ?? '', feature.data?.id, {
+        [FEATURE_STATE.EDITING]: false,
+      });
+    }
+    setEditFeature(null);
+    deselectAllFeatures(map);
+  };
+
   const handleOnSuccess = (successFeature: Feature<Geometry, GeoJsonProperties>) => {
     if (feature) {
       map?.setFeatureState(feature.source ?? '', feature.data?.id, {
@@ -242,6 +253,7 @@ export const CreateAedControl = ({
           form={form}
           setCreateMode={setCreateMode}
           onSuccess={handleOnSuccess}
+          onRemoved={handleOnRemoved}
           onNotify={onNotify}
           compact={compact}
         />

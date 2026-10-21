@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance } from 'axios';
 import type { FeatureCollection } from 'geojson';
+import type { AedRemovalData } from '../model/aed';
 import type { ApiConfiguration, RequestOptions } from '../model/common';
 
 export class ApiClient {
@@ -77,5 +78,10 @@ export class ApiClient {
       ...data,
       source: 'local_knowledge, defikarte.ch',
     });
+  };
+
+  /** Deletes an AED that is permanently gone in OSM. */
+  public deleteAedData = async (id: string, data: AedRemovalData) => {
+    return await this.axiosInstance.delete(`v3/aed/${id}`, { data });
   };
 }

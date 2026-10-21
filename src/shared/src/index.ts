@@ -135,6 +135,7 @@ export { Tooltip } from './components/ui/tooltip/Tooltip';
 export { AttributionControl } from './map/controls/attribution-control/AttributionControl';
 export { CompassControl } from './map/controls/compass-control/CompassControl';
 export { CreateAedControl } from './map/controls/create-aed-control/CreateAedControl';
+export { AedRemoveForm } from './map/controls/create-aed-control/aed-form/AedRemoveForm';
 export { PositionHint } from './map/controls/create-aed-control/position-hint/PositionHint';
 export { DetailView } from './map/controls/detail-view/DetailView';
 export { SearchControl } from './map/controls/search-control/SearchControl';
