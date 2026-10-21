@@ -33,7 +33,6 @@ export {
 export { searchAed } from './services/aed-search.service';
 export {
   BEST_AED_COUNT,
-  BEST_AED_PREFERENCE_RADIUS_METERS,
   findBestAeds,
 } from './services/best-aed.service';
 export { distanceBetweenPoints } from './services/coordinate-calculation.service';

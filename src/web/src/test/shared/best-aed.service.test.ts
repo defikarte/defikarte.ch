@@ -29,39 +29,9 @@ const statusMap: OpeningHoursStatusMap = { 'Mo-Fr 08:00-17:00': OH_STATUS.CLOSED
 const ids = (result: ReturnType<typeof findBestAeds>) => result.map(r => r.feature.id);
 
 describe('findBestAeds', () => {
-  it('ranks open AEDs before those with unknown hours, each closest first', () => {
+  it('returns only available AEDs, closest first', () => {
     const result = findBestAeds(
-      collection(
-        aedNorthOf(1, 100),
-        aedNorthOf(2, 400, open),
-        aedNorthOf(3, 50),
-        aedNorthOf(4, 300, open)
-      ),
-      position,
-      statusMap,
-      4
-    );
-
-    expect(ids(result)).toEqual([4, 2, 3, 1]);
-  });
-
-  it('leaves out closed and not publicly accessible AEDs', () => {
-    const result = findBestAeds(
-      collection(
-        aedNorthOf(1, 10, closed),
-        aedNorthOf(2, 20, { ...open, access: 'no' }),
-        aedNorthOf(3, 30)
-      ),
-      position,
-      statusMap
-    );
-
-    expect(ids(result)).toEqual([3]);
-  });
-
-  it('prefers a close AED over an open one outside the preference radius', () => {
-    const result = findBestAeds(
-      collection(aedNorthOf(1, 1500, open), aedNorthOf(2, 800)),
+      collection(aedNorthOf(1, 1500, open), aedNorthOf(2, 400, open), aedNorthOf(3, 50)),
       position,
       statusMap
     );
@@ -69,8 +39,23 @@ describe('findBestAeds', () => {
     expect(ids(result)).toEqual([2, 1]);
   });
 
+  it('leaves out closed, unknown and not publicly accessible AEDs', () => {
+    const result = findBestAeds(
+      collection(
+        aedNorthOf(1, 10, closed),
+        aedNorthOf(2, 20, { ...open, access: 'no' }),
+        aedNorthOf(3, 30),
+        aedNorthOf(4, 40, open)
+      ),
+      position,
+      statusMap
+    );
+
+    expect(ids(result)).toEqual([4]);
+  });
+
   it('returns at most `count` AEDs', () => {
-    const features = Array.from({ length: 8 }, (_, i) => aedNorthOf(i, i * 10));
+    const features = Array.from({ length: 8 }, (_, i) => aedNorthOf(i, i * 10, open));
 
     expect(findBestAeds(collection(...features), position, null)).toHaveLength(BEST_AED_COUNT);
     expect(findBestAeds(collection(...features), position, null, 2)).toHaveLength(2);

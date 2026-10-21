@@ -23,7 +23,7 @@ export const createAedAvailabilityPointLayers = (
         ['boolean', ['feature-state', FEATURE_STATE.EDITING], false],
         0,
         EMERGENCY_DIMMED_EXPRESSION,
-        0.3,
+        0.5,
         1,
       ],
     },
@@ -71,7 +71,7 @@ export const createAedAvailabilityPointLayers = (
       'circle-opacity': [
         'case',
         EMERGENCY_DIMMED_EXPRESSION,
-        0.1,
+        0.2,
         ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
         ['case', ['boolean', ['feature-state', FEATURE_STATE.SELECTED], false], 0.8, 0.5],
         0.6,
@@ -83,7 +83,7 @@ export const createAedAvailabilityPointLayers = (
         ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
         2,
         ['boolean', ['feature-state', FEATURE_STATE.EMERGENCY], false],
-        3,
+        2,
         0,
       ],
       'circle-stroke-color': [

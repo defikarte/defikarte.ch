@@ -1,6 +1,5 @@
 import {
   Button,
-  calculateBounds,
   DetailView,
   featureStatus,
   getActiveAedOverlay,
@@ -11,7 +10,7 @@ import {
   OH_STATUS,
 } from '@defikarte/shared';
 import classNames from 'classnames';
-import { type LngLatBoundsLike, type MapGeoJSONFeature } from 'maplibre-gl';
+import { type MapGeoJSONFeature } from 'maplibre-gl';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import iconCloseDarkGreen from '../../../assets/icons/icon-close-dark-green.svg';
@@ -19,10 +18,6 @@ import iconDefiWhite from '../../../assets/icons/icon-defi-white.svg';
 import iconNavigationWhite from '../../../assets/icons/icon-navigation-white.svg';
 import iconTimeWhite from '../../../assets/icons/icon-time-white.svg';
 import { getWalkingDirectionsUrl } from '../../../services/navigation.service';
-
-// Up to this distance (~10-12 min walk) the map shows the user and the selected AED together,
-// further away it zooms to the AED, which would otherwise be too small to find.
-const FIT_USER_MAX_DISTANCE_METERS = 1000;
 
 interface EmergencyControlProps {
   map: MapInstance | null;
@@ -104,23 +99,18 @@ export const EmergencyControl = ({
     return () => document.removeEventListener('pointerdown', onCollapse, { capture: true });
   }, [isCollapsed, onCollapse]);
 
-  // Shows the way to the selected AED: the user and it, if it is close enough to fit both -
-  // otherwise the AED alone. Once per newly selected AED, and again when the card comes back. Not
-  // on every GPS tick, so the map doesn't jump while the user walks or pans.
+  // Zooms to the selected AED alone, centred - never together with the user. Once per newly
+  // selected AED, and again when the card comes back. Not on every GPS tick, so the map doesn't
+  // jump while the user walks or pans.
   useEffect(() => {
     if (!map || !showCard || !selectedAed || !userLocation) return;
 
     const aed = selectedAed.feature.geometry.coordinates as [number, number];
-    // with the user: their whole accuracy circle, not only its centre
-    const bounds: LngLatBoundsLike =
-      selectedAed.distance <= FIT_USER_MAX_DISTANCE_METERS
-        ? calculateBounds(userLocation).extend(aed)
-        : [aed, aed];
     // Clear of the search bar (~70px) at the top and the card at the bottom, with a margin on every
     // side. The top has room for the AED marker, which is drawn above its point. Kept tight: on a
     // small phone the card takes half of the map already.
     const bottom = (cardRef.current?.offsetHeight ?? 0) + 32;
-    map.fitBounds(bounds, { top: 120, bottom, left: 48, right: 48 });
+    map.fitBounds([aed, aed], { top: 120, bottom, left: 48, right: 48 });
     // only a newly selected AED and the card showing up trigger a new fit, not the position
   }, [map, selectedAed?.feature.id, showCard, !!userLocation]);
 
