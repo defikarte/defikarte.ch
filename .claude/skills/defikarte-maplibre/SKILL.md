@@ -110,7 +110,7 @@ Rungs 1–2 also cost nothing at render time. They don't re-tile the GeoJSON sou
   Layer order in the returned array = draw order. Both AED overlays usually need the same layer change
   (`aed-point.layer.ts` and `aed-availability-point.layer.ts`).
 - Status logic exists twice on purpose: `OH_STATUS_EXPRESSION` (style) and `featureStatus` (JS). Change both together.
-  Rule: `access=no` → closed, else the `opening_hours` status (`24/7` = open until computed, otherwise unknown).
+  Rule: `access=no` or `private` → closed, else the `opening_hours` status (`24/7` = open until computed, otherwise unknown).
 - Export from `src/shared/src/index.ts` only what app or web actually import.
 - Don't rename, move or "clean up" neighbouring code as part of a map change. Mention issues instead.
 - Known hotspots. Point them out when relevant, but only fix them if asked:

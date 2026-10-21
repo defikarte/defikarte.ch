@@ -4,16 +4,19 @@ import { OH_STATUS, type OpeningHoursStatus, type OpeningHoursStatusMap } from '
 
 export const ACCESS_PROPERTY = 'access';
 
+/** `access` values that are never available to the public, whatever the opening hours. */
+export const NOT_ACCESSIBLE_VALUES = ['no', 'private'];
+
 /**
  * The current status of a feature, the same rules as `OH_STATUS_EXPRESSION` (keep both in sync):
- * `access=no` is never available, otherwise the status of its `opening_hours` value. Until the
+ * `access=no`/`private` is never available, otherwise the status of its `opening_hours` value. Until the
  * status is computed (or if it cannot be), `24/7` counts as open and everything else as unknown.
  */
 export const featureStatus = (
   properties: GeoJsonProperties,
   statusMap: OpeningHoursStatusMap | null
 ): OpeningHoursStatus => {
-  if (properties?.[ACCESS_PROPERTY] === 'no') {
+  if (NOT_ACCESSIBLE_VALUES.includes(properties?.[ACCESS_PROPERTY] as string)) {
     return OH_STATUS.CLOSED;
   }
 

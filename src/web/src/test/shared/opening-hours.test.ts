@@ -188,8 +188,15 @@ describe('featureStatus', () => {
     expect(featureStatus({ access: 'no', opening_hours: '24/7' }, null)).toBe(OH_STATUS.CLOSED);
   });
 
-  it('evaluates access=private by its opening hours', () => {
+  it('treats access=private as closed, whatever the opening hours', () => {
     expect(featureStatus({ access: 'private', opening_hours: '24/7' }, statusMap)).toBe(
+      OH_STATUS.CLOSED
+    );
+    expect(featureStatus({ access: 'private' }, null)).toBe(OH_STATUS.CLOSED);
+  });
+
+  it('evaluates other access values by their opening hours', () => {
+    expect(featureStatus({ access: 'permissive', opening_hours: '24/7' }, statusMap)).toBe(
       OH_STATUS.OPEN
     );
   });
@@ -339,12 +346,15 @@ describe('OpeningHoursController', () => {
     controller.start();
     await flush();
 
-    const [mondayOnly, open, notAccessible, openPrivate, garbage] = aeds.features;
-    expect(controller.getData([OH_STATUS.CLOSED])?.features).toEqual([mondayOnly, notAccessible]);
+    const [mondayOnly, open, notAccessible, privateAed, garbage] = aeds.features;
+    expect(controller.getData([OH_STATUS.CLOSED])?.features).toEqual([
+      mondayOnly,
+      notAccessible,
+      privateAed,
+    ]);
     expect(controller.getData([OH_STATUS.UNKNOWN])?.features).toEqual([garbage]);
     expect(controller.getData([OH_STATUS.OPEN, OH_STATUS.UNKNOWN])?.features).toEqual([
       open,
-      openPrivate,
       garbage,
     ]);
 
@@ -362,8 +372,8 @@ describe('OpeningHoursController', () => {
 
     expect(listener).toHaveBeenCalledWith({
       type: 'FeatureCollection',
-      // not the one with access=no
-      features: [aeds.features[1], aeds.features[3]],
+      // not the ones with access=no or access=private
+      features: [aeds.features[1]],
     });
     expect(request).not.toHaveBeenCalled();
 
@@ -406,8 +416,8 @@ describe('OpeningHoursController', () => {
     );
     expect(listener).toHaveBeenLastCalledWith({
       type: 'FeatureCollection',
-      // not the one with access=no
-      features: [aeds.features[1], aeds.features[3]],
+      // not the ones with access=no or access=private
+      features: [aeds.features[1]],
     });
 
     controller.dispose();

@@ -8,19 +8,19 @@ import {
   MARKER_RED_IMAGE_ID,
   OH_STATUS_STATE,
 } from '../map-instance/configuration/constants';
-import { ACCESS_PROPERTY } from './feature-status';
+import { ACCESS_PROPERTY, NOT_ACCESSIBLE_VALUES } from './feature-status';
 import { OPENING_HOURS_PROPERTY } from './schedules';
 import { OH_STATUS } from './types';
 
 /**
- * The current opening status of a feature. `access=no` is never available; otherwise the status
+ * The current opening status of a feature. `access=no`/`private` is never available; otherwise the status
  * is looked up by its `opening_hours` value in the `oh_status` global state. Until the status is
  * computed (or if it cannot be), `24/7` counts as open and everything else as unknown, like before
  * the status was computed from opening hours. `featureStatus` applies the same rules in JS.
  */
 export const OH_STATUS_EXPRESSION: ExpressionSpecification = [
   'case',
-  ['==', ['get', ACCESS_PROPERTY], 'no'],
+  ['in', ['get', ACCESS_PROPERTY], ['literal', NOT_ACCESSIBLE_VALUES]],
   OH_STATUS.CLOSED,
   [
     'string',
