@@ -69,8 +69,10 @@ function RootComponent() {
         >
           <Map isActive={isMapRoute} />
         </div>
+        {/* Keyed by route so every page gets a fresh scroll container and opens at the top,
+            instead of inheriting the scroll position of the previous page. */}
         {!isMapRoute && (
-          <div className="absolute inset-0 overflow-auto">
+          <div key={pathname} className="absolute inset-0 overflow-auto">
             <Outlet />
           </div>
         )}
