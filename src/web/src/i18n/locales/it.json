@@ -79,6 +79,7 @@
   "indoorRequired": "Al chiuso è richiesto.",
   "locationMaxLength": "La posizione può essere al massimo di 200 caratteri.",
   "descriptionMaxLength": "La descrizione può essere al massimo di 200 caratteri.",
+  "descriptionRedundant": "Gli orari di apertura sono già inseriti. Un’indicazione come «solo durante gli orari di apertura» non è necessaria nella descrizione.",
   "inputInvalid": "Il valore non è valido.",
   "openingHoursInvalid": "Gli orari di apertura non sono validi.",
   "phoneNumberInvalid": "Il numero di telefono non è valido.",

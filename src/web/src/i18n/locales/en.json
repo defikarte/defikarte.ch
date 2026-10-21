@@ -79,6 +79,7 @@
   "indoorRequired": "Indoor is required.",
   "locationMaxLength": "The location can be a maximum of 200 characters long.",
   "descriptionMaxLength": "The description can be a maximum of 200 characters long.",
+  "descriptionRedundant": "The opening hours are already set. A note like “only during opening hours” is not needed in the description.",
   "inputInvalid": "The value is invalid.",
   "openingHoursInvalid": "The opening hours are invalid.",
   "phoneNumberInvalid": "The phone number is invalid.",

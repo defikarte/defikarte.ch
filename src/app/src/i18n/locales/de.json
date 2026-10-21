@@ -107,6 +107,7 @@
   "indoorRequired": "Im Gebäude ist erforderlich.",
   "locationMaxLength": "Der Standort darf maximal 200 Zeichen lang sein.",
   "descriptionMaxLength": "Die Beschreibung darf maximal 200 Zeichen lang sein.",
+  "descriptionRedundant": "Die Öffnungszeiten sind bereits erfasst. Ein Hinweis wie «nur während Öffnungszeiten» ist in der Beschreibung nicht nötig.",
   "inputInvalid": "Der Wert ist ungültig.",
   "openingHoursInvalid": "Die Öffnungszeiten sind ungültig.",
   "phoneNumberInvalid": "Die Telefonnummer ist ungültig.",
