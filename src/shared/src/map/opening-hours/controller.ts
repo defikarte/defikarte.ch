@@ -7,14 +7,13 @@ import {
 } from 'maplibre-gl';
 import { OH_STATUS_STATE } from '../map-instance/configuration/constants';
 import { CachedCompiler, type ScheduleCompiler, WorkerCompiler } from './compiler';
-import { featureStatus } from './feature-status';
+import { type AvailabilityFilter, matchesAvailabilityFilters } from './feature-status';
 import { collectSchedules } from './schedules';
 import { StatusTracker, toStatusMap } from './status';
 import { toIsoDate, weekStart } from './time';
 import {
   DEFAULT_HOLIDAY_REGION,
   type HolidayRegion,
-  type OpeningHoursStatus,
   type OpeningHoursStatusMap,
 } from './types';
 import { type OpeningHoursWorker, OpeningHoursWorkerClient } from './worker-client';
@@ -71,7 +70,7 @@ export class OpeningHoursController {
   // the statuses each data listener wants the AEDs of (globalThis: `Map` is the maplibre map here)
   private readonly dataListeners = new globalThis.Map<
     DataListener,
-    readonly OpeningHoursStatus[]
+    readonly AvailabilityFilter[]
   >();
   private readonly statusListeners = new Set<StatusListener>();
 
@@ -110,8 +109,8 @@ export class OpeningHoursController {
     return this.features ? { type: 'FeatureCollection', features: this.features } : null;
   }
 
-  /** The AEDs with one of the statuses right now, null until the status is computed. */
-  public getData(statuses: readonly OpeningHoursStatus[]): FeatureCollection | null {
+  /** The AEDs matching one of the filters right now, null until the status is computed. */
+  public getData(statuses: readonly AvailabilityFilter[]): FeatureCollection | null {
     const statusMap = this.statusMap;
     if (!this.features || !statusMap) {
       return null;
@@ -120,7 +119,7 @@ export class OpeningHoursController {
     return {
       type: 'FeatureCollection',
       features: this.features.filter(feature =>
-        statuses.includes(featureStatus(feature.properties, statusMap))
+        matchesAvailabilityFilters(feature.properties, statusMap, statuses)
       ),
     };
   }
@@ -130,7 +129,7 @@ export class OpeningHoursController {
    * Returns a function to unsubscribe.
    */
   public subscribeData(
-    statuses: readonly OpeningHoursStatus[],
+    statuses: readonly AvailabilityFilter[],
     listener: DataListener
   ): () => void {
     this.dataListeners.set(listener, statuses);
