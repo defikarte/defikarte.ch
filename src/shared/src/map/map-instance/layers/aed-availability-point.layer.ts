@@ -1,9 +1,11 @@
 import { type FilterSpecification, type LayerSpecification } from 'maplibre-gl';
 import {
   EMERGENCY_DIMMED_EXPRESSION,
+  OH_STATUS_EXPRESSION,
   ohStatusColorExpression,
   ohStatusIconExpression,
 } from '../../opening-hours/expressions';
+import { OH_STATUS } from '../../opening-hours/types';
 import { COLORS, FEATURE_STATE, IMAGE_SCALE } from '../configuration/constants';
 
 const layerFilter: FilterSpecification = ['!', ['has', 'point_count']];
@@ -42,17 +44,8 @@ export const createAedAvailabilityPointLayers = (
     source: source,
     type: 'circle',
     paint: {
-      'circle-color': [
-        'case',
-        ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
-        [
-          'case',
-          ['boolean', ['feature-state', FEATURE_STATE.SELECTED], false],
-          COLORS.SECONDARY_ORANGE_02, // the nearby AED currently shown
-          COLORS.SECONDARY_ORANGE_01,
-        ],
-        ohStatusColorExpression,
-      ],
+      // a nearby AED keeps the colour of its status, it stands out by opacity and outline
+      'circle-color': ohStatusColorExpression,
       'circle-radius': [
         'case',
         ['boolean', ['feature-state', FEATURE_STATE.EDITING], false],
@@ -74,14 +67,15 @@ export const createAedAvailabilityPointLayers = (
         0.2,
         ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
         ['case', ['boolean', ['feature-state', FEATURE_STATE.SELECTED], false], 0.8, 0.5],
-        0.6,
+        // the filters also show closed and unknown AEDs, so this matches the unfiltered layer
+        ['match', OH_STATUS_EXPRESSION, OH_STATUS.OPEN, 0.6, 0.4],
       ],
-      // an outline, so the nearby ring also stands out on the orange ring of AEDs with unknown
-      // availability - and a dark one marks the AEDs of the emergency view
+      // an outline in the status colour marks the nearby AEDs, a dark one the AEDs of the
+      // emergency view
       'circle-stroke-width': [
         'case',
         ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
-        2,
+        3,
         ['boolean', ['feature-state', FEATURE_STATE.EMERGENCY], false],
         2,
         0,
@@ -89,13 +83,13 @@ export const createAedAvailabilityPointLayers = (
       'circle-stroke-color': [
         'case',
         ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
-        COLORS.SECONDARY_ORANGE_02,
+        ohStatusColorExpression,
         COLORS.PRIMARY_100_GREEN_04,
       ],
       'circle-stroke-opacity': [
         'case',
         ['boolean', ['feature-state', FEATURE_STATE.NEARBY], false],
-        0.6,
+        0.9,
         1,
       ],
       'circle-translate': [0, -18],
