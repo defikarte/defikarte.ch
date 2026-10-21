@@ -26,9 +26,9 @@
     "emergencyDefaultOff": "Nur auf Knopfdruck"
   },
   "emergency": {
-    "toggle": "Nächste Defibrillatoren anzeigen",
+    "toggle": "Nächste AEDs anzeigen",
     "fab": "Nächster AED",
-    "title": "Nächste Defibrillatoren",
+    "title": "Nächste AEDs",
     "locating": "Standort wird ermittelt…",
     "locationUnavailable": "Standort nicht verfügbar",
     "retry": "Erneut versuchen",
