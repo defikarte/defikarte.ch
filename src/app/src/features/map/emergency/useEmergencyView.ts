@@ -30,8 +30,8 @@ export const useEmergencyView = ({
   const [emergencyDefault] = useEmergencyDefault();
   // the setting turns the view on at app start, together with its GPS request (below)
   const [isActive, setIsActive] = useState(() => emergencyDefault === 'on');
-  // Here, not in the control: it unmounts during a create flow, the FAB stays collapsed for the
-  // session.
+  // Here, not in the control: it unmounts during a create flow, the FAB stays collapsed until the
+  // user locates themselves again.
   const [isFabCollapsed, setIsFabCollapsed] = useState(false);
   const collapseFab = useCallback(() => setIsFabCollapsed(true), []);
   const gpsStartedRef = useRef(false);
@@ -82,6 +82,9 @@ export const useEmergencyView = ({
     const next = typeof value === 'function' ? value(isGpsActive) : value;
     if (!next) {
       setIsActive(false);
+    } else if (!isActive) {
+      // locating oneself hints at looking for help nearby - the FAB shows its label again
+      setIsFabCollapsed(false);
     }
     setIsGpsActive(next);
   };

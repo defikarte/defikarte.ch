@@ -15,7 +15,7 @@ import { type LngLatBoundsLike, type MapGeoJSONFeature } from 'maplibre-gl';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import iconCloseDarkGreen from '../../../assets/icons/icon-close-dark-green.svg';
-import iconDefiCircleGreen from '../../../assets/icons/icon-defi-circle-green.svg';
+import iconDefiWhite from '../../../assets/icons/icon-defi-white.svg';
 import iconNavigationWhite from '../../../assets/icons/icon-navigation-white.svg';
 import iconTimeWhite from '../../../assets/icons/icon-time-white.svg';
 import { getWalkingDirectionsUrl } from '../../../services/navigation.service';
@@ -144,14 +144,17 @@ export const EmergencyControl = ({
         }}
         className={classNames(
           'absolute bottom-4 right-4 z-10 flex items-center p-1.5 cursor-pointer',
-          'rounded-full bg-primary-100-white shadow-custom-lg shadow-green-shadow-64',
-          'font-semibold leading-[150%] text-primary-100-green-03 hover:text-primary-100-green-04',
+          // the primary Button's fill, so it stands out from the white map controls
+          'rounded-full shadow-custom-lg shadow-green-shadow-64 text-primary-100-white',
+          'bg-linear-to-r from-primary-100-green-03 to-primary-100-green-02',
+          'hover:from-green-custom-02 hover:to-primary-100-green-02',
+          'font-semibold leading-[150%]',
           // collapsing shrinks the pill to the round icon button
           'transition-[padding] duration-300 ease-out motion-reduce:transition-none',
           isCollapsed ? 'pe-1.5' : 'pe-5'
         )}
       >
-        <img src={iconDefiCircleGreen} alt="" className="size-12 shrink-0" />
+        <img src={iconDefiWhite} alt="" className="size-12 shrink-0 p-2" />
         {/* stays in the DOM, so it can slide shut instead of disappearing at once */}
         <span
           aria-hidden={isCollapsed}
