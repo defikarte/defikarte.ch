@@ -2,6 +2,20 @@ import { type Feature } from 'geojson';
 
 export type AedAccess = 'yes' | 'permissive' | 'private';
 export type AedIndoor = 'yes' | 'no';
+// why an AED is permanently gone, the values are also the i18n keys of the reasons
+export type AedRemovalReason = 'dismantled' | 'stolen' | 'destroyed' | 'incorrect';
+export const AED_REMOVAL_REASONS: AedRemovalReason[] = [
+  'dismantled',
+  'stolen',
+  'destroyed',
+  'incorrect',
+];
+
+export interface AedRemovalData {
+  reason: AedRemovalReason | '';
+  comment?: string;
+  reporter: string;
+}
 
 export interface AedData {
   id?: string;

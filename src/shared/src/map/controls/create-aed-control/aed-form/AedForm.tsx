@@ -1,6 +1,6 @@
 import cn from 'classnames';
 import { type Feature, type FeatureCollection } from 'geojson';
-import { type Dispatch, type SetStateAction } from 'react';
+import { type Dispatch, type SetStateAction, useState } from 'react';
 import { type useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { type ApiClient } from '../../../../api/api-client';
@@ -17,6 +17,7 @@ import {
   isPhoneNumberValid,
 } from '../../../../services/custom-validation.service';
 import { type MapInstance } from '../../../map-instance/map-instance';
+import { AedRemoveForm } from './AedRemoveForm';
 
 interface AedFormProps {
   map: MapInstance | null;
@@ -24,6 +25,7 @@ interface AedFormProps {
   form: ReturnType<typeof useForm<AedData>>;
   setCreateMode: Dispatch<SetStateAction<CreateMode>>;
   onSuccess: (feature: Feature) => void;
+  onRemoved: () => void;
   onNotify: NotificationHandler;
   compact?: boolean;
 }
@@ -34,10 +36,12 @@ export const AedForm = ({
   form,
   setCreateMode,
   onSuccess,
+  onRemoved,
   onNotify,
   compact,
 }: AedFormProps) => {
   const { t } = useTranslation();
+  const [isRemoving, setIsRemoving] = useState(false);
   const {
     register,
     watch,
@@ -112,13 +116,21 @@ export const AedForm = ({
     }
   };
 
+  const handleRemoved = async () => {
+    await map?.refreshActiveOverlays();
+    setCreateMode(CreateMode.none);
+    form.reset();
+    onRemoved();
+  };
+
+  const id = watch('id');
   const longitude = watch('longitude');
   const latitude = watch('latitude');
   const isDescriptionRedundantHint = isDescriptionRedundant(
     watch('description'),
     watch('openingHours')
   );
-  const title = watch('id') ? t('editAed') : t('createAed');
+  const title = id ? t('editAed') : t('createAed');
 
   const containerClass = cn(
     'absolute',
@@ -152,183 +164,208 @@ export const AedForm = ({
 
   return (
     <div className={containerClass}>
-      <form
-        className="flex flex-col h-[100%] justify-between"
-        onSubmit={e => void handleSubmit(onSubmit)(e)}
-      >
-        <h1 className="border-b p-4 border-primary-05-green-05">{title}</h1>
-        <div className="flex flex-col flex-grow justify-start px-4 pt-5 pb-4 gap-4 overflow-auto border-b border-primary-05-green-05">
-          <TextField
-            label={t('coordinates')}
-            type="text"
-            required
-            tooltip={{
-              title: t('coordinatesTooltipTitle'),
-              content: t('coordinatesTooltipContent'),
-            }}
-            value={longitude && latitude && `${longitude.toFixed(7)}, ${latitude.toFixed(7)}`}
-            readOnly
-          />
-          <TextField
-            autoComplete="off"
-            label={t('reporter')}
-            type="text"
-            placeholder={t('reporterPlaceholder')}
-            required
-            tooltip={{
-              title: t('reporterTooltipTitle'),
-              content: t('reporterTooltipContent'),
-            }}
-            error={errors.reporter?.message}
-            {...register('reporter', { required: t('reporterRequired') })}
-            disabled={isSubmitting}
-          />
-          <TextField
-            autoComplete="off"
-            label={t('location')}
-            type="text"
-            placeholder={t('locationPlaceholder')}
-            required
-            tooltip={{
-              title: t('locationTooltipTitle'),
-              content: t('locationTooltipContent'),
-              link: 'https://wiki.openstreetmap.org/wiki/Tag:emergency%3Ddefibrillator',
-            }}
-            error={errors.location?.message}
-            {...register('location', {
-              required: t('locationRequired'),
-              maxLength: { value: 200, message: t('locationMaxLength') },
-            })}
-            disabled={isSubmitting}
-          />
-          <SelectField
-            label={t('indoor')}
-            options={['yes', 'no']}
-            required
-            tooltip={{
-              title: t('indoorTooltipTitle'),
-              content: t('indoorTooltipContent'),
-              link: 'https://wiki.openstreetmap.org/wiki/Key:indoor',
-            }}
-            error={errors.indoor?.message}
-            {...register('indoor', { required: t('indoorRequired') })}
-            disabled={isSubmitting}
-          />
-          <TextField
-            autoComplete="off"
-            label={t('level')}
-            type="number"
-            placeholder={t('levelPlaceholder')}
-            tooltip={{
-              title: t('levelTooltipTitle'),
-              content: t('levelTooltipContent'),
-              link: 'https://wiki.openstreetmap.org/wiki/Key:level',
-            }}
-            error={errors.level?.message}
-            {...register('level')}
-            disabled={isSubmitting}
-          />
-          <TextField
-            autoComplete="off"
-            label={t('openingHours')}
-            type="text"
-            placeholder={t('openingHoursPlaceholder')}
-            tooltip={{
-              title: t('openingHoursTooltipTitle'),
-              content: t('openingHoursTooltipContent'),
-              link: 'https://wiki.openstreetmap.org/wiki/Key:opening_hours',
-            }}
-            error={errors.openingHours?.message}
-            {...register('openingHours', { validate: value => areOpeningHoursValid(value, t) })}
-            disabled={isSubmitting}
-          />
-          <TextField
-            autoComplete="off"
-            label={t('description')}
-            type="text"
-            placeholder={t('descriptionPlaceholder')}
-            tooltip={{
-              title: t('descriptionTooltipTitle'),
-              content: t('descriptionTooltipContent'),
-              link: 'https://wiki.openstreetmap.org/wiki/Key:description',
-            }}
-            error={errors.description?.message}
-            hint={isDescriptionRedundantHint ? t('descriptionRedundant') : undefined}
-            {...register('description', {
-              required: false,
-              maxLength: { value: 200, message: t('descriptionMaxLength') },
-            })}
-            disabled={isSubmitting}
-          />
-          <TextField
-            autoComplete="off"
-            label={t('operator')}
-            type="text"
-            placeholder={t('operatorPlaceholder')}
-            tooltip={{
-              title: t('operatorTooltipTitle'),
-              content: t('operatorTooltipContent'),
-              link: 'https://wiki.openstreetmap.org/wiki/Key:operator',
-            }}
-            error={errors.operator?.message}
-            {...register('operator')}
-            disabled={isSubmitting}
-          />
-          <TextField
-            autoComplete="off"
-            label={t('operatorPhone')}
-            type="text"
-            placeholder={t('operatorPhonePlaceholder')}
-            tooltip={{
-              title: t('operatorPhoneTooltipTitle'),
-              content: t('operatorPhoneTooltipContent'),
-              link: 'https://wiki.openstreetmap.org/wiki/Key:phone',
-            }}
-            error={errors.operatorPhone?.message}
-            {...register('operatorPhone', {
-              validate: value => isPhoneNumberValid(value, t),
-              onBlur: handlePhoneNumberBlur,
-            })}
-            disabled={isSubmitting}
-          />
-          <TextField
-            autoComplete="off"
-            label={t('operatorEmail')}
-            type="email"
-            placeholder={t('operatorEmailPlaceholder')}
-            tooltip={{
-              title: t('operatorEmailTooltipTitle'),
-              content: t('operatorEmailTooltipContent'),
-              link: 'https://wiki.openstreetmap.org/wiki/Key:email',
-            }}
-            error={errors.operatorEmail?.message}
-            {...register('operatorEmail')}
-            disabled={isSubmitting}
-          />
-          <SelectField
-            label={t('access')}
-            options={['yes', 'permissive', 'private']}
-            tooltip={{
-              title: t('accessTooltipTitle'),
-              content: t('accessTooltipContent'),
-              link: 'https://wiki.openstreetmap.org/wiki/Key:access',
-            }}
-            {...register('access')}
-            disabled={isSubmitting}
-          />
-        </div>
-        <div className="pt-4 pb-4 px-4 flex-shrink flex w-full items-end self-end">
-          <Button
-            type="submit"
-            variant="primary"
-            size="large"
-            className={cn('w-full', { 'md:w-fit': !compact })}
-            disabled={isSubmitting}
-          >
-            {t('submit')}
-          </Button>
-        </div>
-      </form>
+      {isRemoving && id ? (
+        <AedRemoveForm
+          id={id}
+          apiClient={apiClient}
+          reporter={watch('reporter')}
+          onCancel={() => setIsRemoving(false)}
+          onRemoved={handleRemoved}
+          onNotify={onNotify}
+          compact={compact}
+        />
+      ) : (
+        <form
+          className="flex flex-col h-[100%] justify-between"
+          onSubmit={e => void handleSubmit(onSubmit)(e)}
+        >
+          <h1 className="border-b p-4 border-primary-05-green-05">{title}</h1>
+          <div className="flex flex-col flex-grow justify-start px-4 pt-5 pb-4 gap-4 overflow-auto border-b border-primary-05-green-05">
+            <TextField
+              label={t('coordinates')}
+              type="text"
+              required
+              tooltip={{
+                title: t('coordinatesTooltipTitle'),
+                content: t('coordinatesTooltipContent'),
+              }}
+              value={longitude && latitude && `${longitude.toFixed(7)}, ${latitude.toFixed(7)}`}
+              readOnly
+            />
+            <TextField
+              autoComplete="off"
+              label={t('reporter')}
+              type="text"
+              placeholder={t('reporterPlaceholder')}
+              required
+              tooltip={{
+                title: t('reporterTooltipTitle'),
+                content: t('reporterTooltipContent'),
+              }}
+              error={errors.reporter?.message}
+              {...register('reporter', { required: t('reporterRequired') })}
+              disabled={isSubmitting}
+            />
+            <TextField
+              autoComplete="off"
+              label={t('location')}
+              type="text"
+              placeholder={t('locationPlaceholder')}
+              required
+              tooltip={{
+                title: t('locationTooltipTitle'),
+                content: t('locationTooltipContent'),
+                link: 'https://wiki.openstreetmap.org/wiki/Tag:emergency%3Ddefibrillator',
+              }}
+              error={errors.location?.message}
+              {...register('location', {
+                required: t('locationRequired'),
+                maxLength: { value: 200, message: t('locationMaxLength') },
+              })}
+              disabled={isSubmitting}
+            />
+            <SelectField
+              label={t('indoor')}
+              options={['yes', 'no']}
+              required
+              tooltip={{
+                title: t('indoorTooltipTitle'),
+                content: t('indoorTooltipContent'),
+                link: 'https://wiki.openstreetmap.org/wiki/Key:indoor',
+              }}
+              error={errors.indoor?.message}
+              {...register('indoor', { required: t('indoorRequired') })}
+              disabled={isSubmitting}
+            />
+            <TextField
+              autoComplete="off"
+              label={t('level')}
+              type="number"
+              placeholder={t('levelPlaceholder')}
+              tooltip={{
+                title: t('levelTooltipTitle'),
+                content: t('levelTooltipContent'),
+                link: 'https://wiki.openstreetmap.org/wiki/Key:level',
+              }}
+              error={errors.level?.message}
+              {...register('level')}
+              disabled={isSubmitting}
+            />
+            <TextField
+              autoComplete="off"
+              label={t('openingHours')}
+              type="text"
+              placeholder={t('openingHoursPlaceholder')}
+              tooltip={{
+                title: t('openingHoursTooltipTitle'),
+                content: t('openingHoursTooltipContent'),
+                link: 'https://wiki.openstreetmap.org/wiki/Key:opening_hours',
+              }}
+              error={errors.openingHours?.message}
+              {...register('openingHours', { validate: value => areOpeningHoursValid(value, t) })}
+              disabled={isSubmitting}
+            />
+            <TextField
+              autoComplete="off"
+              label={t('description')}
+              type="text"
+              placeholder={t('descriptionPlaceholder')}
+              tooltip={{
+                title: t('descriptionTooltipTitle'),
+                content: t('descriptionTooltipContent'),
+                link: 'https://wiki.openstreetmap.org/wiki/Key:description',
+              }}
+              error={errors.description?.message}
+              hint={isDescriptionRedundantHint ? t('descriptionRedundant') : undefined}
+              {...register('description', {
+                required: false,
+                maxLength: { value: 200, message: t('descriptionMaxLength') },
+              })}
+              disabled={isSubmitting}
+            />
+            <TextField
+              autoComplete="off"
+              label={t('operator')}
+              type="text"
+              placeholder={t('operatorPlaceholder')}
+              tooltip={{
+                title: t('operatorTooltipTitle'),
+                content: t('operatorTooltipContent'),
+                link: 'https://wiki.openstreetmap.org/wiki/Key:operator',
+              }}
+              error={errors.operator?.message}
+              {...register('operator')}
+              disabled={isSubmitting}
+            />
+            <TextField
+              autoComplete="off"
+              label={t('operatorPhone')}
+              type="text"
+              placeholder={t('operatorPhonePlaceholder')}
+              tooltip={{
+                title: t('operatorPhoneTooltipTitle'),
+                content: t('operatorPhoneTooltipContent'),
+                link: 'https://wiki.openstreetmap.org/wiki/Key:phone',
+              }}
+              error={errors.operatorPhone?.message}
+              {...register('operatorPhone', {
+                validate: value => isPhoneNumberValid(value, t),
+                onBlur: handlePhoneNumberBlur,
+              })}
+              disabled={isSubmitting}
+            />
+            <TextField
+              autoComplete="off"
+              label={t('operatorEmail')}
+              type="email"
+              placeholder={t('operatorEmailPlaceholder')}
+              tooltip={{
+                title: t('operatorEmailTooltipTitle'),
+                content: t('operatorEmailTooltipContent'),
+                link: 'https://wiki.openstreetmap.org/wiki/Key:email',
+              }}
+              error={errors.operatorEmail?.message}
+              {...register('operatorEmail')}
+              disabled={isSubmitting}
+            />
+            <SelectField
+              label={t('access')}
+              options={['yes', 'permissive', 'private']}
+              tooltip={{
+                title: t('accessTooltipTitle'),
+                content: t('accessTooltipContent'),
+                link: 'https://wiki.openstreetmap.org/wiki/Key:access',
+              }}
+              {...register('access')}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="pt-4 pb-4 px-4 flex-shrink flex w-full gap-2 justify-end items-end self-end">
+            {/* only an existing AED can be reported as permanently gone */}
+            {id && (
+              <Button
+                type="button"
+                variant="secondary"
+                size="large"
+                className={cn('w-full', { 'md:w-fit': !compact })}
+                onClick={() => setIsRemoving(true)}
+                disabled={isSubmitting}
+              >
+                {t('removeAed')}
+              </Button>
+            )}
+            <Button
+              type="submit"
+              variant="primary"
+              size="large"
+              className={cn('w-full', { 'md:w-fit': !compact })}
+              disabled={isSubmitting}
+            >
+              {t('submit')}
+            </Button>
+          </div>
+        </form>
+      )}
     </div>
   );
 };

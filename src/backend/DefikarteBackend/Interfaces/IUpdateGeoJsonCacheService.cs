@@ -6,6 +6,8 @@ namespace DefikarteBackend.Interfaces
     {
         Task AddOrUpdateFeaturesInLocalCacheAsync(FeatureCollection newOrUpdatedFeatures);
 
+        Task RemoveFeatureInLocalCacheAsync(string id);
+
         Task CleanupOldItemsInLocalCacheAsync();
 
         Task<bool> TryUpdateAndCombineCacheAsync(FeatureCollection geoJson);
