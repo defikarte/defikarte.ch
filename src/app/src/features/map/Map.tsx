@@ -4,6 +4,7 @@ import {
   CreateAedControl,
   CreateMode,
   DetailView,
+  FEATURE_STATE,
   type Notification,
   SearchControl,
   SharedMap,
@@ -21,6 +22,7 @@ import iconGpsWarningCircleRed from '../../assets/icons/icon-gps-warning-circle-
 import { CustomToast } from '../../components/ui/custom-toast/CustomToast';
 import AppConfiguration from '../../configuration/app.configuration';
 import { useAppReady } from '../../hooks/useAppReady';
+import { useBackHandler } from '../../hooks/useBackHandler';
 import { useBaseLayer } from '../../hooks/useBaseLayer';
 import type { MapSearch } from '../../routes/index';
 import { CapacitorGeolocationService } from '../../services/capacitor-geolocation.service';
@@ -114,6 +116,29 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
   // of the emergency view's AEDs is shown in that view instead
   const showDetailView = !!selectedFeature?.data && !emergency.isViewAedTapped;
 
+  // Android back closes the detail view before it leaves the map
+  useBackHandler(() => {
+    deselectAll();
+    return true;
+  }, isActive && showDetailView && createMode === CreateMode.none);
+
+  // ...and the emergency view, while it is the one on screen (GPS stays on, as with its close button)
+  useBackHandler(() => {
+    emergency.toggle();
+    return true;
+  }, isActive && emergency.isActive && !showDetailView && createMode === CreateMode.none);
+
+  // ...and cancels an edit, the way the form's cancel button does. A create-new flow needs nothing
+  // here: back drops its ?create param, and the effect below cancels it.
+  useBackHandler(() => {
+    mapInstance?.setFeatureState(editFeature?.source ?? '', editFeature?.data?.id, {
+      [FEATURE_STATE.EDITING]: false,
+    });
+    setEditFeature(null);
+    setCreateMode(CreateMode.none);
+    return true;
+  }, isActive && createMode !== CreateMode.none && !!editFeature);
+
   // The splash covers everything until here, so the user never sees the empty map container while
   // maplibre boots. AppReadyProvider holds a timeout that gives up if the map never initialises.
   useEffect(() => {
@@ -193,7 +218,7 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
       return;
     }
 
-    // param removed (hardware back, or the "home" nav item) -> cancel the flow
+    // param removed (Android back via useAndroidBackButton, or the "home" nav item) -> cancel the flow
     if (isCreatingNew) {
       setCreateMode(CreateMode.none);
     }

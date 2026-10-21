@@ -7,11 +7,13 @@ import { NavBar } from '../app/layout/nav-bar/NavBar';
 import { SplashScreen as AppSplashScreen } from '../components/ui/splash-screen/SplashScreen';
 import { Map } from '../features/map/Map';
 import { useAppReady } from '../hooks/useAppReady';
+import { useAndroidBackButton } from '../hooks/useBackHandler';
 
 function RootComponent() {
   const pathname = useRouterState({ select: state => state.location.pathname });
   const [isReady] = useAppReady();
   const isMapRoute = pathname === '/';
+  useAndroidBackButton();
 
   // The app draws under the system bars, so the bar icons sit on top of app content and have to be
   // told which background they are over. The enum reads backwards: Light means dark icons for a
