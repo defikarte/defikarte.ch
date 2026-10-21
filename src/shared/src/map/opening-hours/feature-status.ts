@@ -24,3 +24,20 @@ export const featureStatus = (
 
   return statusMap?.[value] ?? (value === '24/7' ? OH_STATUS.OPEN : OH_STATUS.UNKNOWN);
 };
+
+/** Filter value for the AEDs usable around the clock, in addition to the statuses. */
+export const ALWAYS_AVAILABLE = '24/7';
+
+/** A status, or `ALWAYS_AVAILABLE` for the AEDs with `opening_hours=24/7` and `access=yes`. */
+export type AvailabilityFilter = OpeningHoursStatus | typeof ALWAYS_AVAILABLE;
+
+/** Whether the feature has one of the statuses, or is always available if that is selected. */
+export const matchesAvailabilityFilters = (
+  properties: GeoJsonProperties,
+  statusMap: OpeningHoursStatusMap | null,
+  filters: readonly AvailabilityFilter[]
+): boolean =>
+  filters.includes(featureStatus(properties, statusMap)) ||
+  (filters.includes(ALWAYS_AVAILABLE) &&
+    properties?.[ACCESS_PROPERTY] === 'yes' &&
+    properties[OPENING_HOURS_PROPERTY] === ALWAYS_AVAILABLE);

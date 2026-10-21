@@ -63,6 +63,7 @@
   "permissive": "Eingeschränkt zugänglich",
   "customers": "nur für Kunden zugänglich",
   "availableNow": "Jetzt verfügbar",
+  "available24h": "24h verfügbar",
   "notAvailable": "Geschlossen oder nicht öffentlich zugänglich",
   "availabilityUnknown": "Verfügbarkeit unbekannt",
   "enterLocationOrAddress": "Ortsnamen oder Adresse eingeben...",
