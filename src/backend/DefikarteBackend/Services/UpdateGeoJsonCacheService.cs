@@ -6,6 +6,10 @@ namespace DefikarteBackend.Services
 {
     public class UpdateGeoJsonCacheService : IUpdateGeoJsonCacheService
     {
+        // Marks a feature in the local cache as deleted in OSM, so it is also removed from the
+        // overpass data until that has caught up (the marker is cleaned up like other local items).
+        private const string RemovedProperty = "removed";
+
         private readonly ILogger<UpdateGeoJsonCacheService> _logger;
         private readonly IEnumerable<IGeoJsonCacheRepository> _geoJsonCacheRepositories;
 
@@ -31,7 +35,7 @@ namespace DefikarteBackend.Services
             if (localCacheRepository != null && osmCacheRepository != null)
             {
                 var temporaryData = await SafeGetAsync(localCacheRepository).ConfigureAwait(false);
-                AddOrUpdateItems(temporaryData, geoJson);
+                AddOrUpdateItems(temporaryData, geoJson, applyRemovals: true);
                 return await osmCacheRepository.TryUpdateCacheAsync(geoJson).ConfigureAwait(false);
             }
 
@@ -100,7 +104,7 @@ namespace DefikarteBackend.Services
             if (osmCacheRepository != null)
             {
                 var geoJson = await osmCacheRepository.GetAsync().ConfigureAwait(false);
-                AddOrUpdateItems(newOrUpdatedFeatures, geoJson);
+                AddOrUpdateItems(newOrUpdatedFeatures, geoJson, applyRemovals: true);
                 await osmCacheRepository.TryUpdateCacheAsync(geoJson).ConfigureAwait(false);
             }
             else
@@ -110,11 +114,36 @@ namespace DefikarteBackend.Services
             }
         }
 
-        private static void AddOrUpdateItems(FeatureCollection newOrUpdatedFeatures, FeatureCollection geoJson)
+        public async Task RemoveFeatureInLocalCacheAsync(string id)
+        {
+            var removedFeature = new Feature
+            {
+                Id = id,
+                Properties = new Dictionary<string, string>
+                {
+                    { "timestamp", DateTime.UtcNow.ToString("u") },
+                    { RemovedProperty, "yes" },
+                },
+            };
+
+            await AddOrUpdateFeaturesInLocalCacheAsync(new FeatureCollection { Features = [removedFeature] }).ConfigureAwait(false);
+        }
+
+        private static void AddOrUpdateItems(FeatureCollection newOrUpdatedFeatures, FeatureCollection geoJson, bool applyRemovals = false)
         {
             foreach (var newFeature in newOrUpdatedFeatures.Features)
             {
                 var existingFeatureIndex = geoJson.Features.FindIndex(feature => feature.Id == newFeature.Id);
+
+                if (applyRemovals && newFeature.Properties.ContainsKey(RemovedProperty))
+                {
+                    if (existingFeatureIndex != -1)
+                    {
+                        geoJson.Features.RemoveAt(existingFeatureIndex);
+                    }
+
+                    continue;
+                }
 
                 if (existingFeatureIndex != -1)
                 {

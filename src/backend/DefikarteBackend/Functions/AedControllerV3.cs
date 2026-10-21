@@ -276,6 +276,87 @@ namespace DefikarteBackend.Functions
             }
         }
 
+        [Function("AED_DELETE_V3")]
+        [OpenApiOperation(operationId: "AED_DELETE_V3", tags: ["AED_V3"], Summary = "Deletes the AED with given ID in OSM, because it is permanently gone.")]
+        [OpenApiParameter(name: "id", In = ParameterLocation.Path, Required = true, Type = typeof(long), Summary = "Id of the AED to delete.")]
+        [OpenApiRequestBody("application/json", typeof(AedRemovalRequest))]
+        [OpenApiResponseWithoutBody(statusCode: HttpStatusCode.NoContent, Description = "The AED was deleted")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.NotFound, contentType: "application/json", bodyType: typeof(object), Description = "The NotFound response.")]
+        [OpenApiSecurity("api-key", SecuritySchemeType.ApiKey, In = OpenApiSecurityLocationType.Header, Name = "x-functions-key")]
+        public async Task<IActionResult> Delete(
+          [HttpTrigger(AuthorizationLevel.Function, "delete", Route = "v3/aed/{id}")] HttpRequest req, long id)
+        {
+            try
+            {
+                var username = _config.OsmUserName;
+                var osmApiToken = _config.OsmApiToken;
+                var osmApiUrl = _config.OsmApiUrl;
+
+                if (string.IsNullOrEmpty(osmApiToken) || string.IsNullOrEmpty(osmApiUrl))
+                {
+                    _logger.LogWarning("No valid configuration available for either username, token or osmApiUrl");
+                    return new ObjectResult(new { Message = "Configuration error. Contact API-Admins." })
+                    {
+                        StatusCode = StatusCodes.Status500InternalServerError,
+                    };
+                }
+
+                var validationResult = await req.GetValidatedRequestAsync<AedRemovalRequest, AedRemovalRequestValidator>();
+                if (validationResult == null || validationResult.IsValid == false)
+                {
+                    _logger.LogInformation($"Invalid request data: {JsonConvert.SerializeObject(validationResult?.Errors)}");
+                    return validationResult?.ToBadRequest() ?? new BadRequestObjectResult(new { Message = "Request cannot be parsed. Body is not a valid JSON or null." });
+                }
+
+                var clientFactory = new ClientsFactory(_logger, _httpClient, osmApiUrl);
+                var osmClient = clientFactory.CreateOAuth2Client(osmApiToken);
+                var currentNode = await osmClient.GetNode(id);
+                if (currentNode == null)
+                {
+                    return new ObjectResult(new { Message = $"AED with Id: {id} not found." }) { StatusCode = StatusCodes.Status404NotFound };
+                }
+
+                // only AEDs can be deleted through this API, never any other node
+                if (currentNode.Tags == null || !currentNode.Tags.Contains("emergency", "defibrillator"))
+                {
+                    return new BadRequestObjectResult(new { Message = $"Node with Id: {id} is not an AED." });
+                }
+
+                var removal = validationResult.Value;
+                var comment = $"Remove AED, permanently gone ({removal.Reason}). Reported by {removal.Reporter}.";
+                if (!string.IsNullOrWhiteSpace(removal.Comment))
+                {
+                    comment += $" {removal.Comment}";
+                }
+
+                // OSM tag values are limited to 255 characters
+                comment = StringHelper.RemoveDuplicatedWhitespace(comment) ?? comment;
+                comment = comment.Length > 255 ? comment[..255] : comment;
+
+                var changeSetTags = new TagsCollection() { new Tag("created_by", username), new Tag("comment", comment) };
+                var changeSetId = await osmClient.CreateChangeset(changeSetTags);
+
+                currentNode.ChangeSetId = changeSetId;
+                await osmClient.DeleteElement(changeSetId, currentNode);
+                await osmClient.CloseChangeset(changeSetId);
+
+                _logger.LogInformation($"Deleted node {id}, reason:{removal.Reason}");
+                await _updateGeoJsonCacheService.RemoveFeatureInLocalCacheAsync(id.ToString()).ConfigureAwait(false);
+
+                return new NoContentResult();
+            }
+            catch (JsonSerializationException ex)
+            {
+                _logger.LogError(ex.ToString());
+                return new BadRequestObjectResult(new { ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                return new ObjectResult(new { ex.Message }) { StatusCode = StatusCodes.Status500InternalServerError };
+            }
+        }
+
         private static Node CreateNode(Feature feature, bool isInSwitzerland, TagsCollectionBase? currentNodeTags)
         {
             var props = GeoJsonConverter.Convert2AedPropertyData(feature.Properties);
