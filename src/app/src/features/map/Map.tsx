@@ -125,7 +125,7 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
     }
 
     // (the 24h ones and the other open ones)
-    const usableNow = [FilterType.alwaysAvailable, FilterType.available];
+    const usableNow: FilterType[] = [FilterType.alwaysAvailable, FilterType.available];
     setActiveOverlays(prev =>
       usableNow.every(filter => prev.includes(filter))
         ? prev
