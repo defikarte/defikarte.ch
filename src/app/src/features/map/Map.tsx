@@ -5,6 +5,7 @@ import {
   CreateMode,
   DetailView,
   FEATURE_STATE,
+  FilterType,
   type Notification,
   SearchControl,
   SharedMap,
@@ -115,6 +116,18 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
   // closing the detail view leaves an item-select event without data, not null - and a tap on one
   // of the emergency view's AEDs is shown in that view instead
   const showDetailView = !!selectedFeature?.data && !emergency.isViewAedTapped;
+
+  // The emergency view is about AEDs usable now, so turning it on always shows them on the map.
+  // The other filters stay as the user set them.
+  useEffect(() => {
+    if (!emergency.isActive) {
+      return;
+    }
+
+    setActiveOverlays(prev =>
+      prev.includes(FilterType.available) ? prev : [...prev, FilterType.available]
+    );
+  }, [emergency.isActive, setActiveOverlays]);
 
   // Android back closes the detail view before it leaves the map
   useBackHandler(() => {
