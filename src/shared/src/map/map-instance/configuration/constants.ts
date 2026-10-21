@@ -35,4 +35,6 @@ export const FEATURE_STATE = {
   NEARBY: 'nearby',
   // one of the best AEDs around the user, shown by the emergency view
   EMERGENCY: 'emergency',
+  // the one of them the emergency view currently shows - drawn like a selected AED
+  EMERGENCY_SELECTED: 'emergencySelected',
 };

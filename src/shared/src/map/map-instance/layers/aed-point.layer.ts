@@ -59,8 +59,12 @@ export const createAedPointLayers = (baseId: string, source: string): LayerSpeci
         0,
         [
           'case',
-          ['boolean', ['feature-state', FEATURE_STATE.SELECTED], false],
-          30, // selected
+          [
+            'any',
+            ['boolean', ['feature-state', FEATURE_STATE.SELECTED], false],
+            ['boolean', ['feature-state', FEATURE_STATE.EMERGENCY_SELECTED], false],
+          ],
+          30, // selected, or the AED the emergency view shows
           20, // not selected
         ],
       ],

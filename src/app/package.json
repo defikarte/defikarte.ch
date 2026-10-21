@@ -10,6 +10,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "assets": "npx --yes @capacitor/assets@3.0.5 generate --android --ios --iconBackgroundColor \"#154430\" --iconBackgroundColorDark \"#154430\" --splashBackgroundColor \"#ffffff\" && node scripts/fix-generated-assets.mjs",
+    "upt:android": "tsc -b && vite build && cap sync android",
     "sync:android": "cap sync android",
     "sync:ios": "cap sync ios",
     "lint": "eslint .",

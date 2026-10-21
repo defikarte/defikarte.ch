@@ -16,13 +16,15 @@ interface UseBestAedsProps {
   map: MapInstance | null;
   isActive: boolean;
   userLocation: GeolocationPosition | null;
+  // the one of them drawn like a selected AED - the best one if none (or one no longer listed) is given
+  selectedId?: string | number | null;
 }
 
 /**
  * The best AEDs around the user (see `findBestAeds`), highlighted on the map while all other AEDs
  * are dimmed. Works on the AEDs in memory, so it never makes a request.
  */
-export const useBestAeds = ({ map, isActive, userLocation }: UseBestAedsProps) => {
+export const useBestAeds = ({ map, isActive, userLocation, selectedId }: UseBestAedsProps) => {
   const [bestAeds, setBestAeds] = useState<NearbyAed[]>([]);
   // the position the list was ranked for
   const [rankedAt, setRankedAt] = useState<{ lat: number; lon: number } | null>(null);
@@ -78,9 +80,15 @@ export const useBestAeds = ({ map, isActive, userLocation }: UseBestAedsProps) =
     const sourceId = getActiveAedOverlay(map);
     if (!map || !sourceId || bestAeds.length === 0) return;
 
+    const selected = bestAeds.some(({ feature }) => feature.id === selectedId)
+      ? selectedId
+      : bestAeds[0].feature.id;
     const setEmergency = (value: boolean) =>
       bestAeds.forEach(({ feature }) =>
-        map.setFeatureState(sourceId, feature.id, { [FEATURE_STATE.EMERGENCY]: value })
+        map.setFeatureState(sourceId, feature.id, {
+          [FEATURE_STATE.EMERGENCY]: value,
+          [FEATURE_STATE.EMERGENCY_SELECTED]: value && feature.id === selected,
+        })
       );
 
     setEmergency(true);
@@ -88,7 +96,7 @@ export const useBestAeds = ({ map, isActive, userLocation }: UseBestAedsProps) =
       // a source removed by a filter change took its feature state with it
       if (getActiveAedOverlay(map) === sourceId) setEmergency(false);
     };
-  }, [map, bestAeds, sourceVersion]);
+  }, [map, bestAeds, sourceVersion, selectedId]);
 
   return { bestAeds };
 };
