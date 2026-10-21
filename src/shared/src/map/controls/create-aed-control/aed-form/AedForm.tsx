@@ -114,10 +114,7 @@ export const AedForm = ({
 
   const longitude = watch('longitude');
   const latitude = watch('latitude');
-  const isDescriptionRedundantHint = isDescriptionRedundant(
-    watch('description'),
-    watch('openingHours')
-  );
+  const isDescriptionRedundantHint = isDescriptionRedundant(watch('description'));
   const title = watch('id') ? t('editAed') : t('createAed');
 
   const containerClass = cn(

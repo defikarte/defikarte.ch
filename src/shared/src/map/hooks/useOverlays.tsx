@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { FilterType, OverlayType } from '../../model/map';
 import { type MapInstance } from '../map-instance/map-instance';
 
-const allFilters: FilterType[] = [FilterType.available, FilterType.notAvailable, FilterType.unknown];
+const allFilters: FilterType[] = Object.values(FilterType);
 
 /**
  * The overlay used for the initial map creation, before any filter changes.

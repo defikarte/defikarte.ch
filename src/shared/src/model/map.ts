@@ -5,15 +5,16 @@ import {
   type MapGeoJSONFeature,
   type SourceSpecification,
 } from 'maplibre-gl';
-import { type AvailabilityFilter } from '../map/opening-hours/feature-status';
+import { ALWAYS_AVAILABLE, type AvailabilityFilter } from '../map/opening-hours/feature-status';
 
 // the AEDs shown by their current status; the values are the opening hours status characters,
-// `alwaysAvailable` the AEDs with `opening_hours=24/7` and `access=yes` (a part of `available`)
+// split into groups that don't overlap (`availabilityGroup`): `alwaysAvailable` the open AEDs
+// with `opening_hours=24/7`, `available` the other open ones
 export const FilterType = {
   available: '1',
   notAvailable: '0',
   unknown: '?',
-  alwaysAvailable: '24/7',
+  alwaysAvailable: ALWAYS_AVAILABLE,
 } as const satisfies Record<string, AvailabilityFilter>;
 export type FilterType = (typeof FilterType)[keyof typeof FilterType];
 
