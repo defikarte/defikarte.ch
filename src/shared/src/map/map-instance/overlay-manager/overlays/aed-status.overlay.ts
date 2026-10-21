@@ -11,7 +11,8 @@ import {
   type RefreshableOverlayStrategy,
 } from '../../../../model/map';
 import { type OpeningHoursController } from '../../../opening-hours/controller';
-import { OH_STATUS, type OpeningHoursStatus } from '../../../opening-hours/types';
+import { type AvailabilityFilter } from '../../../opening-hours/feature-status';
+import { OH_STATUS } from '../../../opening-hours/types';
 import { MapConfiguration } from '../../configuration/map.configuration';
 import ClusterZoomInteraction from '../../interactions/cluster-zoom.interaction';
 import CursorClickableInteraction from '../../interactions/cursor-clickable.interaction';
@@ -21,7 +22,8 @@ import { createAedClusterLayers } from '../../layers/aed-cluster.layer';
 import { createAedSource } from '../../sources/aed.source';
 
 /**
- * Shows only the AEDs with one of the selected statuses right now. They are a separate source
+ * Shows only the AEDs in one of the selected groups right now (the statuses, with the 24/7 ones
+ * split off, see `availabilityGroup`). They are a separate source
  * instead of a layer filter, so the clusters count only these AEDs as well.
  */
 export class AedStatusOverlayStrategy implements OverlayStrategy, RefreshableOverlayStrategy {
@@ -30,7 +32,7 @@ export class AedStatusOverlayStrategy implements OverlayStrategy, RefreshableOve
   private aedClusterLayers: LayerSpecification[] = [];
   private map: Map;
   private openingHours: OpeningHoursController;
-  private statuses: readonly OpeningHoursStatus[] = [OH_STATUS.OPEN];
+  private statuses: readonly AvailabilityFilter[] = [OH_STATUS.OPEN];
   private unsubscribeData: (() => void) | null = null;
 
   constructor(map: Map, openingHours: OpeningHoursController) {
@@ -39,7 +41,7 @@ export class AedStatusOverlayStrategy implements OverlayStrategy, RefreshableOve
   }
 
   /** Changes the shown statuses; while the overlay is active, only its data is replaced. */
-  setStatuses(statuses: readonly OpeningHoursStatus[]) {
+  setStatuses(statuses: readonly AvailabilityFilter[]) {
     this.statuses = statuses;
     if (this.unsubscribeData) {
       this.unsubscribeData();

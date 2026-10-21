@@ -32,7 +32,7 @@ SharedMap.tsx (React state, hooks)          src/shared/src/map/
 configuration/map.configuration.ts          all source/layer ids, data URL, base-layer styles
 configuration/constants.ts                  COLORS, FEATURE_STATE, OH_STATUS_STATE, marker image ids
 opening-hours/expressions.ts                OH_STATUS_EXPRESSION + icon/colour expressions for layers
-hooks/useOverlays.tsx                       FilterType[] (UI statuses) → aedAll | aedByStatus
+hooks/useOverlays.tsx                       FilterType[] (UI statuses + 24h) → aedAll | aedByStatus
 ```
 
 Overlays today: `aedAll` (`AedOverlayStrategy`, clustered `aed-source`), `aedByStatus`
@@ -110,7 +110,7 @@ Rungs 1–2 also cost nothing at render time. They don't re-tile the GeoJSON sou
   Layer order in the returned array = draw order. Both AED overlays usually need the same layer change
   (`aed-point.layer.ts` and `aed-availability-point.layer.ts`).
 - Status logic exists twice on purpose: `OH_STATUS_EXPRESSION` (style) and `featureStatus` (JS). Change both together.
-  Rule: `access=no` → closed, else the `opening_hours` status (`24/7` = open until computed, otherwise unknown).
+  Rule: `access=no` or `private` → closed, else the `opening_hours` status (`24/7` = open until computed, otherwise unknown).
 - Export from `src/shared/src/index.ts` only what app or web actually import.
 - Don't rename, move or "clean up" neighbouring code as part of a map change. Mention issues instead.
 - Known hotspots. Point them out when relevant, but only fix them if asked:

@@ -7,14 +7,13 @@ import {
 } from 'maplibre-gl';
 import { OH_STATUS_STATE } from '../map-instance/configuration/constants';
 import { CachedCompiler, type ScheduleCompiler, WorkerCompiler } from './compiler';
-import { featureStatus } from './feature-status';
+import { type AvailabilityFilter, matchesAvailabilityFilters } from './feature-status';
 import { collectSchedules } from './schedules';
 import { StatusTracker, toStatusMap } from './status';
 import { toIsoDate, weekStart } from './time';
 import {
   DEFAULT_HOLIDAY_REGION,
   type HolidayRegion,
-  type OpeningHoursStatus,
   type OpeningHoursStatusMap,
 } from './types';
 import { type OpeningHoursWorker, OpeningHoursWorkerClient } from './worker-client';
@@ -71,8 +70,10 @@ export class OpeningHoursController {
   // the statuses each data listener wants the AEDs of (globalThis: `Map` is the maplibre map here)
   private readonly dataListeners = new globalThis.Map<
     DataListener,
-    readonly OpeningHoursStatus[]
+    readonly AvailabilityFilter[]
   >();
+  // the AEDs each data listener got last, so an unchanged set is not set (and clustered) again
+  private readonly lastData = new globalThis.Map<DataListener, Feature[]>();
   private readonly statusListeners = new Set<StatusListener>();
 
   // a newer compilation supersedes older ones still running
@@ -110,8 +111,8 @@ export class OpeningHoursController {
     return this.features ? { type: 'FeatureCollection', features: this.features } : null;
   }
 
-  /** The AEDs with one of the statuses right now, null until the status is computed. */
-  public getData(statuses: readonly OpeningHoursStatus[]): FeatureCollection | null {
+  /** The AEDs matching one of the filters right now, null until the status is computed. */
+  public getData(statuses: readonly AvailabilityFilter[]): FeatureCollection | null {
     const statusMap = this.statusMap;
     if (!this.features || !statusMap) {
       return null;
@@ -120,7 +121,7 @@ export class OpeningHoursController {
     return {
       type: 'FeatureCollection',
       features: this.features.filter(feature =>
-        statuses.includes(featureStatus(feature.properties, statusMap))
+        matchesAvailabilityFilters(feature.properties, statusMap, statuses)
       ),
     };
   }
@@ -130,7 +131,7 @@ export class OpeningHoursController {
    * Returns a function to unsubscribe.
    */
   public subscribeData(
-    statuses: readonly OpeningHoursStatus[],
+    statuses: readonly AvailabilityFilter[],
     listener: DataListener
   ): () => void {
     this.dataListeners.set(listener, statuses);
@@ -138,6 +139,7 @@ export class OpeningHoursController {
 
     return () => {
       this.dataListeners.delete(listener);
+      this.lastData.delete(listener);
     };
   }
 
@@ -199,6 +201,7 @@ export class OpeningHoursController {
 
     this.client?.terminate();
     this.dataListeners.clear();
+    this.lastData.clear();
     this.statusListeners.clear();
   }
 
@@ -372,9 +375,21 @@ export class OpeningHoursController {
     const listeners = listener ? [listener] : [...this.dataListeners.keys()];
     listeners.forEach(current => {
       const data = this.getData(this.dataListeners.get(current) ?? []);
-      if (data) {
-        current(data);
+      if (!data) {
+        return;
       }
+
+      // e.g. the 24h AEDs, or a status change of AEDs the listener does not show
+      const last = this.lastData.get(current);
+      if (
+        last?.length === data.features.length &&
+        last.every((feature, i) => feature === data.features[i])
+      ) {
+        return;
+      }
+
+      this.lastData.set(current, data.features);
+      current(data);
     });
   }
 }

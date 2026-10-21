@@ -10,11 +10,14 @@ interface TextFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   type: HTMLInputTypeAttribute;
   tooltip?: TooltipData;
   error?: string;
+  // a note that does not block the form, e.g. about redundant data
+  hint?: string;
 }
 
-export const TextField = ({ label, type, tooltip, error, ...props }: TextFieldProps) => {
+export const TextField = ({ label, type, tooltip, error, hint, ...props }: TextFieldProps) => {
   const { t } = useTranslation();
   const id = useId();
+  const noteId = `${id}-note`;
   const isMobile = isMobileAgent();
 
   return (
@@ -29,6 +32,8 @@ export const TextField = ({ label, type, tooltip, error, ...props }: TextFieldPr
         formNoValidate
         id={id}
         type={type}
+        aria-invalid={!!error}
+        aria-describedby={error || hint ? noteId : undefined}
         className={cn(
           {
             'text-base': isMobile,
@@ -42,7 +47,16 @@ export const TextField = ({ label, type, tooltip, error, ...props }: TextFieldPr
           {t('inputInvalid')}
         </span>
       )}
-      {error && <span className="ps-1 text-secondary-red-02 text-xs">{error}</span>}
+      {error && (
+        <span id={noteId} className="ps-1 text-secondary-red-02 text-xs">
+          {error}
+        </span>
+      )}
+      {hint && !error && (
+        <span id={noteId} className="ps-1 text-primary-100-green-04 text-xs">
+          {hint}
+        </span>
+      )}
     </div>
   );
 };

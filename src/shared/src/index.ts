@@ -39,6 +39,7 @@ export { distanceBetweenPoints } from './services/coordinate-calculation.service
 export {
   areOpeningHoursValid,
   formatPhoneNumber,
+  isDescriptionRedundant,
   isPhoneNumberValid,
 } from './services/custom-validation.service';
 export { requestStyleSpecification } from './services/map-style.service';
@@ -86,7 +87,11 @@ export {
   ohStatusColorExpression,
   ohStatusIconExpression,
 } from './map/opening-hours/expressions';
-export { ACCESS_PROPERTY, featureStatus } from './map/opening-hours/feature-status';
+export {
+  ACCESS_PROPERTY,
+  featureStatus,
+  matchesAvailabilityFilters,
+} from './map/opening-hours/feature-status';
 export { collectSchedules, OPENING_HOURS_PROPERTY } from './map/opening-hours/schedules';
 export { StatusTracker, statusAt, toStatusMap } from './map/opening-hours/status';
 export { minuteOfWeek, toIsoDate, WEEK_MINUTES, weekEnd, weekStart } from './map/opening-hours/time';

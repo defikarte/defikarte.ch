@@ -20,9 +20,11 @@ export const FilterControl = ({
 }: FilterControlProps & { ref?: React.RefObject<HTMLDivElement | null> }) => {
   const { t } = useTranslation();
 
-  // in the colours of the markers on the map, so the filters double as its legend
+  // in the colours of the markers on the map, so the filters double as its legend; the groups
+  // don't overlap, every AED is in exactly one of them
   const filters = [
-    { value: FilterType.available, label: t('availableNow'), icon: iconDefiGreen },
+    { value: FilterType.alwaysAvailable, label: t('available24h'), icon: iconDefiGreen },
+    { value: FilterType.available, label: t('availableNowLimited'), icon: iconDefiGreen },
     { value: FilterType.notAvailable, label: t('notAvailable'), icon: iconDefiRed },
     { value: FilterType.unknown, label: t('availabilityUnknown'), icon: iconDefiOrange },
   ];
