@@ -26,13 +26,13 @@
     "emergencyDefaultOff": "Only on demand"
   },
   "emergency": {
-    "toggle": "Show nearest defibrillators",
+    "toggle": "Show nearest AEDs",
     "fab": "Nearest AED",
-    "title": "Nearest defibrillators",
+    "title": "Nearest AEDs",
     "locating": "Finding your location…",
     "locationUnavailable": "Location unavailable",
     "retry": "Try again",
-    "none": "No available defibrillator found",
+    "none": "No available AED found",
     "navigate": "Walking directions"
   },
   "navigate": "Navigate",

@@ -1,6 +1,11 @@
 import { type Feature, type FeatureCollection, type GeoJsonProperties } from 'geojson';
 import { describe, expect, it } from 'vitest';
-import { findBestAeds, OH_STATUS, type OpeningHoursStatusMap } from '@defikarte/shared';
+import {
+  BEST_AED_COUNT,
+  findBestAeds,
+  OH_STATUS,
+  type OpeningHoursStatusMap,
+} from '@defikarte/shared';
 
 const position = { lat: 47.3769, lon: 8.5417 };
 
@@ -33,7 +38,8 @@ describe('findBestAeds', () => {
         aedNorthOf(4, 300, open)
       ),
       position,
-      statusMap
+      statusMap,
+      4
     );
 
     expect(ids(result)).toEqual([4, 2, 3, 1]);
@@ -55,7 +61,7 @@ describe('findBestAeds', () => {
 
   it('prefers a close AED over an open one outside the preference radius', () => {
     const result = findBestAeds(
-      collection(aedNorthOf(1, 6000, open), aedNorthOf(2, 4000)),
+      collection(aedNorthOf(1, 1500, open), aedNorthOf(2, 800)),
       position,
       statusMap
     );
@@ -66,7 +72,7 @@ describe('findBestAeds', () => {
   it('returns at most `count` AEDs', () => {
     const features = Array.from({ length: 8 }, (_, i) => aedNorthOf(i, i * 10));
 
-    expect(findBestAeds(collection(...features), position, null)).toHaveLength(5);
+    expect(findBestAeds(collection(...features), position, null)).toHaveLength(BEST_AED_COUNT);
     expect(findBestAeds(collection(...features), position, null, 2)).toHaveLength(2);
   });
 

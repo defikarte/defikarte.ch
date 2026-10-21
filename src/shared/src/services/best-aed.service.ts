@@ -4,11 +4,11 @@ import { OH_STATUS, type OpeningHoursStatusMap } from '../map/opening-hours/type
 import { distanceBetweenPoints } from './coordinate-calculation.service';
 import { type NearbyAed } from './nearby-aed.service';
 
-export const BEST_AED_COUNT = 5;
+export const BEST_AED_COUNT = 3;
 
 // Within this distance an open AED is preferred over a closer one with unknown hours. Further
 // away the distance alone counts, so a far open AED never beats a close one by its status.
-export const BEST_AED_PREFERENCE_RADIUS_METERS = 5000;
+export const BEST_AED_PREFERENCE_RADIUS_METERS = 1000;
 
 /**
  * The best AEDs to go to from the given position: open ones (incl. 24/7) first, then those with

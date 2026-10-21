@@ -43,6 +43,8 @@ interface DetailViewProps {
   compact?: boolean;
   // the walking route link of the navigate button, Google Maps by default
   getDirectionsUrl?: (lon: number, lat: number) => string;
+  // on mobile, opens with all properties shown instead of only the tags
+  defaultExpanded?: boolean;
 }
 
 export const DetailView = ({
@@ -54,11 +56,12 @@ export const DetailView = ({
   onEdit,
   compact = false,
   getDirectionsUrl = generateGoogleMapsWalkingLink,
+  defaultExpanded = false,
 }: DetailViewProps) => {
   const { t } = useTranslation();
   const responsiveMobile = useMediaQuery({ maxWidth: 768 });
   const isMobile = compact || responsiveMobile;
-  const [propsVisible, setPropsVisible] = useState(false);
+  const [propsVisible, setPropsVisible] = useState(defaultExpanded);
 
   const props = feature?.properties ?? {};
   const coords = (feature?.geometry as Point)?.coordinates;
