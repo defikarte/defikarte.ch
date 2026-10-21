@@ -21,7 +21,8 @@ import markerGradientXs from '../../assets/icons/map-marker-count-gradient-xs.sv
 import { type MapEventCallback, OverlayType } from '../../model/map';
 import { requestStyleSpecification } from '../../services/map-style.service';
 import { OpeningHoursController } from '../opening-hours/controller';
-import { type OpeningHoursStatus, type OpeningHoursStatusMap } from '../opening-hours/types';
+import { type AvailabilityFilter } from '../opening-hours/feature-status';
+import { type OpeningHoursStatusMap } from '../opening-hours/types';
 import {
   EMERGENCY_MODE_STATE,
   MARKER_BLUE_IMAGE_ID,
@@ -300,8 +301,8 @@ export class MapInstance {
     this.mapInstance?.setGlobalStateProperty(EMERGENCY_MODE_STATE, on);
   };
 
-  /** The statuses the `aedByStatus` overlay shows. */
-  public setAedStatusFilter = (statuses: readonly OpeningHoursStatus[]) => {
+  /** The statuses (or `ALWAYS_AVAILABLE`) the `aedByStatus` overlay shows. */
+  public setAedStatusFilter = (statuses: readonly AvailabilityFilter[]) => {
     this.aedStatusOverlay.setStatuses(statuses);
   };
 
