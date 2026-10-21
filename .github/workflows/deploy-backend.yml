@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Defikarte-Backend
+name: "Backend: Deploy to backend-servers"
 
 # Controls when the action will run.
 on:
