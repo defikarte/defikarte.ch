@@ -4,6 +4,7 @@ export default class AppConfiguration {
   static readonly backendApiKey = import.meta.env.VITE_BACKEND_API_KEY || '';
   static readonly maptilerApiKey = import.meta.env.VITE_MAPTILER_API_KEY || '';
   static readonly appVersion = import.meta.env.VITE_APP_VERSION ?? 'dev';
+  static readonly clientId = `defikarte-web/${AppConfiguration.appVersion}`;
   static readonly googleMapsDirectionsUrl = 'https://www.google.com/maps/dir/?api=1';
   static readonly baseLayerLocalStorageKey = 'ACTIVE_BASE_LAYER_ID';
   static readonly routes = ['home', 'project','knowledge', 'sponsors'].map(key => {

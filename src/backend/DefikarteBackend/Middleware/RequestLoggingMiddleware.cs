@@ -33,6 +33,11 @@ namespace DefikarteBackend.Middleware
             var client = request.Headers["x-functions-clientid"].ToString();
             if (string.IsNullOrEmpty(client))
             {
+                // the AED GeoJSON is loaded by MapLibre, which sends the client as query parameter
+                client = request.Query["clientid"].ToString();
+            }
+            if (string.IsNullOrEmpty(client))
+            {
                 client = "unknown";
             }
 

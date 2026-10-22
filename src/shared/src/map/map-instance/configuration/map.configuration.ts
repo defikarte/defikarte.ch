@@ -7,6 +7,8 @@ export interface MapConfigurationOptions {
   baseUrl: string;
   backendApiKey: string;
   maptilerApiKey: string;
+  /** sent as query parameter (a header would cost a CORS preflight), the backend logs it */
+  clientId?: string;
 }
 
 export class MapConfiguration {
@@ -41,6 +43,9 @@ export class MapConfiguration {
 
   public static init(options: MapConfigurationOptions) {
     this.aedGeoJsonUrl = `${options.baseUrl}v3/aed?code=${options.backendApiKey}`;
+    if (options.clientId) {
+      this.aedGeoJsonUrl += `&clientid=${encodeURIComponent(options.clientId)}`;
+    }
 
     this.baseLayers = {
       [this.osmVectorBasemapId]:
