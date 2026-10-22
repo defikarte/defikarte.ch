@@ -1,6 +1,7 @@
 export interface ApiConfiguration {
   baseUrl: string;
   apiKey: string;
+  clientId?: string;
 }
 
 export type RequestOptions = {

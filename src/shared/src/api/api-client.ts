@@ -9,7 +9,7 @@ export class ApiClient {
     this.axiosInstance = axios.create({
       baseURL: config.baseUrl,
       headers: {
-        'x-functions-clientid': 'defikarte-app',
+        'x-functions-clientid': config.clientId ?? 'defikarte-app',
         'x-functions-key': config.apiKey,
       },
     });

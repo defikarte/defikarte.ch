@@ -28,6 +28,7 @@ const mapConfig = {
   baseUrl: AppConfiguration.baseUrl,
   backendApiKey: AppConfiguration.backendApiKey,
   maptilerApiKey: AppConfiguration.maptilerApiKey,
+  clientId: AppConfiguration.clientId,
 };
 
 interface MapProps {

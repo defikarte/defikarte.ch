@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appInsightsName": {
+      "value": "appi-defikarte"
+    },
+    "workspaceName": {
+      "value": "log-defikarte"
+    },
+    "location": {
+      "value": "switzerlandnorth"
+    },
+    "environments": {
+      "value": [
+        {
+          "name": "production",
+          "healthUrl": "https://defikarte-backend.azurewebsites.net/api/health",
+          "frequencySeconds": 300
+        }
+      ]
+    }
+  }
+}
