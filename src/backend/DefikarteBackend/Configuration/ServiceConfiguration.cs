@@ -29,6 +29,12 @@ namespace DefikarteBackend.Configuration
 
         public string MaptilerApiKey { get; private set; } = string.Empty;
 
+        public string BlobStorageSyncStatusName { get; private set; } = string.Empty;
+
+        public int HealthMaxDataAgeMinutes { get; private set; }
+
+        public int HealthMinAedCount { get; private set; }
+
         public static ServiceConfiguration Initialize(IConfigurationRoot configuration)
         {
             return new ServiceConfiguration
@@ -45,6 +51,9 @@ namespace DefikarteBackend.Configuration
                 BlobStorageSwissBoundariesName = configuration.GetValue<string>("BLOB_STORAGE_SWISSBOUNDARIES") ?? string.Empty,
                 AddressSearchUrl = configuration.GetValue<string>("ADDRESS_SEARCH_URL") ?? string.Empty,
                 MaptilerApiKey = configuration.GetValue<string>("MAPTILER_API_KEY") ?? string.Empty,
+                BlobStorageSyncStatusName = configuration.GetValue<string>("BLOB_STORAGE_SYNC_STATUS_NAME") ?? "sync-status.json",
+                HealthMaxDataAgeMinutes = configuration.GetValue<int?>("HEALTH_MAX_DATA_AGE_MINUTES") ?? 60,
+                HealthMinAedCount = configuration.GetValue<int?>("HEALTH_MIN_AED_COUNT") ?? 10000,
             };
         }
     }

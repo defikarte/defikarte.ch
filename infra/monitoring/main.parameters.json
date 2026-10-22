@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appInsightsName": {
+      "value": "defikarte.ch-monitoring"
+    },
+    "environments": {
+      "value": [
+        {
+          "name": "production",
+          "healthUrl": "https://defikarte-backend.azurewebsites.net/api/health",
+          "frequencySeconds": 300
+        },
+        {
+          "name": "staging",
+          "healthUrl": "https://defikarte-backend-staging.azurewebsites.net/api/health",
+          "frequencySeconds": 900
+        }
+      ]
+    }
+  }
+}

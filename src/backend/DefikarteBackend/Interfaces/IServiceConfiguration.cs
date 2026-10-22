@@ -25,5 +25,11 @@
         string AddressSearchUrl { get; }
 
         string MaptilerApiKey { get; }
+
+        string BlobStorageSyncStatusName { get; }
+
+        int HealthMaxDataAgeMinutes { get; }
+
+        int HealthMinAedCount { get; }
     }
 }

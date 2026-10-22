@@ -2,6 +2,7 @@
 using DefikarteBackend.Cache;
 using DefikarteBackend.Configuration;
 using DefikarteBackend.Interfaces;
+using DefikarteBackend.Middleware;
 using DefikarteBackend.Model;
 using DefikarteBackend.OsmOverpassApi;
 using DefikarteBackend.Repository;
@@ -43,11 +44,24 @@ internal class Program
                         NamingStrategy = new CamelCaseNamingStrategy(),
                     }
                 });
+                b.UseMiddleware<RequestLoggingMiddleware>();
             })
             .ConfigureServices(services =>
             {
                 services.AddApplicationInsightsTelemetryWorkerService();
                 services.ConfigureFunctionsApplicationInsights();
+
+                // The App Insights SDK adds a rule that drops everything below Warning. Remove it so our Information logs arrive.
+                services.Configure<LoggerFilterOptions>(options =>
+                {
+                    var defaultRule = options.Rules.FirstOrDefault(rule =>
+                        rule.ProviderName == "Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider");
+                    if (defaultRule is not null)
+                    {
+                        options.Rules.Remove(defaultRule);
+                    }
+                });
+
                 services.AddMvc().AddNewtonsoftJson();
                 services.AddResponseCompression(o =>
                 {
@@ -68,6 +82,8 @@ internal class Program
                     new BlobStorageCacheRepositoryV2(container, serviceConfig.BlobStorageBlobNameV2, DataSourceType.Osm));
                 services.AddTransient<IGeoJsonCacheRepository>(s =>
                    new BlobStorageCacheRepositoryV2(container, serviceConfig.BlobStorageBlobNameLocalV2, DataSourceType.Local));
+                services.AddTransient<ISyncStatusRepository>(s =>
+                    new SyncStatusRepository(container, serviceConfig.BlobStorageSyncStatusName));
 
                 services.AddTransient<IUpdateGeoJsonCacheService, UpdateGeoJsonCacheService>();
 

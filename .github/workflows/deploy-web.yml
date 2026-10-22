@@ -36,6 +36,9 @@ jobs:
         working-directory: ./src/web
         run: pnpm install --frozen-lockfile
 
+      - name: Set app version
+        run: echo "VITE_APP_VERSION=${{ github.run_number }}-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
       - name: Build React App
         working-directory: ./src/web
         run: pnpm run build
