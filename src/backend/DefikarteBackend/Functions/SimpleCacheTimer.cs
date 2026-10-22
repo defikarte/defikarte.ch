@@ -17,24 +17,29 @@ namespace DefikarteBackend.Functions
         private readonly IGeoJsonCacheRepository _osmCacheRepository;
         private readonly OverpassClient _overpassClient;
         private readonly IUpdateGeoJsonCacheService _updateGeoJsonCacheService;
+        private readonly ISyncStatusRepository _syncStatusRepository;
 
         public SimpleCacheTimer(
             ILogger<SimpleCacheTimer> logger,
             ICacheRepository<OsmNode> cacheRepository,
             IEnumerable<IGeoJsonCacheRepository> geoJsonCacheRepositories,
             OverpassClient overpassClient,
-            IUpdateGeoJsonCacheService updateGeoJsonCacheService)
+            IUpdateGeoJsonCacheService updateGeoJsonCacheService,
+            ISyncStatusRepository syncStatusRepository)
         {
             _logger = logger;
             _cacheRepository = cacheRepository;
             _osmCacheRepository = geoJsonCacheRepositories.First(x => x.DataSourceType == DataSourceType.Osm);
             _overpassClient = overpassClient;
             _updateGeoJsonCacheService = updateGeoJsonCacheService;
+            _syncStatusRepository = syncStatusRepository;
         }
 
         [Function(nameof(SimpleCacheTimer))]
         public async Task RunAsync([TimerTrigger("0 */15 * * * *", RunOnStartup = true)] TimerInfo myTimer)
         {
+            var result = SyncStatus.Error;
+            var aedCount = 0;
             try
             {
                 // Throws on errors or empty responses. The existing cache is kept in that case.
@@ -43,7 +48,8 @@ namespace DefikarteBackend.Functions
                 var cachedCount = await GetCachedCountAsync().ConfigureAwait(false);
                 if (response.Count < cachedCount * MinAcceptedRatio)
                 {
-                    _logger.LogWarning($"Overpass returned {response.Count} AEDs, cache has {cachedCount}. Keep existing cache.");
+                    result = SyncStatus.RejectedTooFew;
+                    _logger.LogWarning("Overpass sync {SyncResult} aedCount={AedCount} cachedCount={CachedCount}. Keep existing cache.", result, response.Count, cachedCount);
                     return;
                 }
 
@@ -55,17 +61,52 @@ namespace DefikarteBackend.Functions
 
                 var results = await Task.WhenAll(cacheV1Task, cacheV2Task);
                 var success = results.All(x => x);
-                _logger.LogInformation($"Updated cache successful:{success}");
+                result = success ? SyncStatus.Success : SyncStatus.CacheWriteFailed;
+                aedCount = geoJson.Features.Count;
 
-                // Only drop local edits once fresh OSM data has been stored.
                 if (success)
                 {
+                    _logger.LogInformation("Overpass sync {SyncResult} aedCount={AedCount} cachedCount={CachedCount}", result, aedCount, cachedCount);
+
+                    // Only drop local edits once fresh OSM data has been stored.
                     await _updateGeoJsonCacheService.CleanupOldItemsInLocalCacheAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    _logger.LogError("Overpass sync {SyncResult} aedCount={AedCount} cachedCount={CachedCount}", result, aedCount, cachedCount);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error running {nameof(SimpleCacheTimer)}. Keep existing cache.");
+                result = SyncStatus.Error;
+                _logger.LogError(ex, "Overpass sync {SyncResult}. Keep existing cache.", result);
+            }
+            finally
+            {
+                await WriteSyncStatusAsync(result, aedCount).ConfigureAwait(false);
+            }
+        }
+
+        private async Task WriteSyncStatusAsync(string result, int aedCount)
+        {
+            SyncStatus? previous = null;
+            try
+            {
+                previous = await _syncStatusRepository.GetAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // A corrupt status must not block further writes. Overwrite it with a fresh one.
+                _logger.LogWarning(ex, "Could not read previous sync status. Overwrite it.");
+            }
+
+            try
+            {
+                await _syncStatusRepository.UpdateAsync(SyncStatus.Next(previous, result, aedCount, DateTime.UtcNow)).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Could not write sync status.");
             }
         }
 

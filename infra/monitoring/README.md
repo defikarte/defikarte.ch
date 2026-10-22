@@ -1,0 +1,94 @@
+# Monitoring and alerting
+
+Watches whether the backend is running, returns AED data and whether that data is fresh. It alerts by email
+(warnings) and by email + Azure mobile app push (critical).
+
+## How it works
+
+```
+Availability test (3 locations; prod every 5 min, staging every 15 min)
+        │  GET /api/health  (anonymous)
+        ▼
+HealthController ── reads sync-status.json (written by SimpleCacheTimer after every run)
+        │  200 healthy / degraded   ·   503 unhealthy
+        ▼
+≥2 locations fail ──► ag-defikarte-critical (email + push)
+Overpass sync failed / 5xx spike ──► ag-defikarte-warning (email)
+No availability results for 1 h ──► ag-defikarte-critical
+```
+
+| Condition | Health response | Alert |
+|---|---|---|
+| Backend down / unreachable | timeout or 5xx | critical |
+| Fewer than `HEALTH_MIN_AED_COUNT` AEDs | 503 `too-few-aeds` | critical |
+| Last successful sync older than `HEALTH_MAX_DATA_AGE_MINUTES` | 503 `stale` | critical |
+| Timer did not run for 45 min | 503 `timer-not-running` | critical |
+| One failed Overpass sync, data still fresh | 200 `degraded` | warning (email) |
+| ≥10 HTTP 5xx in 15 min | – | warning (email) |
+
+Check by hand: `curl https://defikarte-backend.azurewebsites.net/api/health`
+
+## Backend app settings (per slot)
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `HEALTH_MAX_DATA_AGE_MINUTES` | 60 | Data older than this → 503 → critical alert |
+| `HEALTH_MIN_AED_COUNT` | 10000 | Fewer AEDs → 503 → critical alert |
+| `BLOB_STORAGE_SYNC_STATUS_NAME` | `sync-status.json` | Blob next to the AED cache |
+
+The defaults apply without configuration. Changing a value needs no redeploy:
+```bash
+az functionapp config appsettings set -g <rg> -n defikarte-backend [--slot staging] --settings HEALTH_MAX_DATA_AGE_MINUTES=45
+```
+
+## Deploy (one time, can be repeated)
+
+Emails are passed on the command line so they don't end up in the public repository.
+
+```bash
+az login
+az account set --subscription <subscription>
+
+# Fill in appInsightsName in main.parameters.json first.
+az deployment group what-if -g <resource-group-of-app-insights> \
+  -f infra/monitoring/main.bicep -p @infra/monitoring/main.parameters.json \
+  -p alertEmails='["you@example.org"]' pushEmails='["your-azure-login@example.org"]'
+
+az deployment group create -g <resource-group-of-app-insights> \
+  -f infra/monitoring/main.bicep -p @infra/monitoring/main.parameters.json \
+  -p alertEmails='["you@example.org"]' pushEmails='["your-azure-login@example.org"]'
+```
+
+After the deployment:
+1. Install the **Azure** mobile app (iOS / Android), sign in with the `pushEmails` account and allow notifications.
+2. Set retention and a daily cap on the Log Analytics workspace behind App Insights (cost protection):
+   ```bash
+   az monitor log-analytics workspace update -g <rg> -n <workspace> --retention-time 90 --quota 1
+   ```
+   (The workspace is not managed by this Bicep, because a PUT would overwrite its other settings.)
+3. Test it: on staging, set `HEALTH_MAX_DATA_AGE_MINUTES=1` → email + push within ~30 min → reset → "Resolved".
+
+Cost: about 35k test runs/month × ~USD 0.0005, plus 3 log alert rules, ≈ USD 20/month. Frequency and locations
+are parameters in `main.bicep`.
+
+## Finding logs
+
+Portal → Application Insights:
+
+- **Live metrics**: requests and failures in real time.
+- **Function App → Log stream**: raw console output.
+- **Failures / Performance**: endpoints by error rate and duration. Click a request to see all its logs.
+- **Transaction search**: search by text, filter by type.
+- **Logs**: KQL. The saved queries are under *Queries → Labels: defikarte*:
+  - `defikarte: requests`: all requests, filter by `name` (endpoint), `resultCode`, `cloud_RoleName` (slot)
+  - `defikarte: requests by source`: per client (`defikarte-web/<build>`, `defikarte-app-ios/<version>`, `defikarte-app-android/<version>`) and route
+  - `defikarte: one request`: everything for one `operation_Id`
+  - `defikarte: overpass sync history`, `defikarte: errors`, `defikarte: health checks`
+
+Every log line written during an HTTP request has `customDimensions.Client`, `Origin`, `UserAgent` and `Route`, e.g.:
+
+```kusto
+traces
+| where tostring(customDimensions.Client) startswith "defikarte-app-ios"
+| order by timestamp desc
+```
