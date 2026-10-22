@@ -52,9 +52,15 @@ namespace DefikarteBackend.Configuration
                 AddressSearchUrl = configuration.GetValue<string>("ADDRESS_SEARCH_URL") ?? string.Empty,
                 MaptilerApiKey = configuration.GetValue<string>("MAPTILER_API_KEY") ?? string.Empty,
                 BlobStorageSyncStatusName = configuration.GetValue<string>("BLOB_STORAGE_SYNC_STATUS_NAME") ?? "sync-status.json",
-                HealthMaxDataAgeMinutes = configuration.GetValue<int?>("HEALTH_MAX_DATA_AGE_MINUTES") ?? 60,
-                HealthMinAedCount = configuration.GetValue<int?>("HEALTH_MIN_AED_COUNT") ?? 10000,
+                HealthMaxDataAgeMinutes = GetIntOrDefault(configuration, "HEALTH_MAX_DATA_AGE_MINUTES", 60),
+                HealthMinAedCount = GetIntOrDefault(configuration, "HEALTH_MIN_AED_COUNT", 10000),
             };
+        }
+
+        // An invalid value must not prevent the backend from starting.
+        private static int GetIntOrDefault(IConfigurationRoot configuration, string key, int defaultValue)
+        {
+            return int.TryParse(configuration[key], out var value) && value > 0 ? value : defaultValue;
         }
     }
 }

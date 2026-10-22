@@ -89,9 +89,19 @@ namespace DefikarteBackend.Functions
 
         private async Task WriteSyncStatusAsync(string result, int aedCount)
         {
+            SyncStatus? previous = null;
             try
             {
-                var previous = await _syncStatusRepository.GetAsync().ConfigureAwait(false);
+                previous = await _syncStatusRepository.GetAsync().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // A corrupt status must not block further writes. Overwrite it with a fresh one.
+                _logger.LogWarning(ex, "Could not read previous sync status. Overwrite it.");
+            }
+
+            try
+            {
                 await _syncStatusRepository.UpdateAsync(SyncStatus.Next(previous, result, aedCount, DateTime.UtcNow)).ConfigureAwait(false);
             }
             catch (Exception ex)
