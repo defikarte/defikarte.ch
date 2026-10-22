@@ -23,7 +23,10 @@
     "satellite": "Satellite",
     "emergency": "Nearest AED",
     "emergencyDefaultOn": "Show on start",
-    "emergencyDefaultOff": "Only on demand"
+    "emergencyDefaultOff": "Only on demand",
+    "location": "Location",
+    "locationDefaultOn": "Zoom to me on start",
+    "locationDefaultOff": "Only on demand"
   },
   "emergency": {
     "toggle": "Show nearest AEDs",

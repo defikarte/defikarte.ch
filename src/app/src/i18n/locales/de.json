@@ -23,7 +23,10 @@
     "satellite": "Satellit",
     "emergency": "Nächster AED",
     "emergencyDefaultOn": "Beim Start anzeigen",
-    "emergencyDefaultOff": "Nur auf Knopfdruck"
+    "emergencyDefaultOff": "Nur auf Knopfdruck",
+    "location": "Standort",
+    "locationDefaultOn": "Beim Start auf mich zoomen",
+    "locationDefaultOff": "Nur auf Knopfdruck"
   },
   "emergency": {
     "toggle": "Nächste AEDs anzeigen",

@@ -6,6 +6,7 @@ import './app/styles/index.css';
 import { AppReadyProvider } from './hooks/useAppReady';
 import { BaseLayerProvider } from './hooks/useBaseLayer';
 import { EmergencyDefaultProvider } from './hooks/useEmergencyDefault';
+import { LocationDefaultProvider } from './hooks/useLocationDefault';
 import { routeTree } from './routeTree.gen';
 
 const router = createRouter({
@@ -28,7 +29,9 @@ createRoot(document.getElementById('root')!).render(
     <AppReadyProvider>
       <BaseLayerProvider>
         <EmergencyDefaultProvider>
-          <RouterProvider router={router} />
+          <LocationDefaultProvider>
+            <RouterProvider router={router} />
+          </LocationDefaultProvider>
         </EmergencyDefaultProvider>
       </BaseLayerProvider>
     </AppReadyProvider>

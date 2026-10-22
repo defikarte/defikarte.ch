@@ -9,4 +9,5 @@ export default class AppConfiguration {
   static readonly clientId = `defikarte-app-${Capacitor.getPlatform()}/${AppConfiguration.appVersion}`;
   static readonly baseLayerLocalStorageKey = 'ACTIVE_BASE_LAYER_ID';
   static readonly emergencyViewLocalStorageKey = 'EMERGENCY_VIEW_DEFAULT';
+  static readonly locationLocalStorageKey = 'LOCATION_DEFAULT';
 }

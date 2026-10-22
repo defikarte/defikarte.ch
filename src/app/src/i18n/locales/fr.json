@@ -23,7 +23,10 @@
     "satellite": "Satellite",
     "emergency": "DAE le plus proche",
     "emergencyDefaultOn": "Afficher au démarrage",
-    "emergencyDefaultOff": "Seulement sur demande"
+    "emergencyDefaultOff": "Seulement sur demande",
+    "location": "Position",
+    "locationDefaultOn": "Centrer sur moi au démarrage",
+    "locationDefaultOff": "Seulement sur demande"
   },
   "emergency": {
     "toggle": "Afficher les défibrillateurs les plus proches",
