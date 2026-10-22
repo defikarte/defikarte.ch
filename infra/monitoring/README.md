@@ -15,6 +15,7 @@ HealthController ── reads sync-status.json (written by SimpleCacheTimer afte
 ≥2 locations fail ──► ag-defikarte-critical (email + push)
 Overpass sync failed / 5xx spike ──► ag-defikarte-warning (email)
 No availability results for 1 h ──► ag-defikarte-critical
+Log daily cap reached ──► ag-defikarte-warning
 ```
 
 | Condition | Health response | Alert |
@@ -46,29 +47,35 @@ az functionapp config appsettings set -g <rg> -n defikarte-backend [--slot stagi
 
 ## Deploy (one time, can be repeated)
 
-Emails are passed on the command line so they don't end up in the public repository.
+Emails are passed on the command line so they don't end up in the public repository. Needs Contributor on the
+resource group `Defikarte_app`.
 
 ```bash
 az login
 az account set --subscription <subscription>
 
-# Fill in appInsightsName in main.parameters.json first.
-az deployment group what-if -g <resource-group-of-app-insights> \
+az deployment group what-if -g Defikarte_app \
   -f infra/monitoring/main.bicep -p @infra/monitoring/main.parameters.json \
   -p alertEmails='["you@example.org"]' pushEmails='["your-azure-login@example.org"]'
 
-az deployment group create -g <resource-group-of-app-insights> \
+az deployment group create -g Defikarte_app \
   -f infra/monitoring/main.bicep -p @infra/monitoring/main.parameters.json \
-  -p alertEmails='["you@example.org"]' pushEmails='["your-azure-login@example.org"]'
+  -p alertEmails='["you@example.org"]' pushEmails='["your-azure-login@example.org"]' \
+  --query properties.outputs.connectionString.value -o tsv
 ```
 
+The Bicep creates the Log Analytics workspace (`log-defikarte`, 90 days retention, daily cap `dailyCapGb`) and
+Application Insights (`appi-defikarte`) on top of it. The last command prints the connection string.
+
 After the deployment:
-1. Install the **Azure** mobile app (iOS / Android), sign in with the `pushEmails` account and allow notifications.
-2. Set retention and a daily cap on the Log Analytics workspace behind App Insights (cost protection):
+1. Set the connection string on the Function App, both slots (both send to the same instance; check with
+   `requests | summarize count() by cloud_RoleName` that the slots have different role names):
    ```bash
-   az monitor log-analytics workspace update -g <rg> -n <workspace> --retention-time 90 --quota 1
+   az functionapp config appsettings set -g <rg> -n defikarte-backend --settings APPLICATIONINSIGHTS_CONNECTION_STRING="<connection string>"
+   az functionapp config appsettings set -g <rg> -n defikarte-backend --slot staging --settings APPLICATIONINSIGHTS_CONNECTION_STRING="<connection string>"
+   az functionapp config appsettings delete -g <rg> -n defikarte-backend [--slot staging] --setting-names APPINSIGHTS_INSTRUMENTATIONKEY
    ```
-   (The workspace is not managed by this Bicep, because a PUT would overwrite its other settings.)
+2. Install the **Azure** mobile app (iOS / Android), sign in with the `pushEmails` account and allow notifications.
 3. Test it: Portal → Monitor → Alerts → Action groups → `ag-defikarte-critical` → **Test** → email + push.
 4. Removing an environment from `environments` does not delete its test and alert (incremental deployment).
    Delete them by hand, e.g. the former staging test:

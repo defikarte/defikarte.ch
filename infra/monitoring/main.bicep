@@ -1,12 +1,18 @@
-// Monitoring and alerting for defikarte-backend: availability tests on /api/health, alert rules,
-// action groups and saved log queries. Deploy into the resource group of the Application Insights instance.
-// See README.md for the deploy command.
+// Monitoring and alerting for defikarte-backend: Log Analytics workspace, Application Insights, availability
+// tests on /api/health, alert rules, action groups and saved log queries. Deploy into the resource group
+// Defikarte_app. See README.md for the deploy command.
 
-@description('Name of the existing Application Insights instance (same resource group).')
+@description('Name of the Application Insights instance. Its connection string goes into the Function App.')
 param appInsightsName string
 
-@description('Region of the Application Insights instance.')
+@description('Name of the Log Analytics workspace that stores the Application Insights data.')
+param workspaceName string
+
+@description('Region of the workspace and Application Insights.')
 param location string = resourceGroup().location
+
+@description('Daily ingestion cap of the workspace in GB (cost protection). When reached, logs are dropped until the next day and an alert is sent.')
+param dailyCapGb int = 1
 
 @description('Backends to monitor. frequencySeconds must be 300 or 900.')
 param environments array = [
@@ -30,8 +36,33 @@ param alertEmails array
 @description('Email addresses of Azure accounts signed in to the Azure mobile app (push for critical alerts).')
 param pushEmails array
 
-resource appInsights 'Microsoft.Insights/components@2020-02-02' existing = {
+// ---------- Log storage ----------
+
+resource workspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
+  name: workspaceName
+  location: location
+  properties: {
+    sku: { name: 'PerGB2018' }
+    // Application Insights data is kept 90 days at no extra cost
+    retentionInDays: 90
+    workspaceCapping: { dailyQuotaGb: dailyCapGb }
+    features: { enableLogAccessUsingOnlyResourcePermissions: true }
+  }
+}
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: appInsightsName
+  location: location
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: workspace.id
+    IngestionMode: 'LogAnalytics'
+    // The Function App sends with the connection string (no Entra ID auth)
+    DisableLocalAuth: false
+    publicNetworkAccessForIngestion: 'Enabled'
+    publicNetworkAccessForQuery: 'Enabled'
+  }
 }
 
 var hiddenLink = 'hidden-link:${appInsights.id}'
@@ -253,6 +284,37 @@ print name = dynamic({0})
   }
 }
 
+resource dailyCapAlert 'Microsoft.Insights/scheduledQueryRules@2023-12-01' = {
+  name: 'defikarte-daily-cap-reached'
+  location: location
+  properties: {
+    displayName: 'defikarte: log daily cap reached'
+    description: 'The workspace reached its daily cap. Logs are dropped until the next day, Live metrics still works.'
+    severity: 2
+    enabled: true
+    scopes: [workspace.id]
+    evaluationFrequency: 'PT15M'
+    windowSize: 'PT15M'
+    criteria: {
+      allOf: [
+        {
+          query: '''
+_LogOperation
+| where Category =~ "Ingestion"
+| where Detail contains "OverQuota"
+'''
+          timeAggregation: 'Count'
+          operator: 'GreaterThanOrEqual'
+          threshold: 1
+          failingPeriods: { numberOfEvaluationPeriods: 1, minFailingPeriodsToAlert: 1 }
+        }
+      ]
+    }
+    autoMitigate: true
+    actions: { actionGroups: [warningGroup.id] }
+  }
+}
+
 // ---------- Saved log queries (Logs > Queries > defikarte) ----------
 
 var savedQueries = [
@@ -344,3 +406,6 @@ resource queries 'Microsoft.OperationalInsights/queryPacks/queries@2019-09-01' =
     }
   }
 ]
+
+@description('Set as APPLICATIONINSIGHTS_CONNECTION_STRING on the Function App (production and staging slot).')
+output connectionString string = appInsights.properties.ConnectionString

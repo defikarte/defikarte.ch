@@ -3,7 +3,13 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "appInsightsName": {
-      "value": "defikarte.ch-monitoring"
+      "value": "appi-defikarte"
+    },
+    "workspaceName": {
+      "value": "log-defikarte"
+    },
+    "location": {
+      "value": "switzerlandnorth"
     },
     "environments": {
       "value": [
