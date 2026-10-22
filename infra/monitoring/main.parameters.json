@@ -11,11 +11,6 @@
           "name": "production",
           "healthUrl": "https://defikarte-backend.azurewebsites.net/api/health",
           "frequencySeconds": 300
-        },
-        {
-          "name": "staging",
-          "healthUrl": "https://defikarte-backend-staging.azurewebsites.net/api/health",
-          "frequencySeconds": 900
         }
       ]
     }

@@ -6,7 +6,7 @@ Watches whether the backend is running, returns AED data and whether that data i
 ## How it works
 
 ```
-Availability test (3 locations; prod every 5 min, staging every 15 min)
+Availability test (production only, 3 locations, every 5 min)
         │  GET /api/health  (anonymous)
         ▼
 HealthController ── reads sync-status.json (written by SimpleCacheTimer after every run)
@@ -27,6 +27,9 @@ No availability results for 1 h ──► ag-defikarte-critical
 | ≥10 HTTP 5xx in 15 min | – | warning (email) |
 
 Check by hand: `curl https://defikarte-backend.azurewebsites.net/api/health`
+
+Staging has no availability test (cost). Its Overpass sync and 5xx alerts still apply. Check it by hand:
+`curl https://defikarte-backend-staging.azurewebsites.net/api/health`
 
 ## Backend app settings (per slot)
 
@@ -66,9 +69,15 @@ After the deployment:
    az monitor log-analytics workspace update -g <rg> -n <workspace> --retention-time 90 --quota 1
    ```
    (The workspace is not managed by this Bicep, because a PUT would overwrite its other settings.)
-3. Test it: on staging, set `HEALTH_MAX_DATA_AGE_MINUTES=1` → email + push within ~30 min → reset → "Resolved".
+3. Test it: Portal → Monitor → Alerts → Action groups → `ag-defikarte-critical` → **Test** → email + push.
+4. Removing an environment from `environments` does not delete its test and alert (incremental deployment).
+   Delete them by hand, e.g. the former staging test:
+   ```bash
+   az monitor metrics alert delete -g <rg> -n defikarte-staging-unavailable
+   az resource delete -g <rg> -n defikarte-health-staging --resource-type Microsoft.Insights/webtests
+   ```
 
-Cost: about 35k test runs/month × ~USD 0.0005, plus 3 log alert rules, ≈ USD 20/month. Frequency and locations
+Cost: about 26k test runs/month × ~USD 0.0005, plus 3 log alert rules, ≈ USD 15/month. Frequency and locations
 are parameters in `main.bicep`.
 
 ## Finding logs

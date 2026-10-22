@@ -15,11 +15,6 @@ param environments array = [
     healthUrl: 'https://defikarte-backend.azurewebsites.net/api/health'
     frequencySeconds: 300
   }
-  {
-    name: 'staging'
-    healthUrl: 'https://defikarte-backend-staging.azurewebsites.net/api/health'
-    frequencySeconds: 900
-  }
 ]
 
 @description('Availability test locations. Keep at least 3, an alert needs 2 failing locations.')
