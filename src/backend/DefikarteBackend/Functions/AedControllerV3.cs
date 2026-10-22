@@ -353,6 +353,7 @@ namespace DefikarteBackend.Functions
         {
             var overpassResponse = await _overpassClient.GetAllDefibrillatorsInSwitzerland();
             var geojsonResponse = GeoJsonConverter.Convert2GeoJson(overpassResponse);
+            geojsonResponse.Timestamp = DateTime.UtcNow;
             return geojsonResponse;
         }
     }
