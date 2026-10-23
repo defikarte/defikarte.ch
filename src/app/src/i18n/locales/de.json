@@ -21,12 +21,10 @@
     "basemap": "Base Map",
     "osm": "OpenStreetMap",
     "satellite": "Satellit",
-    "emergency": "Nächster AED",
-    "emergencyDefaultOn": "Beim Start anzeigen",
-    "emergencyDefaultOff": "Nur auf Knopfdruck",
-    "location": "Standort",
-    "locationDefaultOn": "Beim Start auf mich zoomen",
-    "locationDefaultOff": "Nur auf Knopfdruck"
+    "startView": "Startansicht",
+    "startViewMap": "Übersichtskarte",
+    "startViewLocation": "Mein Standort",
+    "startViewEmergency": "Nächster AED"
   },
   "emergency": {
     "toggle": "Nächste AEDs anzeigen",

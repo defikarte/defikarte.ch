@@ -8,6 +8,7 @@ export default class AppConfiguration {
   static readonly appVersion = import.meta.env.VITE_APP_VERSION ?? 'dev';
   static readonly clientId = `defikarte-app-${Capacitor.getPlatform()}/${AppConfiguration.appVersion}`;
   static readonly baseLayerLocalStorageKey = 'ACTIVE_BASE_LAYER_ID';
-  static readonly emergencyViewLocalStorageKey = 'EMERGENCY_VIEW_DEFAULT';
-  static readonly locationLocalStorageKey = 'LOCATION_DEFAULT';
+  static readonly startViewLocalStorageKey = 'START_VIEW';
+  // the former emergency view setting, read once to carry it over to the start view
+  static readonly legacyEmergencyViewLocalStorageKey = 'EMERGENCY_VIEW_DEFAULT';
 }
