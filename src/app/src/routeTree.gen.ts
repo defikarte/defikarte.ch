@@ -57,7 +57,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/status': typeof StatusRoute
-  '/settings/emergency': typeof SettingsEmergencyRoute
   '/settings/language': typeof SettingsLanguageRoute
   '/settings/mapdesign': typeof SettingsMapdesignRoute
   '/settings/start': typeof SettingsStartRoute
@@ -67,7 +66,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/status': typeof StatusRoute
-  '/settings/emergency': typeof SettingsEmergencyRoute
   '/settings/language': typeof SettingsLanguageRoute
   '/settings/mapdesign': typeof SettingsMapdesignRoute
   '/settings/start': typeof SettingsStartRoute
@@ -78,7 +76,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/status': typeof StatusRoute
-  '/settings/emergency': typeof SettingsEmergencyRoute
   '/settings/language': typeof SettingsLanguageRoute
   '/settings/mapdesign': typeof SettingsMapdesignRoute
   '/settings/start': typeof SettingsStartRoute
@@ -90,7 +87,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/status'
-    | '/settings/emergency'
     | '/settings/language'
     | '/settings/mapdesign'
     | '/settings/start'
@@ -100,7 +96,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/status'
-    | '/settings/emergency'
     | '/settings/language'
     | '/settings/mapdesign'
     | '/settings/start'
@@ -110,7 +105,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/status'
-    | '/settings/emergency'
     | '/settings/language'
     | '/settings/mapdesign'
     | '/settings/start'
@@ -121,7 +115,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   StatusRoute: typeof StatusRoute
-  SettingsEmergencyRoute: typeof SettingsEmergencyRoute
   SettingsLanguageRoute: typeof SettingsLanguageRoute
   SettingsMapdesignRoute: typeof SettingsMapdesignRoute
   SettingsStartRoute: typeof SettingsStartRoute
@@ -186,7 +179,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   StatusRoute: StatusRoute,
-  SettingsEmergencyRoute: SettingsEmergencyRoute,
   SettingsLanguageRoute: SettingsLanguageRoute,
   SettingsMapdesignRoute: SettingsMapdesignRoute,
   SettingsStartRoute: SettingsStartRoute,
