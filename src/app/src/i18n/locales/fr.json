@@ -21,9 +21,10 @@
     "basemap": "Carte de base",
     "osm": "OpenStreetMap",
     "satellite": "Satellite",
-    "emergency": "DAE le plus proche",
-    "emergencyDefaultOn": "Afficher au démarrage",
-    "emergencyDefaultOff": "Seulement sur demande"
+    "startView": "Vue au démarrage",
+    "startViewMap": "Vue d’ensemble",
+    "startViewLocation": "Ma position",
+    "startViewEmergency": "DAE le plus proche"
   },
   "emergency": {
     "toggle": "Afficher les défibrillateurs les plus proches",

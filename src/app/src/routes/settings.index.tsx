@@ -4,9 +4,9 @@ import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { SettingsPage } from '../app/layout/settings-page/SettingsPage';
 import iconArrowRightGreen from '../assets/icons/icon-arrow-right-green.svg';
-import iconDefiWhite from '../assets/icons/icon-defi-white.svg';
 import iconGlobeWhite from '../assets/icons/icon-globe-white.svg';
 import iconLayersWhite from '../assets/icons/icon-layers-white.svg';
+import iconNavigationWhite from '../assets/icons/icon-navigation-white.svg';
 
 export const Route = createFileRoute('/settings/')({
   component: RouteComponent,
@@ -25,8 +25,8 @@ function RouteComponent() {
       <SettingsLink to="/settings/mapdesign" icon={iconLayersWhite}>
         {t('settings.mapdesign')}
       </SettingsLink>
-      <SettingsLink to="/settings/emergency" icon={iconDefiWhite}>
-        {t('settings.emergency')}
+      <SettingsLink to="/settings/start" icon={iconNavigationWhite}>
+        {t('settings.startView')}
       </SettingsLink>
     </SettingsPage>
   );
