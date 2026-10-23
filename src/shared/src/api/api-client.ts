@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance } from 'axios';
 import type { FeatureCollection } from 'geojson';
-import type { ApiConfiguration, RequestOptions } from '../model/common';
+import type { ApiConfiguration, HealthReport, RequestOptions } from '../model/common';
 
 export class ApiClient {
   private axiosInstance: AxiosInstance;
@@ -59,6 +59,23 @@ export class ApiClient {
     }
 
     return {} as FeatureCollection;
+  };
+
+  public getHealth = async (options?: RequestOptions): Promise<HealthReport | null> => {
+    try {
+      // unhealthy is answered with 503 and the report as body
+      const response = await this.axiosInstance.get<HealthReport>('health', {
+        signal: options?.signal,
+        validateStatus: status => status === 200 || status === 503,
+      });
+      return response.data;
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        console.error(error);
+      }
+    }
+
+    return null;
   };
 
   public postAedData = async (data: FeatureCollection) => {

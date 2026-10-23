@@ -144,5 +144,24 @@
   "accessTooltipContent": "Ist der Defibrillator öffentlich zugänglich oder nur „privat“ wie z.B durch Mitarbeitende.",
   "more": "Mehr",
   "photoLoading": "Foto wird geladen...",
-  "photoAlt": "Foto des Defibrillators"
+  "photoAlt": "Foto des Defibrillators",
+  "statusPage": {
+    "title": "Status",
+    "server": "Server",
+    "device": "Dieses Gerät",
+    "unreachable": "Nicht erreichbar",
+    "loading": "Wird geladen…",
+    "aedCount": "Anzahl AEDs",
+    "lastSync": "Letzte Synchronisation",
+    "lastAttempt": "Letzter Versuch",
+    "failures": "Fehlversuche in Folge",
+    "reasons": "Gründe",
+    "dataTimestamp": "Datenstand",
+    "loadedAt": "Geladen um",
+    "notLoaded": "AED-Daten noch nicht geladen (zuerst die Karte öffnen).",
+    "version": "Version",
+    "client": "Client",
+    "reload": "Aktualisieren",
+    "minutesAgo": "vor {{count}} Min."
+  }
 }

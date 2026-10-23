@@ -144,5 +144,24 @@
   "accessTooltipContent": "Is the defibrillator publicly accessible or only “private,” e.g., for employees?",
   "more": "More",
   "photoLoading": "Loading photo...",
-  "photoAlt": "Photo of the defibrillator"
+  "photoAlt": "Photo of the defibrillator",
+  "statusPage": {
+    "title": "Status",
+    "server": "Server",
+    "device": "This device",
+    "unreachable": "Unreachable",
+    "loading": "Loading…",
+    "aedCount": "Number of AEDs",
+    "lastSync": "Last sync",
+    "lastAttempt": "Last attempt",
+    "failures": "Consecutive failures",
+    "reasons": "Reasons",
+    "dataTimestamp": "Data timestamp",
+    "loadedAt": "Loaded at",
+    "notLoaded": "AED data not loaded yet (open the map first).",
+    "version": "Version",
+    "client": "Client",
+    "reload": "Refresh",
+    "minutesAgo": "{{count}} min ago"
+  }
 }
