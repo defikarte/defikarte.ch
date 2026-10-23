@@ -143,5 +143,24 @@
   "accessTooltipContent": "Il defibrillatore è accessibile al pubblico o solo “privato”, ad esempio dai dipendenti?",
   "more": "Di più",
   "photoLoading": "Caricamento foto...",
-  "photoAlt": "Foto del defibrillatore"
+  "photoAlt": "Foto del defibrillatore",
+  "statusPage": {
+    "title": "Stato",
+    "server": "Server",
+    "device": "Questo dispositivo",
+    "unreachable": "Non raggiungibile",
+    "loading": "Caricamento…",
+    "aedCount": "Numero di DAE",
+    "lastSync": "Ultima sincronizzazione",
+    "lastAttempt": "Ultimo tentativo",
+    "failures": "Errori consecutivi",
+    "reasons": "Motivi",
+    "dataTimestamp": "Data dei dati",
+    "loadedAt": "Caricato alle",
+    "notLoaded": "Dati DAE non ancora caricati (aprire prima la mappa).",
+    "version": "Versione",
+    "client": "Client",
+    "reload": "Aggiorna",
+    "minutesAgo": "{{count}} min fa"
+  }
 }

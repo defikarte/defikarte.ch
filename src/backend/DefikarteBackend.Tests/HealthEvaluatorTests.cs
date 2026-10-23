@@ -60,12 +60,24 @@ namespace DefikarteBackend.Tests
         [Test]
         public void Evaluate_NoRecentAttempt_TimerNotRunning()
         {
-            var status = SyncStatus.Next(null, SyncStatus.Success, 15000, Now.AddMinutes(-50));
+            var status = SyncStatus.Next(null, SyncStatus.Success, 15000, Now.AddMinutes(-70));
 
             var report = HealthEvaluator.Evaluate(status, Now, MaxAgeMinutes, MinAedCount);
 
             Assert.That(report.Status, Is.EqualTo(HealthReport.Unhealthy));
-            Assert.That(report.Reasons, Is.EqualTo(new[] { "timer-not-running" }));
+            Assert.That(report.Reasons, Is.EqualTo(new[] { "stale", "timer-not-running" }));
+        }
+
+        [Test]
+        public void Evaluate_HourlySyncWithinMaxAge_IsHealthy()
+        {
+            // staging syncs once an hour with HEALTH_MAX_DATA_AGE_MINUTES=150
+            var status = SyncStatus.Next(null, SyncStatus.Success, 15000, Now.AddMinutes(-51));
+
+            var report = HealthEvaluator.Evaluate(status, Now, 150, MinAedCount);
+
+            Assert.That(report.Status, Is.EqualTo(HealthReport.Healthy));
+            Assert.That(report.Reasons, Is.Empty);
         }
 
         [Test]

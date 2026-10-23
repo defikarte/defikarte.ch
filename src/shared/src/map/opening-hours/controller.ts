@@ -5,6 +5,7 @@ import {
   type Map,
   type MapSourceDataEvent,
 } from 'maplibre-gl';
+import { setAedDataInfo } from '../../services/aed-data-info.service';
 import { OH_STATUS_STATE } from '../map-instance/configuration/constants';
 import { CachedCompiler, type ScheduleCompiler, WorkerCompiler } from './compiler';
 import { type AvailabilityFilter, matchesAvailabilityFilters } from './feature-status';
@@ -231,6 +232,9 @@ export class OpeningHoursController {
 
     // a filtered source only holds part of the AEDs
     const isFiltered = !!(source.serialize() as GeoJSONSourceSpecification).filter;
+    if (!isFiltered) {
+      setAedDataInfo(data);
+    }
     this.addData(data.features, !isFiltered);
   }
 
@@ -244,6 +248,7 @@ export class OpeningHoursController {
         const url = new URL(this.getDataUrl(), window.location.href).href;
         const data = await this.client!.request({ type: 'load', url, cache });
         if (!this.disposed) {
+          setAedDataInfo(data);
           this.addData(data.features, true);
         }
       } catch (error) {

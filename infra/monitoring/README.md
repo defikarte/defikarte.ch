@@ -23,7 +23,7 @@ Log daily cap reached ──► ag-defikarte-warning
 | Backend down / unreachable | timeout or 5xx | critical |
 | Fewer than `HEALTH_MIN_AED_COUNT` AEDs | 503 `too-few-aeds` | critical |
 | Last successful sync older than `HEALTH_MAX_DATA_AGE_MINUTES` | 503 `stale` | critical |
-| Timer did not run for 45 min | 503 `timer-not-running` | critical |
+| Timer did not run for `HEALTH_MAX_DATA_AGE_MINUTES` | 503 `timer-not-running` | critical |
 | One failed Overpass sync, data still fresh | 200 `degraded` | warning (email) |
 | ≥10 HTTP 5xx in 15 min | – | warning (email) |
 
