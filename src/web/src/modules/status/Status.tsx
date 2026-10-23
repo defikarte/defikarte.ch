@@ -59,7 +59,7 @@ export const Status = () => {
 };
 
 const StatusGroup = ({ title, children }: React.PropsWithChildren<{ title: string }>) => (
-  <section className="flex w-full flex-col gap-3 lg:max-w-[700px]">
+  <section className="flex w-full flex-col gap-3 lg:max-w-175">
     <Text size="medium" weight="bold">
       {title}
     </Text>
