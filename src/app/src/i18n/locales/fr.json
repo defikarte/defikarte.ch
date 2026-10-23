@@ -21,7 +21,7 @@
     "basemap": "Carte de base",
     "osm": "OpenStreetMap",
     "satellite": "Satellite",
-    "startView": "Vue au démarrage",
+    "startView": "Affichage de la carte (par défaut)",
     "startViewMap": "Vue d’ensemble",
     "startViewLocation": "Ma position",
     "startViewEmergency": "DAE le plus proche"
