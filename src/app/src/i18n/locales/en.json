@@ -21,7 +21,7 @@
     "basemap": "Base map",
     "osm": "OpenStreetMap",
     "satellite": "Satellite",
-    "startView": "Map view (default)",
+    "startView": "Start map view",
     "startViewMap": "Map overview",
     "startViewLocation": "My location",
     "startViewEmergency": "Nearest AED"

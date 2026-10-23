@@ -21,7 +21,7 @@
     "basemap": "Mappa di base",
     "osm": "OpenStreetMap",
     "satellite": "Satellitare",
-    "startView": "Vista della mappa (predefinita)",
+    "startView": "Vista all'avvio",
     "startViewMap": "Panoramica",
     "startViewLocation": "La mia posizione",
     "startViewEmergency": "DAE più vicino"
