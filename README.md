@@ -102,6 +102,11 @@ pnpm run dev        # Start development server
 pnpm run build      # Build for production
 ```
 
+The fullscreen map is at `/map`, its position in the hash (`#zoom/lat/lon`). `/map/aed/<OSM node id>`
+opens that AED's detail view directly, e.g. `/map/aed/6636784162#18/47.134491/7.230301`. This is the
+link to use for a single AED, for example in the defi_data change report mails. The hosting needs to
+serve `index.html` for these paths.
+
 **Backend:**
 
 ```bash

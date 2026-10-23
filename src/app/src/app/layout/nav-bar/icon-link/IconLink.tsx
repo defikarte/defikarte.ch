@@ -13,7 +13,7 @@ export const IconLink = ({ iconSrc, activeProps, children, ...props }: IconLinkP
   const activeLinkProps = { className: activeProps?.className };
   return (
     <Link className="flex items-center flex-col flex-1" activeProps={activeLinkProps} {...props}>
-      {({ isActive }) => (
+      {({ isActive }: { isActive: boolean }) => (
         <>
           <img src={isActive ? activeProps?.iconSrc : iconSrc} />
           <span className="text-xs leading-normal font-medium">{children}</span>

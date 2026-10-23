@@ -7,6 +7,7 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: string;
   iconHover?: string;
   iconOnly?: boolean;
+  loading?: boolean;
 }
 
 export const Button = React.memo(({
@@ -16,7 +17,9 @@ export const Button = React.memo(({
   iconHover,
   children,
   iconOnly,
+  loading,
   className,
+  disabled,
   ...props
 }: Props) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -62,10 +65,21 @@ export const Button = React.memo(({
     <button
       className={buttonClass}
       {...props}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {icon && <img src={isHovered ? iconHover : icon} alt="icon" className={iconClass} />}
+      {loading && (
+        <span
+          aria-hidden
+          className={classNames(
+            iconClass,
+            'shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent'
+          )}
+        />
+      )}
+      {!loading && icon && <img src={isHovered ? iconHover : icon} alt="icon" className={iconClass} />}
       <span className={textClass}>{children}</span>
     </button>
   );

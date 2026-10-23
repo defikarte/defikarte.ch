@@ -18,47 +18,39 @@ export const Status = () => {
       </Text>
 
       <StatusGroup title={t('statusPage.server')}>
-        {loading && <StatusRow label={t('statusPage.loading')} />}
         {unreachable && <StatusRow label={t('statusPage.unreachable')} />}
-        {health && (
-          <>
-            <StatusRow label={t('statusPage.title')}>
-              <HealthTag status={health.status} />
-            </StatusRow>
-            <StatusRow label={t('statusPage.aedCount')}>{health.aedCount}</StatusRow>
-            <StatusRow label={t('statusPage.lastSync')}>
-              {formatDate(health.lastSuccessUtc)}
-              {health.ageMinutes !== null &&
-                ` (${t('statusPage.minutesAgo', { count: health.ageMinutes })})`}
-            </StatusRow>
-            <StatusRow label={t('statusPage.lastAttempt')}>
-              {formatDate(health.lastAttemptUtc)}
-            </StatusRow>
-            <StatusRow label={t('statusPage.failures')}>{health.consecutiveFailures}</StatusRow>
-            {health.reasons.length > 0 && (
-              <StatusRow label={t('statusPage.reasons')}>{health.reasons.join(', ')}</StatusRow>
-            )}
-          </>
-        )}
+        <StatusRow label={t('statusPage.title')}>
+          {health && <HealthTag status={health.status} />}
+        </StatusRow>
+        <StatusRow label={t('statusPage.aedCount')}>{health?.aedCount}</StatusRow>
+        <StatusRow label={t('statusPage.lastSync')}>
+          {health && formatDate(health.lastSuccessUtc)}
+          {health?.ageMinutes != null &&
+            ` (${t('statusPage.minutesAgo', { count: health.ageMinutes })})`}
+        </StatusRow>
+        <StatusRow label={t('statusPage.lastAttempt')}>
+          {health && formatDate(health.lastAttemptUtc)}
+        </StatusRow>
+        <StatusRow label={t('statusPage.failures')}>{health?.consecutiveFailures}</StatusRow>
+        <StatusRow label={t('statusPage.reasons')}>{health?.reasons.join(', ')}</StatusRow>
       </StatusGroup>
-      {!loading && (
-        <Button variant="secondary" onClick={() => void reload()}>
-          {t('statusPage.reload')}
-        </Button>
-      )}
+      <Button
+        variant="secondary"
+        loading={loading}
+        aria-label={loading ? t('statusPage.loading') : undefined}
+        onClick={() => void reload()}
+      >
+        {t('statusPage.reload')}
+      </Button>
 
       <StatusGroup title={t('statusPage.device')}>
-        {aedData ? (
-          <>
-            <StatusRow label={t('statusPage.dataTimestamp')}>
-              {formatDate(aedData.timestamp)}
-            </StatusRow>
-            <StatusRow label={t('statusPage.aedCount')}>{aedData.aedCount}</StatusRow>
-            <StatusRow label={t('statusPage.loadedAt')}>{formatDate(aedData.loadedAt)}</StatusRow>
-          </>
-        ) : (
-          <StatusRow label={t('statusPage.notLoaded')} />
-        )}
+        <StatusRow label={t('statusPage.dataTimestamp')}>
+          {aedData && formatDate(aedData.timestamp)}
+        </StatusRow>
+        <StatusRow label={t('statusPage.aedCount')}>{aedData?.aedCount}</StatusRow>
+        <StatusRow label={t('statusPage.loadedAt')}>
+          {aedData && formatDate(aedData.loadedAt)}
+        </StatusRow>
         <StatusRow label={t('statusPage.version')}>{AppConfiguration.appVersion}</StatusRow>
         <StatusRow label={t('statusPage.client')}>{AppConfiguration.clientId}</StatusRow>
       </StatusGroup>
@@ -67,7 +59,7 @@ export const Status = () => {
 };
 
 const StatusGroup = ({ title, children }: React.PropsWithChildren<{ title: string }>) => (
-  <section className="flex w-full flex-col gap-3 lg:max-w-[700px]">
+  <section className="flex w-full flex-col gap-3 lg:max-w-175">
     <Text size="medium" weight="bold">
       {title}
     </Text>

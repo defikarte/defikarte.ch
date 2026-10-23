@@ -13,9 +13,9 @@ import { Route as StatusRouteImport } from './routes/status'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings.index'
+import { Route as SettingsStartRouteImport } from './routes/settings.start'
 import { Route as SettingsMapdesignRouteImport } from './routes/settings.mapdesign'
 import { Route as SettingsLanguageRouteImport } from './routes/settings.language'
-import { Route as SettingsEmergencyRouteImport } from './routes/settings.emergency'
 
 const StatusRoute = StatusRouteImport.update({
   id: '/status',
@@ -37,6 +37,11 @@ const SettingsIndexRoute = SettingsIndexRouteImport.update({
   path: '/settings/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsStartRoute = SettingsStartRouteImport.update({
+  id: '/settings/start',
+  path: '/settings/start',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsMapdesignRoute = SettingsMapdesignRouteImport.update({
   id: '/settings/mapdesign',
   path: '/settings/mapdesign',
@@ -47,28 +52,23 @@ const SettingsLanguageRoute = SettingsLanguageRouteImport.update({
   path: '/settings/language',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsEmergencyRoute = SettingsEmergencyRouteImport.update({
-  id: '/settings/emergency',
-  path: '/settings/emergency',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/status': typeof StatusRoute
-  '/settings/emergency': typeof SettingsEmergencyRoute
   '/settings/language': typeof SettingsLanguageRoute
   '/settings/mapdesign': typeof SettingsMapdesignRoute
+  '/settings/start': typeof SettingsStartRoute
   '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/status': typeof StatusRoute
-  '/settings/emergency': typeof SettingsEmergencyRoute
   '/settings/language': typeof SettingsLanguageRoute
   '/settings/mapdesign': typeof SettingsMapdesignRoute
+  '/settings/start': typeof SettingsStartRoute
   '/settings': typeof SettingsIndexRoute
 }
 export interface FileRoutesById {
@@ -76,9 +76,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/status': typeof StatusRoute
-  '/settings/emergency': typeof SettingsEmergencyRoute
   '/settings/language': typeof SettingsLanguageRoute
   '/settings/mapdesign': typeof SettingsMapdesignRoute
+  '/settings/start': typeof SettingsStartRoute
   '/settings/': typeof SettingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -87,27 +87,27 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/status'
-    | '/settings/emergency'
     | '/settings/language'
     | '/settings/mapdesign'
+    | '/settings/start'
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/status'
-    | '/settings/emergency'
     | '/settings/language'
     | '/settings/mapdesign'
+    | '/settings/start'
     | '/settings'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/status'
-    | '/settings/emergency'
     | '/settings/language'
     | '/settings/mapdesign'
+    | '/settings/start'
     | '/settings/'
   fileRoutesById: FileRoutesById
 }
@@ -115,9 +115,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   StatusRoute: typeof StatusRoute
-  SettingsEmergencyRoute: typeof SettingsEmergencyRoute
   SettingsLanguageRoute: typeof SettingsLanguageRoute
   SettingsMapdesignRoute: typeof SettingsMapdesignRoute
+  SettingsStartRoute: typeof SettingsStartRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
 }
 
@@ -151,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/start': {
+      id: '/settings/start'
+      path: '/settings/start'
+      fullPath: '/settings/start'
+      preLoaderRoute: typeof SettingsStartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings/mapdesign': {
       id: '/settings/mapdesign'
       path: '/settings/mapdesign'
@@ -165,13 +172,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsLanguageRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings/emergency': {
-      id: '/settings/emergency'
-      path: '/settings/emergency'
-      fullPath: '/settings/emergency'
-      preLoaderRoute: typeof SettingsEmergencyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -179,9 +179,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   StatusRoute: StatusRoute,
-  SettingsEmergencyRoute: SettingsEmergencyRoute,
   SettingsLanguageRoute: SettingsLanguageRoute,
   SettingsMapdesignRoute: SettingsMapdesignRoute,
+  SettingsStartRoute: SettingsStartRoute,
   SettingsIndexRoute: SettingsIndexRoute,
 }
 export const routeTree = rootRouteImport

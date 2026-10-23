@@ -21,9 +21,10 @@
     "basemap": "Base map",
     "osm": "OpenStreetMap",
     "satellite": "Satellite",
-    "emergency": "Nearest AED",
-    "emergencyDefaultOn": "Show on start",
-    "emergencyDefaultOff": "Only on demand"
+    "startView": "Start map view",
+    "startViewMap": "Map overview",
+    "startViewLocation": "My location",
+    "startViewEmergency": "Nearest AED"
   },
   "emergency": {
     "toggle": "Show nearest AEDs",
