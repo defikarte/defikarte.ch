@@ -38,7 +38,7 @@ Von unserer Plattform profitieren viele Organisationen. Mit deiner Unterstützun
   <img src="https://contrib.rocks/image?repo=defikarte/defikarte.ch" />
 </a>
 
-Made with [contributors-img](https://contributors-img.web.app).
+Made with [contrib.rocks](https://contrib.rocks).
 
 ## Open Source
 
