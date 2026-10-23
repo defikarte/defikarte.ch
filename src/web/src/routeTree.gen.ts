@@ -73,8 +73,8 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/project': typeof ProjectRoute
   '/sponsors': typeof SponsorsRoute
-  '/map/aed/$aedId': typeof MapAedAedIdRoute
   '/status': typeof StatusRoute
+  '/map/aed/$aedId': typeof MapAedAedIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -84,8 +84,8 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/project': typeof ProjectRoute
   '/sponsors': typeof SponsorsRoute
-  '/map/aed/$aedId': typeof MapAedAedIdRoute
   '/status': typeof StatusRoute
+  '/map/aed/$aedId': typeof MapAedAedIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -96,8 +96,8 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/project': typeof ProjectRoute
   '/sponsors': typeof SponsorsRoute
-  '/map_/aed/$aedId': typeof MapAedAedIdRoute
   '/status': typeof StatusRoute
+  '/map_/aed/$aedId': typeof MapAedAedIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -109,8 +109,8 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/project'
     | '/sponsors'
-    | '/map/aed/$aedId'
     | '/status'
+    | '/map/aed/$aedId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -120,8 +120,8 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/project'
     | '/sponsors'
-    | '/map/aed/$aedId'
     | '/status'
+    | '/map/aed/$aedId'
   id:
     | '__root__'
     | '/'
@@ -131,8 +131,8 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/project'
     | '/sponsors'
-    | '/map_/aed/$aedId'
     | '/status'
+    | '/map_/aed/$aedId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -143,8 +143,8 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProjectRoute: typeof ProjectRoute
   SponsorsRoute: typeof SponsorsRoute
-  MapAedAedIdRoute: typeof MapAedAedIdRoute
   StatusRoute: typeof StatusRoute
+  MapAedAedIdRoute: typeof MapAedAedIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -223,8 +223,8 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProjectRoute: ProjectRoute,
   SponsorsRoute: SponsorsRoute,
-  MapAedAedIdRoute: MapAedAedIdRoute,
   StatusRoute: StatusRoute,
+  MapAedAedIdRoute: MapAedAedIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
