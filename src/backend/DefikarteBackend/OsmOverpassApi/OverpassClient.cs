@@ -2,6 +2,8 @@
 using DefikarteBackend.Model;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using System.Net;
+using System.Text.RegularExpressions;
 
 namespace DefikarteBackend.OsmOverpassApi
 {
@@ -36,16 +38,18 @@ namespace DefikarteBackend.OsmOverpassApi
                     ),
             };
 
+            HttpStatusCode? statusCode = null;
             try
             {
                 using var response = await _overpassHttpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+                statusCode = response.StatusCode;
                 response.EnsureSuccessStatusCode();
                 var responseContent = await response.Content.ReadAsStringAsync();
                 return ParseResponse(responseContent);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Overpass request to {BaseAddress} failed", _overpassHttpClient.BaseAddress);
+                _logger.LogError(ex, "Overpass request to {BaseAddress} failed with status {StatusCode}", _overpassHttpClient.BaseAddress, (int?)statusCode);
                 throw;
             }
         }
@@ -55,6 +59,12 @@ namespace DefikarteBackend.OsmOverpassApi
         /// </summary>
         public static IList<OsmNode> ParseResponse(string responseContent)
         {
+            // Overpass answers rejected queries (rate limit, server busy) with an HTML page, often with HTTP 200.
+            if (!responseContent.TrimStart().StartsWith('{'))
+            {
+                throw new InvalidOperationException($"Overpass response is not JSON: {ToSnippet(responseContent)}");
+            }
+
             var json = JObject.Parse(responseContent);
 
             // Overpass returns HTTP 200 with a remark on runtime errors (timeout, out of memory). Elements are then empty or partial.
@@ -77,6 +87,13 @@ namespace DefikarteBackend.OsmOverpassApi
             }
 
             return result;
+        }
+
+        private static string ToSnippet(string content)
+        {
+            var text = Regex.Replace(content, "<[^>]*>", " ");
+            text = Regex.Replace(text, @"\s+", " ").Trim();
+            return text.Length > 500 ? text[..500] : text;
         }
     }
 }

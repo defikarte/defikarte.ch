@@ -32,3 +32,19 @@ export type NotificationHandler = (notification: Notification) => void;
  * Minimal translation function, so shared code does not have to depend on i18next itself.
  */
 export type Translate = (key: string) => string;
+
+export type HealthStatus = 'healthy' | 'degraded' | 'unhealthy';
+
+/**
+ * Response of the backend /health endpoint.
+ */
+export interface HealthReport {
+  status: HealthStatus;
+  aedCount: number;
+  lastSuccessUtc: string | null;
+  lastAttemptUtc: string | null;
+  ageMinutes: number | null;
+  maxAgeMinutes: number;
+  consecutiveFailures: number;
+  reasons: string[];
+}

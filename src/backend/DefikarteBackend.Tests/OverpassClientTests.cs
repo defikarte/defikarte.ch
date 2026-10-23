@@ -29,6 +29,17 @@ namespace DefikarteBackend.Tests
         }
 
         [Test]
+        public void ParseResponse_HtmlErrorPage_ThrowsWithOverpassMessage()
+        {
+            var content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<html><body>\n<p><strong style=\"color:#FF0000\">Error</strong>: runtime error: open64: 0 Success /osm3s_osm_base Dispatcher_Client::request_read_and_idx::rate_limited. Please check /api/status for the quota of your IP address. </p>\n</body></html>";
+
+            var ex = Assert.Throws<InvalidOperationException>(() => OverpassClient.ParseResponse(content));
+
+            Assert.That(ex.Message, Does.Contain("rate_limited"));
+            Assert.That(ex.Message, Does.Not.Contain("<"));
+        }
+
+        [Test]
         public void FeatureCollection_Timestamp_SurvivesRoundTrip()
         {
             var timestamp = new DateTime(2026, 10, 22, 8, 15, 0, DateTimeKind.Utc);

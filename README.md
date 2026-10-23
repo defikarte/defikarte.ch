@@ -118,7 +118,7 @@ func start                        # run the functions locally (http://localhost:
 
 The backend reads its settings from `src/backend/DefikarteBackend/local.settings.json` (not committed).
 It needs `AzureWebJobsStorage` (Azure Storage connection string, or Azurite locally), the Overpass/OSM
-settings (`OVERPASS_URL`, `OSM_API_URL`, `OSM_USER_NAME`, `OSM_API_TOKEN`), the blob names
+settings (`OVERPASS_URL`, `OVERPASS_SYNC_SCHEDULE` e.g. `0 */15 * * * *`, `OSM_API_URL`, `OSM_USER_NAME`, `OSM_API_TOKEN`), the blob names
 (`BLOB_STORAGE_CONTAINER_NAME`, `BLOB_STORAGE_BLOB_NAME`, `BLOB_STORAGE_BLOB_NAME_V2`,
 `BLOB_STORAGE_BLOB_NAME_LOCAL_V2`, `BLOB_STORAGE_SWISSBOUNDARIES`) and the address search
 (`ADDRESS_SEARCH_URL`, `MAPTILER_API_KEY`); see

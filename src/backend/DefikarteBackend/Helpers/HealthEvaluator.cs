@@ -4,9 +4,6 @@ namespace DefikarteBackend.Helpers
 {
     public static class HealthEvaluator
     {
-        // SimpleCacheTimer runs every 15 minutes. Three missed runs mean the timer itself is not running.
-        private static readonly TimeSpan TimerNotRunningAfter = TimeSpan.FromMinutes(45);
-
         public static HealthReport Evaluate(SyncStatus? status, DateTime nowUtc, int maxAgeMinutes, int minAedCount)
         {
             var report = new HealthReport { MaxAgeMinutes = maxAgeMinutes };
@@ -39,7 +36,9 @@ namespace DefikarteBackend.Helpers
                 report.Reasons.Add("too-few-aeds");
             }
 
-            if (status.LastAttemptUtc == null || nowUtc - status.LastAttemptUtc > TimerNotRunningAfter)
+            // The sync schedule differs per slot (OVERPASS_SYNC_SCHEDULE), and so does maxAgeMinutes. A fixed limit
+            // would flag a slot that syncs less often (staging: hourly) as not running between two regular runs.
+            if (status.LastAttemptUtc == null || nowUtc - status.LastAttemptUtc > TimeSpan.FromMinutes(maxAgeMinutes))
             {
                 report.Reasons.Add("timer-not-running");
             }
