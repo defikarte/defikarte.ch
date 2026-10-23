@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StatusRouteImport } from './routes/status'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings.index'
@@ -16,6 +17,11 @@ import { Route as SettingsMapdesignRouteImport } from './routes/settings.mapdesi
 import { Route as SettingsLanguageRouteImport } from './routes/settings.language'
 import { Route as SettingsEmergencyRouteImport } from './routes/settings.emergency'
 
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -50,6 +56,7 @@ const SettingsEmergencyRoute = SettingsEmergencyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/status': typeof StatusRoute
   '/settings/emergency': typeof SettingsEmergencyRoute
   '/settings/language': typeof SettingsLanguageRoute
   '/settings/mapdesign': typeof SettingsMapdesignRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/status': typeof StatusRoute
   '/settings/emergency': typeof SettingsEmergencyRoute
   '/settings/language': typeof SettingsLanguageRoute
   '/settings/mapdesign': typeof SettingsMapdesignRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/status': typeof StatusRoute
   '/settings/emergency': typeof SettingsEmergencyRoute
   '/settings/language': typeof SettingsLanguageRoute
   '/settings/mapdesign': typeof SettingsMapdesignRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/status'
     | '/settings/emergency'
     | '/settings/language'
     | '/settings/mapdesign'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/status'
     | '/settings/emergency'
     | '/settings/language'
     | '/settings/mapdesign'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/status'
     | '/settings/emergency'
     | '/settings/language'
     | '/settings/mapdesign'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  StatusRoute: typeof StatusRoute
   SettingsEmergencyRoute: typeof SettingsEmergencyRoute
   SettingsLanguageRoute: typeof SettingsLanguageRoute
   SettingsMapdesignRoute: typeof SettingsMapdesignRoute
@@ -110,6 +123,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  StatusRoute: StatusRoute,
   SettingsEmergencyRoute: SettingsEmergencyRoute,
   SettingsLanguageRoute: SettingsLanguageRoute,
   SettingsMapdesignRoute: SettingsMapdesignRoute,

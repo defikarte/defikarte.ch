@@ -127,5 +127,24 @@
   "goHome": "Aller à la page d'accueil",
   "node": "Nœud",
   "photoLoading": "Chargement de la photo...",
-  "photoAlt": "Photo du défibrillateur"
+  "photoAlt": "Photo du défibrillateur",
+  "statusPage": {
+    "title": "Statut",
+    "server": "Serveur",
+    "device": "Cet appareil",
+    "unreachable": "Injoignable",
+    "loading": "Chargement…",
+    "aedCount": "Nombre de DAE",
+    "lastSync": "Dernière synchronisation",
+    "lastAttempt": "Dernière tentative",
+    "failures": "Échecs consécutifs",
+    "reasons": "Raisons",
+    "dataTimestamp": "Date des données",
+    "loadedAt": "Chargé à",
+    "notLoaded": "Données DAE pas encore chargées (ouvrir d'abord la carte).",
+    "version": "Version",
+    "client": "Client",
+    "reload": "Actualiser",
+    "minutesAgo": "il y a {{count}} min"
+  }
 }

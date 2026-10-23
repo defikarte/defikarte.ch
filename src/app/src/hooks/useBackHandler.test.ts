@@ -7,6 +7,10 @@ describe('getBackTarget', () => {
     expect(getBackTarget('/settings/language')).toBe('/settings');
   });
 
+  it('leads from the status page to About', () => {
+    expect(getBackTarget('/status')).toBe('/about');
+  });
+
   it('leads from a tab root to the map', () => {
     expect(getBackTarget('/settings')).toBe('/');
     expect(getBackTarget('/about')).toBe('/');
