@@ -45,6 +45,30 @@ The defaults apply without configuration. Changing a value needs no redeploy:
 az functionapp config appsettings set -g <rg> -n defikarte-backend [--slot staging] --settings HEALTH_MAX_DATA_AGE_MINUTES=45
 ```
 
+### Overpass sync schedule (required)
+
+`OVERPASS_SYNC_SCHEDULE` has no default. Without it the sync timer doesn't load. Production and staging share one
+outbound IP, and Overpass rejects parallel queries from one IP (HTML error page instead of JSON). So the slots run at
+different minutes. Staging syncs only once an hour, so its data may be older and it needs a higher
+`HEALTH_MAX_DATA_AGE_MINUTES` (150 = one failed sync allowed before `stale`). Set them as slot settings, so a swap
+doesn't move them:
+```bash
+az functionapp config appsettings set -g <rg> -n defikarte-backend --slot-settings "OVERPASS_SYNC_SCHEDULE=0 */15 * * * *"
+az functionapp config appsettings set -g <rg> -n defikarte-backend --slot staging --slot-settings "OVERPASS_SYNC_SCHEDULE=0 7 * * * *" HEALTH_MAX_DATA_AGE_MINUTES=150
+```
+
+### Force a sync (e.g. broken cache)
+
+The timer doesn't run on startup. To refetch right away: Portal → Function App (or staging slot) → Functions →
+`SimpleCacheTimer` → Code + Test → Test/Run. Or call the admin endpoint. It needs the **master key**; function keys
+and the `default` host key get 401:
+```bash
+az functionapp keys list -g <rg> -n defikarte-backend [--slot staging]   # masterKey
+curl -X POST "https://defikarte-backend[-staging].azurewebsites.net/admin/functions/SimpleCacheTimer" \
+  -H "x-functions-key: <master key>" -H "Content-Type: application/json" -d '{"input":""}'
+```
+It returns 202 at once. The result shows up in the `Overpass sync …` traces and in `/api/health`.
+
 ## Deploy (one time, can be repeated)
 
 Emails are passed on the command line so they don't end up in the public repository. Needs Contributor on the

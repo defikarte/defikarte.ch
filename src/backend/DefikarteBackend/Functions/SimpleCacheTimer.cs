@@ -35,8 +35,10 @@ namespace DefikarteBackend.Functions
             _syncStatusRepository = syncStatusRepository;
         }
 
+        // Production and staging slot share one outbound IP. Overpass rejects parallel queries from one IP,
+        // so each slot needs its own schedule (app setting OVERPASS_SYNC_SCHEDULE, see infra/monitoring/README.md).
         [Function(nameof(SimpleCacheTimer))]
-        public async Task RunAsync([TimerTrigger("0 */15 * * * *", RunOnStartup = true)] TimerInfo myTimer)
+        public async Task RunAsync([TimerTrigger("%OVERPASS_SYNC_SCHEDULE%")] TimerInfo myTimer)
         {
             var result = SyncStatus.Error;
             var aedCount = 0;
