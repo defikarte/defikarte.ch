@@ -6,7 +6,7 @@ import { type MapInstance } from '../map-instance/map-instance';
 
 interface UseAedDeepLinkProps {
   map: MapInstance | null;
-  // OSM node id from the url (e.g. `?aed=123` on /map), selects that AED once the AEDs are loaded
+  // OSM node id from the url (web: `/map/aed/123`), selects that AED once the AEDs are loaded
   aedId?: string;
   selectFeatureOnMap: (event: MapInteractionEvent) => boolean;
 }

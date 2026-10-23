@@ -16,6 +16,7 @@ import { Route as MapRouteImport } from './routes/map'
 import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as ImprintRouteImport } from './routes/imprint'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MapAedAedIdRouteImport } from './routes/map_.aed.$aedId'
 
 const SponsorsRoute = SponsorsRouteImport.update({
   id: '/sponsors',
@@ -52,6 +53,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MapAedAedIdRoute = MapAedAedIdRouteImport.update({
+  id: '/map_/aed/$aedId',
+  path: '/map/aed/$aedId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/project': typeof ProjectRoute
   '/sponsors': typeof SponsorsRoute
+  '/map/aed/$aedId': typeof MapAedAedIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/project': typeof ProjectRoute
   '/sponsors': typeof SponsorsRoute
+  '/map/aed/$aedId': typeof MapAedAedIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/project': typeof ProjectRoute
   '/sponsors': typeof SponsorsRoute
+  '/map_/aed/$aedId': typeof MapAedAedIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/project'
     | '/sponsors'
+    | '/map/aed/$aedId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/project'
     | '/sponsors'
+    | '/map/aed/$aedId'
   id:
     | '__root__'
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/project'
     | '/sponsors'
+    | '/map_/aed/$aedId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +131,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProjectRoute: typeof ProjectRoute
   SponsorsRoute: typeof SponsorsRoute
+  MapAedAedIdRoute: typeof MapAedAedIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/map_/aed/$aedId': {
+      id: '/map_/aed/$aedId'
+      path: '/map/aed/$aedId'
+      fullPath: '/map/aed/$aedId'
+      preLoaderRoute: typeof MapAedAedIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,6 +203,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProjectRoute: ProjectRoute,
   SponsorsRoute: SponsorsRoute,
+  MapAedAedIdRoute: MapAedAedIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

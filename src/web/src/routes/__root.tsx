@@ -21,7 +21,7 @@ const ScrollToTop = () => {
 function RootComponent() {
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const matchRoute = useMatchRoute();
-  const isEmbedded = matchRoute({ to: '/map' });
+  const isEmbedded = matchRoute({ to: '/map' }) || matchRoute({ to: '/map/aed/$aedId' });
   const isMobile = useMediaQuery({ maxWidth: 768 });
   const isMedium = useMediaQuery({ maxWidth: 1024 });
   const position: 'top-right' | 'bottom-center' = isMobile ? 'bottom-center' : 'top-right';

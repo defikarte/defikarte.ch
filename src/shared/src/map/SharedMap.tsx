@@ -61,7 +61,7 @@ interface SharedMapProps {
   apiClient: ApiClient;
   locationProvider: LocationProvider;
   isHash: boolean;
-  // OSM node id of an AED to select on load (web: `?aed=` on /map)
+  // OSM node id of an AED to select on load (web: `/map/aed/<id>`)
   initialAedId?: string;
   persistedBaseLayer?: string;
   onBaseLayerChange?: (layer: string) => void;
