@@ -113,6 +113,18 @@ export const DetailView = ({
     (props['defibrillator:location'] as string) ?? props.description ?? props.operator ?? 'n/A';
 
   const directionsUrl = getDirectionsUrl(coords[0], coords[1]);
+  // like the edit button: in the action row on desktop, next to edit in the details on mobile
+  const shareButton = feature.id !== undefined && (
+    // keyed so the "copied" state resets when another AED is opened
+    <ShareAedButton
+      key={feature.id}
+      aedId={feature.id}
+      name={name}
+      isOpen={isOpen}
+      isMobile={isMobile}
+      shareLink={shareLink}
+    />
+  );
   const containerClass = cn(
     'z-10',
     'absolute',
@@ -231,32 +243,29 @@ export const DetailView = ({
           isOpen={isOpen}
           className={cn({ hidden: isMobile && !propsVisible })}
         />
-        {isMobile && onEdit && (
-          <IconButton
-            title={t('edit')}
-            icon={iconEditDarkGreen}
-            variant={isOpen ? 'tint' : 'secondary'}
-            onClick={onEdit}
-            className={cn('w-full', 'flex', 'justify-end', 'items-end', 'pt-1', {
+        {isMobile && (shareButton || onEdit) && (
+          <div
+            className={cn('w-full', 'flex', 'justify-end', 'items-end', 'gap-2', 'pt-1', {
               hidden: !propsVisible,
             })}
-          />
+          >
+            {shareButton}
+            {onEdit && (
+              <IconButton
+                title={t('edit')}
+                icon={iconEditDarkGreen}
+                variant={isOpen ? 'tint' : 'secondary'}
+                onClick={onEdit}
+                className="flex"
+              />
+            )}
+          </div>
         )}
       </div>
       <div className={cn('py-3 px-4 flex-shrink flex w-full items-end', !compact && '2xl:py-4')}>
         <div className="flex justify-between items-center w-full flex-row-reverse h-10">
           <div className="flex items-center gap-2">
-            {feature.id !== undefined && (
-              // keyed so the "copied" state resets when another AED is opened
-              <ShareAedButton
-                key={feature.id}
-                aedId={feature.id}
-                name={name}
-                isOpen={isOpen}
-                isMobile={isMobile}
-                shareLink={shareLink}
-              />
-            )}
+            {!isMobile && shareButton}
             {!isMobile && onEdit && (
               <IconButton
                 title={t('edit')}
