@@ -19,6 +19,7 @@ import iconTimeCircleGreen from '../../../../assets/icons/icon-time-circle-green
 import iconTimeCircleGrey from '../../../../assets/icons/icon-time-circle-grey.svg';
 import { AedPhoto } from './aed-photo/AedPhoto';
 import { ItemProperty } from './item-property/ItemProperty';
+import { LinkAedProperty } from './link-aed-property/LinkAedProperty';
 
 interface FeaturePropsListProps {
   feature: Feature;
@@ -94,6 +95,10 @@ export const FeaturePropsList = ({ feature, isOpen, className }: FeaturePropsLis
         value={feature.id ?? ''}
       />
       <AedPhoto wikimediaCommons={props.wikimedia_commons} image={props.image} />
+      {feature.id !== undefined && (
+        // keyed so the "copied" state resets when another AED is opened
+        <LinkAedProperty key={feature.id} aedId={feature.id} isOpen={isOpen} />
+      )}
     </div>
   );
 };

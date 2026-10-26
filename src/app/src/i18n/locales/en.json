@@ -59,6 +59,8 @@
   "close": "Close",
   "edit": "Edit",
   "node": "Node",
+  "linkAed": "Link to this AED",
+  "aedLinkCopied": "Link to the AED copied",
   "yes": "Yes",
   "no": "No",
   "permissive": "Limited accessibility",

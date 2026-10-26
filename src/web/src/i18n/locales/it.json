@@ -126,6 +126,8 @@
   "notFound": "La pagina non è stata trovata.",
   "goHome": "Vai alla homepage",
   "node": "Nodo",
+  "linkAed": "Link a questo DAE",
+  "aedLinkCopied": "Link al DAE copiato",
   "photoLoading": "Caricamento foto...",
   "photoAlt": "Foto del defibrillatore",
   "statusPage": {

@@ -126,6 +126,8 @@
   "notFound": "The page was not found.",
   "goHome": "Go to homepage",
   "node": "Node",
+  "linkAed": "Link to this AED",
+  "aedLinkCopied": "Link to the AED copied",
   "photoLoading": "Loading photo...",
   "photoAlt": "Photo of the defibrillator",
   "statusPage": {

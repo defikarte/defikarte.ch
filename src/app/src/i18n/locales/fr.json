@@ -59,6 +59,8 @@
   "close": "Fermer",
   "edit": "Modifier",
   "node": "Nœud",
+  "linkAed": "Lien vers ce DAE",
+  "aedLinkCopied": "Lien vers le DAE copié",
   "yes": "Oui",
   "no": "Non",
   "permissive": "Accessibilité limitée",

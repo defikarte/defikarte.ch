@@ -59,6 +59,8 @@
   "close": "Schliessen",
   "edit": "Bearbeiten",
   "node": "Knoten",
+  "linkAed": "Diesen Defi verlinken",
+  "aedLinkCopied": "Link zum Defi kopiert",
   "yes": "Ja",
   "no": "Nein",
   "permissive": "Eingeschränkt zugänglich",

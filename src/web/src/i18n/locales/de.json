@@ -125,6 +125,8 @@
   "notFound": "Die Seite wurde nicht gefunden.",
   "goHome": "Gehe zur Startseite",
   "node": "Knoten",
+  "linkAed": "Diesen Defi verlinken",
+  "aedLinkCopied": "Link zum Defi kopiert",
   "photoLoading": "Foto wird geladen...",
   "photoAlt": "Foto des Defibrillators",
   "statusPage": {
