@@ -126,6 +126,9 @@
   "notFound": "La page a été introuvable.",
   "goHome": "Aller à la page d'accueil",
   "node": "Nœud",
+  "linkAed": "Copier le lien vers le DAE",
+  "shareAed": "Partager le lien vers le DAE",
+  "aedLinkCopied": "Lien vers le DAE copié",
   "photoLoading": "Chargement de la photo...",
   "photoAlt": "Photo du défibrillateur",
   "statusPage": {
