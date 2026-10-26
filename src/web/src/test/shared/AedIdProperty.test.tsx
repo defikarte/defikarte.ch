@@ -28,9 +28,16 @@ const renderDetailView = () =>
     />
   );
 
-describe('LinkAedProperty (detail view)', () => {
+describe('AedIdProperty (detail view)', () => {
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it('shows the AED id', () => {
+    renderDetailView();
+
+    expect(screen.getByText('node')).toBeInTheDocument();
+    expect(screen.getByText('240776510')).toBeInTheDocument();
   });
 
   it('copies the deep link of the AED and confirms it for a moment', async () => {
@@ -49,7 +56,7 @@ describe('LinkAedProperty (detail view)', () => {
     act(() => {
       vi.advanceTimersByTime(2000);
     });
-    expect(screen.getByText('linkAed')).toBeInTheDocument();
+    expect(screen.queryByText('aedLinkCopied')).not.toBeInTheDocument();
   });
 
   it('shows the link to select by hand when copying fails', async () => {

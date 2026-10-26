@@ -9,17 +9,15 @@ import iconInfoCircleGreen from '../../../../assets/icons/icon-info-circle-green
 import iconInfoCircleGrey from '../../../../assets/icons/icon-info-circle-grey.svg';
 import iconPhoneCircleGreen from '../../../../assets/icons/icon-phone-circle-green.svg';
 import iconPhoneCircleGrey from '../../../../assets/icons/icon-phone-circle-grey.svg';
-import iconPinCircleGreen from '../../../../assets/icons/icon-pin-circle-green.svg';
-import iconPinCircleGrey from '../../../../assets/icons/icon-pin-circle-grey.svg';
 import iconProfileCircleGreen from '../../../../assets/icons/icon-profile-circle-green.svg';
 import iconProfileCircleGrey from '../../../../assets/icons/icon-profile-circle-grey.svg';
 import iconStairsCircleGreen from '../../../../assets/icons/icon-stairs-circle-green.svg';
 import iconStairsCircleGrey from '../../../../assets/icons/icon-stairs-circle-grey.svg';
 import iconTimeCircleGreen from '../../../../assets/icons/icon-time-circle-green.svg';
 import iconTimeCircleGrey from '../../../../assets/icons/icon-time-circle-grey.svg';
+import { AedIdProperty } from './aed-id-property/AedIdProperty';
 import { AedPhoto } from './aed-photo/AedPhoto';
 import { ItemProperty } from './item-property/ItemProperty';
-import { LinkAedProperty } from './link-aed-property/LinkAedProperty';
 
 interface FeaturePropsListProps {
   feature: Feature;
@@ -89,16 +87,11 @@ export const FeaturePropsList = ({ feature, isOpen, className }: FeaturePropsLis
           value={props.email}
         />
       )}
-      <ItemProperty
-        icon={isOpen ? iconPinCircleGreen : iconPinCircleGrey}
-        title={t('node')}
-        value={feature.id ?? ''}
-      />
-      <AedPhoto wikimediaCommons={props.wikimedia_commons} image={props.image} />
       {feature.id !== undefined && (
         // keyed so the "copied" state resets when another AED is opened
-        <LinkAedProperty key={feature.id} aedId={feature.id} isOpen={isOpen} />
+        <AedIdProperty key={feature.id} aedId={feature.id} isOpen={isOpen} />
       )}
+      <AedPhoto wikimediaCommons={props.wikimedia_commons} image={props.image} />
     </div>
   );
 };
