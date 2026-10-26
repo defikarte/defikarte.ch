@@ -127,6 +127,7 @@
   "goHome": "Go to homepage",
   "node": "AED ID",
   "linkAed": "Copy link to the AED",
+  "shareAed": "Share link to the AED",
   "aedLinkCopied": "Link to the AED copied",
   "photoLoading": "Loading photo...",
   "photoAlt": "Photo of the defibrillator",

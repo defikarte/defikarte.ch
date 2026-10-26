@@ -22,6 +22,7 @@ import { type MapInstance } from '../../map-instance/map-instance';
 import { NOT_ACCESSIBLE_VALUES } from '../../opening-hours/feature-status';
 import { OH_STATUS } from '../../opening-hours/types';
 import { FeaturePropsList } from './property-list/FeaturePropsList';
+import { ShareAedButton } from './share-aed-button/ShareAedButton';
 import { useAedStatus } from './useAedStatus';
 
 const GOOGLE_MAPS_DIRECTIONS_URL = 'https://www.google.com/maps/dir/?api=1';
@@ -46,6 +47,8 @@ interface DetailViewProps {
   getDirectionsUrl?: (lon: number, lat: number) => string;
   // on mobile, opens with all properties shown instead of only the tags
   defaultExpanded?: boolean;
+  // on mobile, opens the share menu for the link to the AED, the web share API by default
+  shareLink?: (url: string, title: string) => Promise<void>;
 }
 
 export const DetailView = ({
@@ -58,6 +61,7 @@ export const DetailView = ({
   compact = false,
   getDirectionsUrl = generateGoogleMapsWalkingLink,
   defaultExpanded = false,
+  shareLink,
 }: DetailViewProps) => {
   const { t } = useTranslation();
   const responsiveMobile = useMediaQuery({ maxWidth: 768 });
@@ -241,24 +245,37 @@ export const DetailView = ({
       </div>
       <div className={cn('py-3 px-4 flex-shrink flex w-full items-end', !compact && '2xl:py-4')}>
         <div className="flex justify-between items-center w-full flex-row-reverse h-10">
-          {!isMobile && onEdit && (
-            <IconButton
-              title={t('edit')}
-              icon={iconEditDarkGreen}
-              variant={isOpen ? 'tint' : 'secondary'}
-              className="flex"
-              onClick={onEdit}
-            />
-          )}
-          {isMobile && (
-            <Button
-              className="pe-0"
-              variant="secondary"
-              onClick={() => setPropsVisible(s => !s)}
-            >
-              {propsVisible ? t('hide') : t('details')}
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {feature.id !== undefined && (
+              // keyed so the "copied" state resets when another AED is opened
+              <ShareAedButton
+                key={feature.id}
+                aedId={feature.id}
+                name={name}
+                isOpen={isOpen}
+                isMobile={isMobile}
+                shareLink={shareLink}
+              />
+            )}
+            {!isMobile && onEdit && (
+              <IconButton
+                title={t('edit')}
+                icon={iconEditDarkGreen}
+                variant={isOpen ? 'tint' : 'secondary'}
+                className="flex"
+                onClick={onEdit}
+              />
+            )}
+            {isMobile && (
+              <Button
+                className="pe-0"
+                variant="secondary"
+                onClick={() => setPropsVisible(s => !s)}
+              >
+                {propsVisible ? t('hide') : t('details')}
+              </Button>
+            )}
+          </div>
           {isOpen && (
             <a href={directionsUrl} target="_blank">
               <Button variant="primary" icon={iconNavigationWhite}>
