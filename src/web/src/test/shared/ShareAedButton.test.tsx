@@ -4,7 +4,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DetailView } from '@defikarte/shared';
 
 // i18n is not initialised in tests, so t() returns the keys
-const AED_URL = 'https://defikarte.ch/map/aed/240776510';
+
+// built from the current site, so it works on staging and locally too
+const AED_URL = `${window.location.origin}/map/aed/240776510`;
 const feature: Feature = {
   type: 'Feature',
   id: 240776510,
@@ -101,6 +103,16 @@ describe('ShareAedButton (detail view)', () => {
     shareLink.mockImplementation(() => Promise.reject(new Error('not supported')));
     await click('shareAed');
     expect(writeText).toHaveBeenCalledWith(AED_URL);
+  });
+
+  it('shares the link passed in by the app', async () => {
+    const shareLink = vi.fn(() => Promise.resolve());
+    const getAedUrl = (aedId: string | number) => `https://defikarte.ch/map/aed/${aedId}`;
+    renderDetailView({ compact: true, shareLink, getAedUrl });
+
+    await click('shareAed');
+
+    expect(shareLink).toHaveBeenCalledWith('https://defikarte.ch/map/aed/240776510', 'Lobby');
   });
 
   it('copies on mobile when the browser cannot share', async () => {

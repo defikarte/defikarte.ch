@@ -28,7 +28,7 @@ import { useBaseLayer } from '../../hooks/useBaseLayer';
 import type { MapSearch } from '../../routes/index';
 import { CapacitorGeolocationService } from '../../services/capacitor-geolocation.service';
 import { getWalkingDirectionsUrl } from '../../services/navigation.service';
-import { shareLink } from '../../services/share.service';
+import { getAedUrl, shareLink } from '../../services/share.service';
 import { EmergencyControl } from './emergency/EmergencyControl';
 import { useEmergencyView } from './emergency/useEmergencyView';
 
@@ -310,6 +310,7 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
               onEdit={() => handleEditFeature(selectedFeature)}
               getDirectionsUrl={getWalkingDirectionsUrl}
               shareLink={shareLink}
+              getAedUrl={getAedUrl}
               compact
             />
           )}

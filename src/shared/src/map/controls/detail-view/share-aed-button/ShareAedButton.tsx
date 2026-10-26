@@ -5,15 +5,13 @@ import iconLinkDarkGreen from '../../../../assets/icons/icon-link-dark-green.svg
 import iconShareDarkGreen from '../../../../assets/icons/icon-share-dark-green.svg';
 import { IconButton } from '../../../../components/ui/icon-button/IconButton';
 
-// `/map/aed/<OSM node id>` opens the detail view of that AED (see useAedDeepLink).
-// The app shares the website link too, so people without the app can open it.
-const AED_LINK_BASE_URL = 'https://defikarte.ch/map/aed/';
 const COPIED_DURATION_MS = 2000;
 
 const shareWithWebShareApi = (url: string, title: string) => navigator.share({ title, url });
 
 interface ShareAedButtonProps {
-  aedId: string | number;
+  // the link that opens the detail view of the AED
+  url: string;
   name: string;
   isOpen: boolean;
   // mobile opens the share menu of the platform, desktop copies the link
@@ -23,7 +21,7 @@ interface ShareAedButtonProps {
 }
 
 export const ShareAedButton = ({
-  aedId,
+  url,
   name,
   isOpen,
   isMobile,
@@ -31,7 +29,6 @@ export const ShareAedButton = ({
 }: ShareAedButtonProps) => {
   const { t } = useTranslation();
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
-  const url = `${AED_LINK_BASE_URL}${aedId}`;
 
   useEffect(() => {
     if (copyState !== 'copied') return;

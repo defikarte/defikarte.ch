@@ -33,6 +33,11 @@ const generateGoogleMapsWalkingLink = (lon: number, lat: number): string => {
   return directionUrl;
 };
 
+// `/map/aed/<OSM node id>` opens the detail view of that AED (see useAedDeepLink). Built from the
+// current site, so the link works on staging and locally too.
+const generateAedUrl = (aedId: string | number): string =>
+  `${window.location.origin}/map/aed/${aedId}`;
+
 interface DetailViewProps {
   // provides the opening status, the same one the markers on the map show
   map: MapInstance | null;
@@ -49,6 +54,8 @@ interface DetailViewProps {
   defaultExpanded?: boolean;
   // on mobile, opens the share menu for the link to the AED, the web share API by default
   shareLink?: (url: string, title: string) => Promise<void>;
+  // the shared link to the AED, on the current site by default
+  getAedUrl?: (aedId: string | number) => string;
 }
 
 export const DetailView = ({
@@ -62,6 +69,7 @@ export const DetailView = ({
   getDirectionsUrl = generateGoogleMapsWalkingLink,
   defaultExpanded = false,
   shareLink,
+  getAedUrl = generateAedUrl,
 }: DetailViewProps) => {
   const { t } = useTranslation();
   const responsiveMobile = useMediaQuery({ maxWidth: 768 });
@@ -118,7 +126,7 @@ export const DetailView = ({
     // keyed so the "copied" state resets when another AED is opened
     <ShareAedButton
       key={feature.id}
-      aedId={feature.id}
+      url={getAedUrl(feature.id)}
       name={name}
       isOpen={isOpen}
       isMobile={isMobile}
