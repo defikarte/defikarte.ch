@@ -125,6 +125,9 @@
   "notFound": "Die Seite wurde nicht gefunden.",
   "goHome": "Gehe zur Startseite",
   "node": "Knoten",
+  "linkAed": "Link zum Defibrillator kopieren",
+  "shareAed": "Link zum Defibrillator teilen",
+  "aedLinkCopied": "Link zum Defibrillator kopiert",
   "photoLoading": "Foto wird geladen...",
   "photoAlt": "Foto des Defibrillators",
   "statusPage": {
