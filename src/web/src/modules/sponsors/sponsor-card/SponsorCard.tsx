@@ -9,7 +9,7 @@ type SponsorCardProps = {
 export const SponsorCard = ({ src, href, compact }: SponsorCardProps) => {
   const linkClass = classNames(
     'cursor-pointer',
-    compact ? 'w-[calc(50%-10px)] md:w-52 lg:w-43 xl:w-55' : 'w-full md:w-auto'
+    compact ? 'w-[calc(50%-10px)] md:w-52 xl:w-55' : 'w-full md:w-auto'
   );
   const cardClass = classNames(
     'w-full rounded-2xl flex justify-center items-center bg-primary-100-white',

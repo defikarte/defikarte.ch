@@ -142,7 +142,7 @@ export const Sponsors = () => {
         <Text size="large" weight="bold" className="pt-32 pb-16">
           {t('SectionSponsorsSilver')}
         </Text>
-        <div className="flex gap-5 md:gap-9 justify-center flex-wrap">
+        <div className="flex gap-5 md:gap-9 justify-center flex-wrap max-w-3xl">
           <SponsorCard src={imageDefikartePartnerOctave} href="https://www.octave.com/" compact />
           <SponsorCard
             src={imageDefikartePartnerHostpoint}
