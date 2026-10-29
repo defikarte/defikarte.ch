@@ -13,6 +13,7 @@ import imageDefikartePartnerProcamed from '../../assets/landingpages/unterstuetz
 import imageDefikartePartnerResqpro from '../../assets/landingpages/unterstuetzung/defikarte-partner-resqpro.jpg';
 import imageDefikartePartnerSinoma from '../../assets/landingpages/unterstuetzung/defikarte-partner-sinoma.jpg';
 import imageDefikartePartnerSirmed from '../../assets/landingpages/unterstuetzung/defikarte-partner-sirmed.svg';
+import imageDefikartePartnerSmartpeak from '../../assets/landingpages/unterstuetzung/defikarte-partner-smartpeak.svg';
 import imageDefikartePartnerSusv from '../../assets/landingpages/unterstuetzung/defikarte-partner-susv.svg';
 import imageDefikarteUnterstuetzungSackmesser from '../../assets/landingpages/unterstuetzung/defikarte-unterstuetzung-sackmesser.jpg';
 import imageDefikarteUnterstuetzungTeaser from '../../assets/landingpages/unterstuetzung/defikarte-unterstuetzung-teaser.jpg';
@@ -152,6 +153,11 @@ export const Sponsors = () => {
           <SponsorCard
             src={imageDefikartePartnerAkkupoint}
             href="https://www.akkupoint.ch/"
+            compact
+          />
+          <SponsorCard
+            src={imageDefikartePartnerSmartpeak}
+            href="https://www.smartpeak.ch/"
             compact
           />
         </div>
