@@ -1,10 +1,10 @@
 import classNames from 'classnames';
 
-type SponsorCardProps = {
+interface SponsorCardProps {
   href: string;
   src: string;
   compact?: boolean;
-};
+}
 
 export const SponsorCard = ({ src, href, compact }: SponsorCardProps) => {
   const linkClass = classNames(
