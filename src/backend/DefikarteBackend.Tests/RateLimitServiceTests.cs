@@ -151,8 +151,8 @@ namespace DefikarteBackend.Tests
         [Test]
         public async Task CheckAsync_ForARemoval_ShouldStopEverybodyAtTheGlobalLimit()
         {
-            // 10 per day for all, each from another IP and install id
-            for (var i = 0; i < 10; i++)
+            // 20 per day for all, each from another IP and install id
+            for (var i = 0; i < 20; i++)
             {
                 var decision = await _service.CheckAsync("AED_REMOVAL_POST_V3", Guid.NewGuid().ToString(), $"198.51.100.{i}");
                 Assert.That(decision.Outcome, Is.EqualTo(RateLimitOutcome.Allowed), $"call {i + 1}");
