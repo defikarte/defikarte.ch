@@ -97,8 +97,11 @@ export class ApiClient {
     });
   };
 
-  /** Deletes an AED that is permanently gone in OSM. */
-  public deleteAedData = async (id: string, data: AedRemovalData) => {
-    return await this.axiosInstance.delete(`v3/aed/${id}`, { data });
+  /**
+   * Reports an AED as permanently gone. The backend hides it on the map right away and deletes it in OSM
+   * after a delay, unless an admin cancels the report.
+   */
+  public requestAedRemoval = async (id: string, data: AedRemovalData) => {
+    return await this.axiosInstance.post(`v3/aed/${id}/removal`, data);
   };
 }

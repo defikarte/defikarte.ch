@@ -1,9 +1,10 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { AxiosError, type AxiosResponse } from 'axios';
 import { describe, expect, it, vi } from 'vitest';
 import { AedRemoveForm, type ApiClient } from '@defikarte/shared';
 
 // i18n is not initialised in tests, so t() returns the keys
-const renderForm = (deleteAedData = vi.fn().mockResolvedValue({})) => {
+const renderForm = (requestAedRemoval = vi.fn().mockResolvedValue({})) => {
   const handlers = {
     onCancel: vi.fn(),
     onRemoved: vi.fn().mockResolvedValue(undefined),
@@ -12,12 +13,12 @@ const renderForm = (deleteAedData = vi.fn().mockResolvedValue({})) => {
   render(
     <AedRemoveForm
       id="42"
-      apiClient={{ deleteAedData } as unknown as ApiClient}
+      apiClient={{ requestAedRemoval } as unknown as ApiClient}
       reporter="Anna"
       {...handlers}
     />
   );
-  return { deleteAedData, ...handlers };
+  return { requestAedRemoval, ...handlers };
 };
 
 describe('AedRemoveForm', () => {
@@ -28,23 +29,23 @@ describe('AedRemoveForm', () => {
     expect(screen.getByText('removeAedNoticeContent')).toBeInTheDocument();
   });
 
-  it('does not delete without a reason', async () => {
-    const { deleteAedData } = renderForm();
+  it('does not request a removal without a reason', async () => {
+    const { requestAedRemoval } = renderForm();
 
     fireEvent.click(screen.getByRole('button', { name: 'removeAedSubmit' }));
 
-    await waitFor(() => expect(deleteAedData).not.toHaveBeenCalled());
+    await waitFor(() => expect(requestAedRemoval).not.toHaveBeenCalled());
   });
 
-  it('deletes the AED with reason, comment and the reporter of the edit form', async () => {
-    const { deleteAedData, onRemoved, onNotify } = renderForm();
+  it('requests the removal with reason, comment and the reporter of the edit form', async () => {
+    const { requestAedRemoval, onRemoved, onNotify } = renderForm();
 
     fireEvent.change(screen.getByLabelText(/removeAedReason/), { target: { value: 'stolen' } });
     fireEvent.change(screen.getByLabelText(/removeAedComment/), { target: { value: 'Seit Mai' } });
     fireEvent.click(screen.getByRole('button', { name: 'removeAedSubmit' }));
 
     await waitFor(() =>
-      expect(deleteAedData).toHaveBeenCalledWith('42', {
+      expect(requestAedRemoval).toHaveBeenCalledWith('42', {
         reason: 'stolen',
         comment: 'Seit Mai',
         reporter: 'Anna',
@@ -63,6 +64,22 @@ describe('AedRemoveForm', () => {
     await waitFor(() =>
       expect(onNotify).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'error', message: 'offline' })
+      )
+    );
+    expect(onRemoved).not.toHaveBeenCalled();
+  });
+
+  it('shows a translated message when the rate limit is reached', async () => {
+    const rateLimited = new AxiosError('Request failed with status code 429');
+    rateLimited.response = { status: 429 } as AxiosResponse;
+    const { onRemoved, onNotify } = renderForm(vi.fn().mockRejectedValue(rateLimited));
+
+    fireEvent.change(screen.getByLabelText(/removeAedReason/), { target: { value: 'destroyed' } });
+    fireEvent.click(screen.getByRole('button', { name: 'removeAedSubmit' }));
+
+    await waitFor(() =>
+      expect(onNotify).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'error', message: 'tooManyRequests' })
       )
     );
     expect(onRemoved).not.toHaveBeenCalled();
