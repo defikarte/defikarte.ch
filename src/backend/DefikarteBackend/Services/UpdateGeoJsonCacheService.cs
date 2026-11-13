@@ -6,9 +6,13 @@ namespace DefikarteBackend.Services
 {
     public class UpdateGeoJsonCacheService : IUpdateGeoJsonCacheService
     {
-        // Marks a feature in the local cache as deleted in OSM, so it is also removed from the
-        // overpass data until that has caught up (the marker is cleaned up like other local items).
+        // Marks a feature in the local cache as removed, so it is also removed from the overpass data. This
+        // starts when the removal is requested (the node still exists in OSM until the delay is over) and
+        // lasts until overpass has caught up with the delete. The marker has its own expiry (removedUntil)
+        // instead of the 1 hour of other local items, which would bring the AED back while it is still in overpass.
         private const string RemovedProperty = "removed";
+        private const string RemovedUntilProperty = "removedUntil";
+        private const string TimestampFormat = "yyyy-MM-dd HH:mm:ssZ";
 
         private readonly ILogger<UpdateGeoJsonCacheService> _logger;
         private readonly IEnumerable<IGeoJsonCacheRepository> _geoJsonCacheRepositories;
@@ -54,27 +58,10 @@ namespace DefikarteBackend.Services
                 }
 
                 var currentTime = DateTime.UtcNow;
-                var oneHourAgo = currentTime.AddHours(-1);
 
                 var geoJson = await SafeGetAsync(localCacheRepository).ConfigureAwait(false);
 
-                geoJson.Features.RemoveAll(feature =>
-                {
-                    if (feature.Properties.TryGetValue("timestamp", out var timestampObj) && timestampObj is string timestampStr)
-                    {
-                        if (DateTime.TryParseExact(
-                                timestampStr,
-                                "yyyy-MM-dd HH:mm:ssZ",
-                                System.Globalization.CultureInfo.InvariantCulture,
-                                System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal,
-                                out var timestamp))
-                        {
-                            return timestamp < oneHourAgo;
-                        }
-                    }
-                    return false;
-                });
-
+                geoJson.Features.RemoveAll(feature => IsExpired(feature, currentTime));
                 await localCacheRepository.TryUpdateCacheAsync(geoJson).ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -114,7 +101,7 @@ namespace DefikarteBackend.Services
             }
         }
 
-        public async Task RemoveFeatureInLocalCacheAsync(string id)
+        public async Task RemoveFeatureInLocalCacheAsync(string id, DateTime removedUntilUtc)
         {
             var removedFeature = new Feature
             {
@@ -123,10 +110,38 @@ namespace DefikarteBackend.Services
                 {
                     { "timestamp", DateTime.UtcNow.ToString("u") },
                     { RemovedProperty, "yes" },
+                    { RemovedUntilProperty, removedUntilUtc.ToUniversalTime().ToString("u") },
                 },
             };
 
             await AddOrUpdateFeaturesInLocalCacheAsync(new FeatureCollection { Features = [removedFeature] }).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Local items expire after an hour, a removal marker when its removedUntil is over.
+        /// </summary>
+        public static bool IsExpired(Feature feature, DateTime nowUtc)
+        {
+            if (feature.Properties.ContainsKey(RemovedProperty)
+                && feature.Properties.TryGetValue(RemovedUntilProperty, out var removedUntilStr)
+                && TryParseTimestamp(removedUntilStr, out var removedUntil))
+            {
+                return removedUntil < nowUtc;
+            }
+
+            return feature.Properties.TryGetValue("timestamp", out var timestampStr)
+                && TryParseTimestamp(timestampStr, out var timestamp)
+                && timestamp < nowUtc.AddHours(-1);
+        }
+
+        private static bool TryParseTimestamp(string? value, out DateTime result)
+        {
+            return DateTime.TryParseExact(
+                value,
+                TimestampFormat,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal,
+                out result);
         }
 
         private static void AddOrUpdateItems(FeatureCollection newOrUpdatedFeatures, FeatureCollection geoJson, bool applyRemovals = false)

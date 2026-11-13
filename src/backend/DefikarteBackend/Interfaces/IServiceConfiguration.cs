@@ -31,5 +31,13 @@
         int HealthMaxDataAgeMinutes { get; }
 
         int HealthMinAedCount { get; }
+
+        /// <summary>Hours between a removal request and the delete in OSM. 0 deletes immediately.</summary>
+        int AedRemovalDelayHours { get; }
+
+        string AedRemovalsTableName { get; }
+
+        /// <summary>Secret for the admin endpoints. Empty disables them.</summary>
+        string AdminApiKey { get; }
     }
 }

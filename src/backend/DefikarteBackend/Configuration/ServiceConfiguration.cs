@@ -35,6 +35,12 @@ namespace DefikarteBackend.Configuration
 
         public int HealthMinAedCount { get; private set; }
 
+        public int AedRemovalDelayHours { get; private set; } = 24;
+
+        public string AedRemovalsTableName { get; private set; } = "aedremovals";
+
+        public string AdminApiKey { get; private set; } = string.Empty;
+
         public static ServiceConfiguration Initialize(IConfigurationRoot configuration)
         {
             return new ServiceConfiguration
@@ -54,6 +60,9 @@ namespace DefikarteBackend.Configuration
                 BlobStorageSyncStatusName = configuration.GetValue<string>("BLOB_STORAGE_SYNC_STATUS_NAME") ?? "sync-status.json",
                 HealthMaxDataAgeMinutes = GetIntOrDefault(configuration, "HEALTH_MAX_DATA_AGE_MINUTES", 60),
                 HealthMinAedCount = GetIntOrDefault(configuration, "HEALTH_MIN_AED_COUNT", 10000),
+                AedRemovalDelayHours = int.TryParse(configuration["AED_REMOVAL_DELAY_HOURS"], out var delay) && delay >= 0 ? delay : 24,
+                AedRemovalsTableName = configuration.GetValue<string>("AED_REMOVALS_TABLE_NAME") ?? "aedremovals",
+                AdminApiKey = configuration.GetValue<string>("ADMIN_API_KEY") ?? string.Empty,
             };
         }
 

@@ -6,7 +6,7 @@ namespace DefikarteBackend.Interfaces
     {
         Task AddOrUpdateFeaturesInLocalCacheAsync(FeatureCollection newOrUpdatedFeatures);
 
-        Task RemoveFeatureInLocalCacheAsync(string id);
+        Task RemoveFeatureInLocalCacheAsync(string id, DateTime removedUntilUtc);
 
         Task CleanupOldItemsInLocalCacheAsync();
 

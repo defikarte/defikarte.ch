@@ -1,4 +1,5 @@
-﻿using Azure.Storage.Blobs;
+﻿using Azure.Data.Tables;
+using Azure.Storage.Blobs;
 using DefikarteBackend.Cache;
 using DefikarteBackend.Configuration;
 using DefikarteBackend.Interfaces;
@@ -33,6 +34,9 @@ internal class Program
 
         var container = new BlobContainerClient(serviceConfig.BlobStorageConnectionString, serviceConfig.BlobStorageContainerName);
         container.CreateIfNotExists();
+
+        var removalsTable = new TableClient(serviceConfig.BlobStorageConnectionString, serviceConfig.AedRemovalsTableName);
+        removalsTable.CreateIfNotExists();
 
         var host = new HostBuilder()
             .ConfigureFunctionsWebApplication(b =>
@@ -86,6 +90,12 @@ internal class Program
                     new SyncStatusRepository(container, serviceConfig.BlobStorageSyncStatusName));
 
                 services.AddTransient<IUpdateGeoJsonCacheService, UpdateGeoJsonCacheService>();
+
+                services.AddSingleton(TimeProvider.System);
+                services.AddSingleton(removalsTable);
+                services.AddSingleton<IAedRemovalRepository, TableStorageAedRemovalRepository>();
+                services.AddSingleton<IOsmNodeService, OsmNodeService>();
+                services.AddTransient<IAedRemovalService, AedRemovalService>();
 
                 services.AddSingleton(container);
                 services.AddSingleton<IBlobStorageDataRepository, BlobStorageDataRepository>();

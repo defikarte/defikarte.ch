@@ -28,7 +28,7 @@ namespace DefikarteBackend.Tests
         [Test]
         public async Task RemoveFeatureInLocalCacheAsync_ShouldRemoveTheFeatureFromTheOsmCache()
         {
-            await _service.RemoveFeatureInLocalCacheAsync("1");
+            await _service.RemoveFeatureInLocalCacheAsync("1", DateTime.UtcNow.AddHours(24));
 
             Assert.That(_osmCache.Data.Features.Select(x => x.Id), Is.EqualTo(new[] { "2" }));
         }
@@ -36,18 +36,20 @@ namespace DefikarteBackend.Tests
         [Test]
         public async Task TryUpdateAndCombineCacheAsync_GivenOverpassDataWithARemovedFeature_ShouldLeaveItOut()
         {
-            await _service.RemoveFeatureInLocalCacheAsync("1");
+            await _service.RemoveFeatureInLocalCacheAsync("1", DateTime.UtcNow.AddHours(24));
 
-            // overpass has not caught up with the deletion yet
+            // overpass still has the node, because it is not deleted in OSM yet or overpass has not caught up
             await _service.TryUpdateAndCombineCacheAsync(new FeatureCollection { Features = [CreateFeature("1"), CreateFeature("2")] });
 
             Assert.That(_osmCache.Data.Features.Select(x => x.Id), Is.EqualTo(new[] { "2" }));
         }
 
         [Test]
-        public async Task CleanupOldItemsInLocalCacheAsync_ShouldKeepARecentRemoval()
+        public async Task CleanupOldItemsInLocalCacheAsync_ShouldKeepARemovalUntilItsRemovedUntil()
         {
-            await _service.RemoveFeatureInLocalCacheAsync("1");
+            await _service.RemoveFeatureInLocalCacheAsync("1", DateTime.UtcNow.AddHours(24));
+            // the marker is older than an hour, like during the delay of a removal
+            _localCache.Data.Features[0].Properties["timestamp"] = DateTime.UtcNow.AddHours(-5).ToString("u");
 
             await _service.CleanupOldItemsInLocalCacheAsync();
 
@@ -55,9 +57,19 @@ namespace DefikarteBackend.Tests
         }
 
         [Test]
-        public async Task CleanupOldItemsInLocalCacheAsync_ShouldDropARemovalAfterAnHour()
+        public async Task CleanupOldItemsInLocalCacheAsync_ShouldDropARemovalAfterItsRemovedUntil()
         {
-            await _service.RemoveFeatureInLocalCacheAsync("1");
+            await _service.RemoveFeatureInLocalCacheAsync("1", DateTime.UtcNow.AddMinutes(-1));
+
+            await _service.CleanupOldItemsInLocalCacheAsync();
+
+            Assert.That(_localCache.Data.Features, Is.Empty);
+        }
+
+        [Test]
+        public async Task CleanupOldItemsInLocalCacheAsync_ShouldStillDropOtherItemsAfterAnHour()
+        {
+            await _service.AddOrUpdateFeaturesInLocalCacheAsync(new FeatureCollection { Features = [CreateFeature("3")] });
             _localCache.Data.Features[0].Properties["timestamp"] = DateTime.UtcNow.AddHours(-2).ToString("u");
 
             await _service.CleanupOldItemsInLocalCacheAsync();
@@ -71,26 +83,5 @@ namespace DefikarteBackend.Tests
             Geometry = new PointGeometry { Coordinates = [8.5, 47.3] },
             Properties = new Dictionary<string, string> { { "emergency", "defibrillator" } },
         };
-
-        private sealed class InMemoryGeoJsonCacheRepository(DataSourceType dataSourceType, params Feature[] features) : IGeoJsonCacheRepository
-        {
-            public FeatureCollection Data { get; private set; } = new FeatureCollection { Features = [.. features] };
-
-            public DataSourceType DataSourceType => dataSourceType;
-
-            public Task<bool> ExistsAsync() => Task.FromResult(true);
-
-            public Task<FeatureCollection> GetAsync() => Task.FromResult(Data);
-
-            public Task<string> GetRawAsync() => throw new NotImplementedException();
-
-            public Task<Feature?> GetByIdAsync(string id) => Task.FromResult(Data.Features.Find(x => x.Id == id));
-
-            public Task<bool> TryUpdateCacheAsync(FeatureCollection values)
-            {
-                Data = values;
-                return Task.FromResult(true);
-            }
-        }
     }
 }
