@@ -43,6 +43,9 @@ Many tasks need both. A new map filter, for example, needs a UI toggle and a map
   and web locale files (8 files).
 - Code shared by app and web goes in `src/shared` and is exported from `src/shared/src/index.ts` only if needed.
 
+- **Never add AI attribution to commits or PRs.** No `Co-Authored-By: <AI agent>` trailers (Claude, Copilot,
+  Codex, …) and no "Generated with …" lines in commit messages or PR descriptions.
+
 ## Commands
 
 ```bash
