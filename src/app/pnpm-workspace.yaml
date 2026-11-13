@@ -1,2 +1,4 @@
 packages:
   - "../shared"
+allowBuilds:
+  esbuild: true

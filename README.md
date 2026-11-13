@@ -38,7 +38,7 @@ Von unserer Plattform profitieren viele Organisationen. Mit deiner Unterstützun
   <img src="https://contrib.rocks/image?repo=defikarte/defikarte.ch" />
 </a>
 
-Made with [contributors-img](https://contributors-img.web.app).
+Made with [contrib.rocks](https://contrib.rocks).
 
 ## Open Source
 
@@ -102,6 +102,11 @@ pnpm run dev        # Start development server
 pnpm run build      # Build for production
 ```
 
+The fullscreen map is at `/map`, its position in the hash (`#zoom/lat/lon`). `/map/aed/<OSM node id>`
+opens that AED's detail view directly, e.g. `/map/aed/6636784162#18/47.134491/7.230301`. This is the
+link to use for a single AED, for example in the defi_data change report mails. The hosting needs to
+serve `index.html` for these paths.
+
 **Backend:**
 
 ```bash
@@ -113,7 +118,7 @@ func start                        # run the functions locally (http://localhost:
 
 The backend reads its settings from `src/backend/DefikarteBackend/local.settings.json` (not committed).
 It needs `AzureWebJobsStorage` (Azure Storage connection string, or Azurite locally), the Overpass/OSM
-settings (`OVERPASS_URL`, `OSM_API_URL`, `OSM_USER_NAME`, `OSM_API_TOKEN`), the blob names
+settings (`OVERPASS_URL`, `OVERPASS_SYNC_SCHEDULE` e.g. `0 */15 * * * *`, `OSM_API_URL`, `OSM_USER_NAME`, `OSM_API_TOKEN`), the blob names
 (`BLOB_STORAGE_CONTAINER_NAME`, `BLOB_STORAGE_BLOB_NAME`, `BLOB_STORAGE_BLOB_NAME_V2`,
 `BLOB_STORAGE_BLOB_NAME_LOCAL_V2`, `BLOB_STORAGE_SWISSBOUNDARIES`) and the address search
 (`ADDRESS_SEARCH_URL`, `MAPTILER_API_KEY`); see

@@ -18,6 +18,7 @@ import {
   OverlayType,
 } from '../model/map';
 import { deselectAllFeatures } from './helper';
+import { useAedDeepLink } from './hooks/useAedDeepLink';
 import { useFeatureSelection } from './hooks/useFeatureSelection';
 import { useHandleCreateMode } from './hooks/useHandleCreateMode';
 import { useMapEvents } from './hooks/useMapEvents';
@@ -60,6 +61,8 @@ interface SharedMapProps {
   apiClient: ApiClient;
   locationProvider: LocationProvider;
   isHash: boolean;
+  // OSM node id of an AED to select on load (web: `/map/aed/<id>`)
+  initialAedId?: string;
   persistedBaseLayer?: string;
   onBaseLayerChange?: (layer: string) => void;
   children: (state: SharedMapState) => ReactNode;
@@ -71,6 +74,7 @@ export const SharedMap = ({
   apiClient,
   locationProvider,
   isHash,
+  initialAedId,
   persistedBaseLayer,
   onBaseLayerChange,
   children,
@@ -108,6 +112,7 @@ export const SharedMap = ({
   } = useUserLocation({ map: mapInstance, locationProvider });
   const { handleSelectOrCenterFeatureOnMap, selectFeatureOnMap, handleEditFeature } =
     useFeatureSelection({ map: mapInstance, setEditFeature, setCreateMode });
+  useAedDeepLink({ map: mapInstance, aedId: initialAedId, selectFeatureOnMap });
 
   const setActiveBaseLayer = useCallback(
     (layer: string) => {

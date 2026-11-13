@@ -18,6 +18,7 @@ import iconDefiWhite from '../../../assets/icons/icon-defi-white.svg';
 import iconNavigationWhite from '../../../assets/icons/icon-navigation-white.svg';
 import iconTimeWhite from '../../../assets/icons/icon-time-white.svg';
 import { getWalkingDirectionsUrl } from '../../../services/navigation.service';
+import { getAedUrl, shareLink } from '../../../services/share.service';
 
 interface EmergencyControlProps {
   map: MapInstance | null;
@@ -172,6 +173,8 @@ export const EmergencyControl = ({
         onClose={() => setIsDetailOpen(false)}
         onEdit={() => onEdit(toMapEvent(map, selectedAed))}
         getDirectionsUrl={getWalkingDirectionsUrl}
+        shareLink={shareLink}
+        getAedUrl={getAedUrl}
         // the card already shows the tags, "Details" is for everything else
         defaultExpanded
         compact

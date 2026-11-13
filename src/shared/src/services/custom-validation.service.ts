@@ -27,15 +27,32 @@ export const areOpeningHoursValid = (
   return msg === '' || value === null || value === '' ? true : msg;
 };
 
-// "nur während Öffnungszeiten" and the like, in de, fr, it and en
-const OPENING_HOURS_MENTION =
-  /öffnungszeit|(heures|horaires?) d['’]ouverture|orari\w* d['’i ]+apertura|opening hours/i;
+const DAY = '(mo|di|mi|do|fr|sa|so|lu|ma|me|je|ve|gi|tu|we|th|su)[a-z]*\\.?';
+const RANGE = '\\s*(-|–|bis|à|al|to)\\s*';
 
-/** Whether the description mentions the opening hours although they are already set. */
-export const isDescriptionRedundant = (
-  description: string | undefined,
-  openingHours: string | undefined
-): boolean => !!openingHours?.trim() && !!description && OPENING_HOURS_MENTION.test(description);
+// "nur während Öffnungszeiten" and the like in de (also without umlauts), fr, it and en, the
+// hours written out ("Mo-Fr", "8-17 Uhr", "08:00-17:00") or "always open" ("24h", "rund um die Uhr")
+const OPENING_HOURS_MENTION = new RegExp(
+  [
+    '(ö|oe)ffnungszeit',
+    '(gesch(ä|ae)fts|b(ü|ue)ro)zeit',
+    "(heures|horaires?) d['’]ouverture",
+    "orari\\w* d['’i ]+apertura",
+    '(opening|business|office) hours',
+    `\\b${DAY}${RANGE}${DAY}\\b`,
+    `\\b\\d{1,2}[:.]\\d{2}${RANGE}\\d{1,2}`,
+    `\\b\\d{1,2}${RANGE}\\d{1,2}\\s*(uhr|h)\\b`,
+    '\\b24\\s*(/\\s*(7|24)|h|std|stunden|heures|ore|hours)\\b',
+    'rund um die uhr|jederzeit|jour et nuit|around the clock',
+  ].join('|'),
+  'i'
+);
+
+/** Whether the description mentions the opening hours, which belong in their own field. */
+export const isDescriptionRedundant = (description: string | undefined): boolean =>
+  !!description &&
+  // "Ö" can also be typed as "O" and a combining diaeresis
+  OPENING_HOURS_MENTION.test(description.normalize('NFC'));
 
 export const isPhoneNumberValid = (value: string | undefined, t: Translate): string | boolean => {
   if (value === undefined) {

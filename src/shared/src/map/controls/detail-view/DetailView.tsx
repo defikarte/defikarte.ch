@@ -22,6 +22,7 @@ import { type MapInstance } from '../../map-instance/map-instance';
 import { NOT_ACCESSIBLE_VALUES } from '../../opening-hours/feature-status';
 import { OH_STATUS } from '../../opening-hours/types';
 import { FeaturePropsList } from './property-list/FeaturePropsList';
+import { ShareAedButton } from './share-aed-button/ShareAedButton';
 import { useAedStatus } from './useAedStatus';
 
 const GOOGLE_MAPS_DIRECTIONS_URL = 'https://www.google.com/maps/dir/?api=1';
@@ -31,6 +32,11 @@ const generateGoogleMapsWalkingLink = (lon: number, lat: number): string => {
   const directionUrl = `${GOOGLE_MAPS_DIRECTIONS_URL}&travelmode=walking&destination=${endCoordinates}`;
   return directionUrl;
 };
+
+// `/map/aed/<OSM node id>` opens the detail view of that AED (see useAedDeepLink). Built from the
+// current site, so the link works on staging and locally too.
+const generateAedUrl = (aedId: string | number): string =>
+  `${window.location.origin}/map/aed/${aedId}`;
 
 interface DetailViewProps {
   // provides the opening status, the same one the markers on the map show
@@ -46,6 +52,10 @@ interface DetailViewProps {
   getDirectionsUrl?: (lon: number, lat: number) => string;
   // on mobile, opens with all properties shown instead of only the tags
   defaultExpanded?: boolean;
+  // on mobile, opens the share menu for the link to the AED, the web share API by default
+  shareLink?: (url: string, title: string) => Promise<void>;
+  // the shared link to the AED, on the current site by default
+  getAedUrl?: (aedId: string | number) => string;
 }
 
 export const DetailView = ({
@@ -58,6 +68,8 @@ export const DetailView = ({
   compact = false,
   getDirectionsUrl = generateGoogleMapsWalkingLink,
   defaultExpanded = false,
+  shareLink,
+  getAedUrl = generateAedUrl,
 }: DetailViewProps) => {
   const { t } = useTranslation();
   const responsiveMobile = useMediaQuery({ maxWidth: 768 });
@@ -109,6 +121,18 @@ export const DetailView = ({
     (props['defibrillator:location'] as string) ?? props.description ?? props.operator ?? 'n/A';
 
   const directionsUrl = getDirectionsUrl(coords[0], coords[1]);
+  // like the edit button: in the action row on desktop, next to edit in the details on mobile
+  const shareButton = feature.id !== undefined && (
+    // keyed so the "copied" state resets when another AED is opened
+    <ShareAedButton
+      key={feature.id}
+      url={getAedUrl(feature.id)}
+      name={name}
+      isOpen={isOpen}
+      isMobile={isMobile}
+      shareLink={shareLink}
+    />
+  );
   const containerClass = cn(
     'z-10',
     'absolute',
@@ -227,38 +251,48 @@ export const DetailView = ({
           isOpen={isOpen}
           className={cn({ hidden: isMobile && !propsVisible })}
         />
-        {isMobile && onEdit && (
-          <IconButton
-            title={t('edit')}
-            icon={iconEditDarkGreen}
-            variant={isOpen ? 'tint' : 'secondary'}
-            onClick={onEdit}
-            className={cn('w-full', 'flex', 'justify-end', 'items-end', 'pt-1', {
+        {isMobile && (shareButton || onEdit) && (
+          <div
+            className={cn('w-full', 'flex', 'justify-end', 'items-end', 'gap-2', 'pt-1', {
               hidden: !propsVisible,
             })}
-          />
+          >
+            {shareButton}
+            {onEdit && (
+              <IconButton
+                title={t('edit')}
+                icon={iconEditDarkGreen}
+                variant={isOpen ? 'tint' : 'secondary'}
+                onClick={onEdit}
+                className="flex"
+              />
+            )}
+          </div>
         )}
       </div>
       <div className={cn('py-3 px-4 flex-shrink flex w-full items-end', !compact && '2xl:py-4')}>
         <div className="flex justify-between items-center w-full flex-row-reverse h-10">
-          {!isMobile && onEdit && (
-            <IconButton
-              title={t('edit')}
-              icon={iconEditDarkGreen}
-              variant={isOpen ? 'tint' : 'secondary'}
-              className="flex"
-              onClick={onEdit}
-            />
-          )}
-          {isMobile && (
-            <Button
-              className="pe-0"
-              variant="secondary"
-              onClick={() => setPropsVisible(s => !s)}
-            >
-              {propsVisible ? t('hide') : t('details')}
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {!isMobile && shareButton}
+            {!isMobile && onEdit && (
+              <IconButton
+                title={t('edit')}
+                icon={iconEditDarkGreen}
+                variant={isOpen ? 'tint' : 'secondary'}
+                className="flex"
+                onClick={onEdit}
+              />
+            )}
+            {isMobile && (
+              <Button
+                className="pe-0"
+                variant="secondary"
+                onClick={() => setPropsVisible(s => !s)}
+              >
+                {propsVisible ? t('hide') : t('details')}
+              </Button>
+            )}
+          </div>
           {isOpen && (
             <a href={directionsUrl} target="_blank">
               <Button variant="primary" icon={iconNavigationWhite}>

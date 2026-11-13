@@ -2,6 +2,8 @@
 using DefikarteBackend.Model;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using System.Net;
+using System.Text.RegularExpressions;
 
 namespace DefikarteBackend.OsmOverpassApi
 {
@@ -26,7 +28,7 @@ namespace DefikarteBackend.OsmOverpassApi
             {
                 Method = HttpMethod.Post,
                 Content = new StringContent(
-                    "[out:json][timeout:25]; " +
+                    "[out:json][timeout:90]; " +
                     "(area[\"ISO3166-1\" = \"CH\"][admin_level = 2]; area[\"ISO3166-1\" = \"LI\"][admin_level = 2];)->.searchArea;" +
                     "(node[\"emergency\" = \"defibrillator\"](area.searchArea);" +
                     "way[\"emergency\" = \"defibrillator\"](area.searchArea);" +
@@ -36,26 +38,62 @@ namespace DefikarteBackend.OsmOverpassApi
                     ),
             };
 
+            HttpStatusCode? statusCode = null;
             try
             {
                 using var response = await _overpassHttpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+                statusCode = response.StatusCode;
                 response.EnsureSuccessStatusCode();
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var json = JObject.Parse(responseContent);
-                json.TryGetValue("elements", out var osmNodes);
-                var jArray = osmNodes as JArray;
-#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
-                List<OsmNode> result = jArray != null
-                    ? jArray.Select(x => x.ToObject<OsmNode>()).Where(node => node != null).ToList()
-                    : new List<OsmNode>();
-#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
-                return result;
+                return ParseResponse(responseContent);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Overpass request to {BaseAddress} failed", _overpassHttpClient.BaseAddress);
+                _logger.LogError(ex, "Overpass request to {BaseAddress} failed with status {StatusCode}", _overpassHttpClient.BaseAddress, (int?)statusCode);
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Parses an overpass response. Throws if the response is incomplete, so callers never replace valid cached data with it.
+        /// </summary>
+        public static IList<OsmNode> ParseResponse(string responseContent)
+        {
+            // Overpass answers rejected queries (rate limit, server busy) with an HTML page, often with HTTP 200.
+            if (!responseContent.TrimStart().StartsWith('{'))
+            {
+                throw new InvalidOperationException($"Overpass response is not JSON: {ToSnippet(responseContent)}");
+            }
+
+            var json = JObject.Parse(responseContent);
+
+            // Overpass returns HTTP 200 with a remark on runtime errors (timeout, out of memory). Elements are then empty or partial.
+            if (json.TryGetValue("remark", out var remark))
+            {
+                throw new InvalidOperationException($"Overpass response contains a remark: {remark}");
+            }
+
+            if (!json.TryGetValue("elements", out var osmNodes) || osmNodes is not JArray jArray)
+            {
+                throw new InvalidOperationException("Overpass response contains no elements.");
+            }
+
+#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
+            List<OsmNode> result = jArray.Select(x => x.ToObject<OsmNode>()).Where(node => node != null).ToList();
+#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
+            if (result.Count == 0)
+            {
+                throw new InvalidOperationException("Overpass response contains no elements.");
+            }
+
+            return result;
+        }
+
+        private static string ToSnippet(string content)
+        {
+            var text = Regex.Replace(content, "<[^>]*>", " ");
+            text = Regex.Replace(text, @"\s+", " ").Trim();
+            return text.Length > 500 ? text[..500] : text;
         }
     }
 }

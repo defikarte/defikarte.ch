@@ -13,6 +13,8 @@ import imageDefikartePartnerProcamed from '../../assets/landingpages/unterstuetz
 import imageDefikartePartnerResqpro from '../../assets/landingpages/unterstuetzung/defikarte-partner-resqpro.jpg';
 import imageDefikartePartnerSinoma from '../../assets/landingpages/unterstuetzung/defikarte-partner-sinoma.jpg';
 import imageDefikartePartnerSirmed from '../../assets/landingpages/unterstuetzung/defikarte-partner-sirmed.svg';
+import imageDefikartePartnerSmartpeak from '../../assets/landingpages/unterstuetzung/defikarte-partner-smartpeak.svg';
+import imageDefikartePartnerSurevive from '../../assets/landingpages/unterstuetzung/defikarte-partner-surevive.jpg';
 import imageDefikartePartnerSusv from '../../assets/landingpages/unterstuetzung/defikarte-partner-susv.svg';
 import imageDefikarteUnterstuetzungSackmesser from '../../assets/landingpages/unterstuetzung/defikarte-unterstuetzung-sackmesser.jpg';
 import imageDefikarteUnterstuetzungTeaser from '../../assets/landingpages/unterstuetzung/defikarte-unterstuetzung-teaser.jpg';
@@ -137,11 +139,12 @@ export const Sponsors = () => {
           <SponsorCard src={imageDefikartePartnerByteworks} href="https://www.byteworks.ch/" />
           <SponsorCard src={imageDefikartePartnerSinoma} href="https://www.sinoma.ch/" />
           <SponsorCard src={imageDefikartePartnerKtsg} href="https://www.sg.ch/" />
+          <SponsorCard src={imageDefikartePartnerSurevive} href="https://www.surevive.ch/" />
         </div>
         <Text size="large" weight="bold" className="pt-32 pb-16">
           {t('SectionSponsorsSilver')}
         </Text>
-        <div className="flex gap-5 md:gap-9 justify-center flex-wrap">
+        <div className="flex gap-5 md:gap-9 justify-center flex-wrap max-w-3xl">
           <SponsorCard src={imageDefikartePartnerOctave} href="https://www.octave.com/" compact />
           <SponsorCard
             src={imageDefikartePartnerHostpoint}
@@ -152,6 +155,11 @@ export const Sponsors = () => {
           <SponsorCard
             src={imageDefikartePartnerAkkupoint}
             href="https://www.akkupoint.ch/"
+            compact
+          />
+          <SponsorCard
+            src={imageDefikartePartnerSmartpeak}
+            href="https://www.smartpeak.ch/"
             compact
           />
         </div>

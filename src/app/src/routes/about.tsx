@@ -1,5 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
+import AppConfiguration from '../configuration/app.configuration';
 import iconExternalLink from '../assets/icons/icon-external-link-middle-green.svg';
 import logo from '../assets/infos_page/defikarte-logo-hochformat.svg';
 import moodImage from '../assets/infos_page/defikarte-mood-image-01-de.jpg';
@@ -94,7 +95,7 @@ function RouteComponent() {
         <Divider />
 
         {/* Open Source */}
-        <section className="pb-8">
+        <section>
           <h2 className="text-2xl font-medium text-primary-100-green-04">
             {t('infos.openSource')}
           </h2>
@@ -107,6 +108,14 @@ function RouteComponent() {
             <ExternalLinkCard url="www.github.com/defikarte" />
           </div>
         </section>
+
+        {/* Deliberately unobtrusive: the status page is meant for support, not for everyone. */}
+        <Link
+          to="/status"
+          className="block pb-8 pt-10 text-center text-xs text-primary-60-green-04"
+        >
+          {t('statusPage.version')} {AppConfiguration.appVersion}
+        </Link>
       </div>
     </div>
   );

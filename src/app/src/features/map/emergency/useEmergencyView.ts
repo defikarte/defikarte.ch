@@ -1,6 +1,6 @@
 import { type MapInstance, type MapInteractionEvent, useBestAeds } from '@defikarte/shared';
 import { type Dispatch, type SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
-import { useEmergencyDefault } from '../../../hooks/useEmergencyDefault';
+import { useStartView } from '../../../hooks/useStartView';
 
 interface UseEmergencyViewProps {
   map: MapInstance | null;
@@ -27,9 +27,9 @@ export const useEmergencyView = ({
   selectedFeature,
   deselectAll,
 }: UseEmergencyViewProps) => {
-  const [emergencyDefault] = useEmergencyDefault();
-  // the setting turns the view on at app start, together with its GPS request (below)
-  const [isActive, setIsActive] = useState(() => emergencyDefault === 'on');
+  const [startView] = useStartView();
+  // the start view setting turns the view on at app start, together with its GPS request (below)
+  const [isActive, setIsActive] = useState(() => startView === 'emergency');
   // Here, not in the control: it unmounts during a create flow, the FAB stays collapsed until the
   // user locates themselves again.
   const [isFabCollapsed, setIsFabCollapsed] = useState(false);
@@ -71,10 +71,11 @@ export const useEmergencyView = ({
     }
 
     gpsStartedRef.current = true;
-    if (isActive) {
+    // the "my location" start view starts GPS on its own, without the view
+    if (isActive || startView === 'location') {
       setIsGpsActive(true);
     }
-  }, [isActive, setIsGpsActive]);
+  }, [isActive, startView, setIsGpsActive]);
 
   // GPS turned off with the search bar button also ends the view: without a position its AEDs
   // would be stale. (A failed request turns GPS off too, but the view stays to offer a retry.)

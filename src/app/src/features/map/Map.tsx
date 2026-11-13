@@ -28,6 +28,7 @@ import { useBaseLayer } from '../../hooks/useBaseLayer';
 import type { MapSearch } from '../../routes/index';
 import { CapacitorGeolocationService } from '../../services/capacitor-geolocation.service';
 import { getWalkingDirectionsUrl } from '../../services/navigation.service';
+import { getAedUrl, shareLink } from '../../services/share.service';
 import { EmergencyControl } from './emergency/EmergencyControl';
 import { useEmergencyView } from './emergency/useEmergencyView';
 
@@ -35,6 +36,7 @@ const mapConfig = {
   baseUrl: AppConfiguration.baseUrl,
   backendApiKey: AppConfiguration.backendApiKey,
   maptilerApiKey: AppConfiguration.maptilerApiKey,
+  clientId: AppConfiguration.clientId,
 };
 
 interface MapProps {
@@ -124,11 +126,12 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
       return;
     }
 
-    // (instead of only the 24h ones, which are a part of them)
+    // (the 24h ones and the other open ones)
+    const usableNow: FilterType[] = [FilterType.alwaysAvailable, FilterType.available];
     setActiveOverlays(prev =>
-      prev.includes(FilterType.available)
+      usableNow.every(filter => prev.includes(filter))
         ? prev
-        : [...prev.filter(x => x !== FilterType.alwaysAvailable), FilterType.available]
+        : [...prev.filter(x => !usableNow.includes(x)), ...usableNow]
     );
   }, [emergency.isActive, setActiveOverlays]);
 
@@ -306,6 +309,8 @@ const MapControls = ({ mapState, autoStartCreate, isActive }: MapControlsProps) 
               onClose={() => deselectAll()}
               onEdit={() => handleEditFeature(selectedFeature)}
               getDirectionsUrl={getWalkingDirectionsUrl}
+              shareLink={shareLink}
+              getAedUrl={getAedUrl}
               compact
             />
           )}

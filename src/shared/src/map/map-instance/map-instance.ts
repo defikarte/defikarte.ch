@@ -208,7 +208,9 @@ export class MapInstance {
   }
 
   public fitBounds(bounds: LngLatBoundsLike, padding: number | PaddingOptions = 10) {
-    this.mapInstance?.fitBounds(bounds, {
+    // not mapInstance: the first GPS fix at app start often arrives before the map has loaded, and
+    // useUserLocation zooms to it only once
+    this.map.fitBounds(bounds, {
       padding,
       maxZoom: 18,
     });

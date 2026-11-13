@@ -114,6 +114,7 @@ jobs:
       VITE_BACKEND_API: ${{ vars.BACKEND_API_URL }}
       VITE_BACKEND_API_KEY: ${{ secrets.BACKEND_API_KEY }}
       VITE_MAPTILER_API_KEY: ${{ secrets.MAPTILER_API_KEY }}
+      VITE_APP_VERSION: ${{ needs.prepare.outputs.version_name }}
     steps:
       - uses: actions/checkout@v4
 
@@ -199,6 +200,7 @@ jobs:
       VITE_BACKEND_API: ${{ vars.BACKEND_API_URL }}
       VITE_BACKEND_API_KEY: ${{ secrets.BACKEND_API_KEY }}
       VITE_MAPTILER_API_KEY: ${{ secrets.MAPTILER_API_KEY }}
+      VITE_APP_VERSION: ${{ needs.prepare.outputs.version_name }}
     steps:
       - uses: actions/checkout@v4
 

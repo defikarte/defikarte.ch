@@ -18,7 +18,9 @@ All paths are relative to `src/shared/src/map/`.
    when a status flips.
 4. **Filter change.** `useOverlays`: all statuses selected → `aedAll`, otherwise
    `setAedStatusFilter(statuses)` + `aedByStatus`. The `aedByStatus` source is built from
-   `openingHours.getData(statuses)` (in memory) and follows changes via `subscribeData` → `setData`.
+   `openingHours.getData(statuses)` (in memory) and follows changes via `subscribeData` → `setData`
+   (only when its AEDs really changed). The filters are groups that never overlap (`availabilityGroup`):
+   `ALWAYS_AVAILABLE` = open with `opening_hours=24/7`, `OH_STATUS.OPEN` = the other open ones, closed, unknown.
    Switching back to `aedAll` rebuilds its source from `openingHours.getAllAeds()`. Nothing is downloaded again.
 5. **Base-layer switch.** `setActiveBaseLayer(id)` → fetch or reuse the style → `applyActiveOverlaysOnStyle`
    merges every active overlay's `createSource()` + `createLayers()` into the style →
@@ -38,7 +40,7 @@ All paths are relative to `src/shared/src/map/`.
 | Layers | `aed-point.layer.ts` + `aed-availability-point.layer.ts` (symbol + circle halo; status via `OH_STATUS_EXPRESSION`; feature-state `selected`/`nearby`/`editing`), `aed-cluster.layer.ts` (step on `point_count`), `aed-create-point.layer.ts`, `user-location.layer.ts`, `osm.layer.ts` | |
 | Opening hours | `opening-hours/controller.ts`, `expressions.ts`, `feature-status.ts` (JS twin of the expression), `status.ts`, `compile*.ts`, worker files | Covered by `src/web/src/test/shared/opening-hours.test.ts` |
 | Interactions | `item-select`, `cluster-zoom`, `cursor-clickable`, `item-move` | All implement `InteractionLayer { on, off }` |
-| Hooks | `useOverlays`, `useFeatureSelection`, `useHandleCreateMode`, `useUserLocation`, `useMapEvents`, `create-aed-control/useNearbyAeds`, `detail-view/useAedStatus` | |
+| Hooks | `useOverlays`, `useFeatureSelection`, `useHandleCreateMode`, `useUserLocation`, `useMapEvents`, `useAedDeepLink`, `create-aed-control/useNearbyAeds`, `detail-view/useAedStatus` | `useAedDeepLink` selects the AED from `initialAedId` (web route `/map/aed/$aedId`) once the AEDs are in memory, no request |
 | Services | `aed-search.service.ts` (searches loaded source data), `nearby-aed.service.ts` (pure distance filter), `coordinate-calculation.service.ts` | Pure, so easy to test |
 
 AED feature properties are raw OSM tags: `opening_hours`, `access`, `indoor`, `level`,

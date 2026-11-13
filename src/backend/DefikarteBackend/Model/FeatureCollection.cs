@@ -7,6 +7,12 @@ namespace DefikarteBackend.Model
         public string Type { get; set; } = "FeatureCollection";
 
         public List<Feature> Features { get; set; } = [];
+
+        /// <summary>
+        /// UTC time of the last successful overpass sync. Not updated by local edits.
+        /// </summary>
+        [JsonProperty("timestamp", NullValueHandling = NullValueHandling.Ignore)]
+        public DateTime? Timestamp { get; set; }
     }
 
     public class FeatureCollection<TFeature>

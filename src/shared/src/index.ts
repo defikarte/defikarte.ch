@@ -2,6 +2,8 @@
 export { ApiClient } from './api/api-client';
 export {
   type ApiConfiguration,
+  type HealthReport,
+  type HealthStatus,
   type Notification,
   type NotificationHandler,
   type NotificationType,
@@ -30,6 +32,7 @@ export {
 } from './model/map';
 
 // Services
+export { type AedDataInfo, getAedDataInfo } from './services/aed-data-info.service';
 export { searchAed } from './services/aed-search.service';
 export {
   BEST_AED_COUNT,
@@ -126,9 +129,11 @@ export { usePrevious } from './map/hooks/usePrevious';
 export { useUserLocation } from './map/hooks/useUserLocation';
 export { useOnOutsideKeyDown } from './hooks/useOnOutsideKeyDown';
 export { useOnOutsidePointerDown } from './hooks/useOnOutsidePointerDown';
+export { useServiceStatus } from './hooks/useServiceStatus';
 
 // UI components
 export { Button } from './components/ui/button/Button';
+export { HealthTag } from './components/ui/health-tag/HealthTag';
 export { IconButton } from './components/ui/icon-button/IconButton';
 export { MapIconButton } from './components/ui/map-icon-button/MapIconButton';
 export { SelectField } from './components/ui/select-field/SelectField';

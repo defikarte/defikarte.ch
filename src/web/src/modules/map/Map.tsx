@@ -28,14 +28,17 @@ const mapConfig = {
   baseUrl: AppConfiguration.baseUrl,
   backendApiKey: AppConfiguration.backendApiKey,
   maptilerApiKey: AppConfiguration.maptilerApiKey,
+  clientId: AppConfiguration.clientId,
 };
 
 interface MapProps {
   isHash: boolean;
+  // OSM node id of an AED to open on load, see the /map route
+  aedId?: string;
   setIsFullscreen?: Dispatch<SetStateAction<boolean>>;
 }
 
-export const Map = ({ isHash, setIsFullscreen }: MapProps) => {
+export const Map = ({ isHash, aedId, setIsFullscreen }: MapProps) => {
   const { t } = useTranslation();
   const locationProvider = useMemo(() => new GeolocationService(), []);
   const [persistedBaseLayer, setPersistedBaseLayer] = usePersistenceState<string>(
@@ -49,6 +52,7 @@ export const Map = ({ isHash, setIsFullscreen }: MapProps) => {
       apiClient={backend}
       locationProvider={locationProvider}
       isHash={isHash}
+      initialAedId={aedId}
       persistedBaseLayer={persistedBaseLayer}
       onBaseLayerChange={setPersistedBaseLayer}
       splashScreen={<SplashScreen />}

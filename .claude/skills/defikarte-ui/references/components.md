@@ -11,7 +11,7 @@ each Figma sync, reconcile this file against the component sheet (node `877:134`
 | `IconButton` | `icon` (required), `variant: tint \| secondary \| white \| white-transparent`, `size: regular \| large` | Small round icon-only action inside content (close a toast or sheet, …) | — |
 | `MapIconButton` | `icon`, `active`, `variant: default \| gps-on \| gps-off`, `ref` | Round buttons floating on the map (filter, GPS, layer). `active` = toggled state | `map-icons-round` |
 | `Tag` | `icon` (required), `variant: primary \| tint \| secondary \| green \| orange \| red`, children | Small status pill with icon (e.g. "Indoor", "Private"). `green`/`orange`/`red` = open / unknown / closed (red + `icon-access-white` = not publicly accessible), matching the map marker colours (see `DetailView`) | — |
-| `TextField` | `label`, `type`, `tooltip?: TooltipData`, `error?`, + `<input>` attrs; `required` adds red `*` | Every single-line input. Works with react-hook-form `register()` | `textfield` |
+| `TextField` | `label`, `type`, `tooltip?: TooltipData`, `error?`, `hint?` (non-blocking note in green, hidden while there is an error), + `<input>` attrs; `required` adds red `*` | Every single-line input. Works with react-hook-form `register()` | `textfield` |
 | `SelectField` | `label`, `options: string[]` (i18n keys, translated inside), `tooltip?`, `error?` | Every dropdown or single choice from a short list in forms | — |
 | `Tooltip` | `tooltip?: { title, content, link? }` | "?" help popover next to a field label. Used internally by TextField/SelectField | — |
 
@@ -24,7 +24,7 @@ anything that closes on an outside click or Esc.
 |---|---|
 | `DetailView` + `property-list/FeaturePropsList`, `ItemProperty`, `AedPhoto` | Bottom sheet / side panel with a list of icon+label rows (Figma `Defi_Details`) |
 | `SearchControl` + `SearchResults/ResultItem` | Search bar with result list (Figma `Search bar Mobile`) |
-| `FilterControl` + `FilterItem` | Toggle list in a popover |
+| `FilterControl` + `FilterItem` | Toggle list in a popover; the filter groups never overlap (every AED is in exactly one) |
 | `CreateAedControl` + `AedForm` | Multi-step flow with a form built from TextField/SelectField |
 | `MapButtons` | Floating bottom action bar: icon-only on mobile, labelled from `md:` |
 | `PositionHint` | White pill/card banner with icon + text, expands into a list. Neutral vs. warning (orange border) state |

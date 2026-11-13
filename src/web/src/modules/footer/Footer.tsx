@@ -59,6 +59,13 @@ export const Footer = () => {
             GitHub
             <img src={iconExternalLinkMiddleGreen} className="ps-1" />
           </a>
+          <Link
+            key="status"
+            to="/status"
+            className="text-primary-100-white font-normal leading-[150%] text-sm cursor-pointer"
+          >
+            {t('statusPage.title')}
+          </Link>
         </div>
       </div>
       <div className="w-full flex flex-col md:flex-row items-start md:items-center gap-6 py-14 md:py-0">

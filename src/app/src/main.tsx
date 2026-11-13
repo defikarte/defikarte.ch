@@ -5,7 +5,7 @@ import './i18n/i18n.ts';
 import './app/styles/index.css';
 import { AppReadyProvider } from './hooks/useAppReady';
 import { BaseLayerProvider } from './hooks/useBaseLayer';
-import { EmergencyDefaultProvider } from './hooks/useEmergencyDefault';
+import { StartViewProvider } from './hooks/useStartView';
 import { routeTree } from './routeTree.gen';
 
 const router = createRouter({
@@ -27,9 +27,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AppReadyProvider>
       <BaseLayerProvider>
-        <EmergencyDefaultProvider>
+        <StartViewProvider>
           <RouterProvider router={router} />
-        </EmergencyDefaultProvider>
+        </StartViewProvider>
       </BaseLayerProvider>
     </AppReadyProvider>
   </StrictMode>

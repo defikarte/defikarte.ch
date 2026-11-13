@@ -22,8 +22,8 @@ import { createAedClusterLayers } from '../../layers/aed-cluster.layer';
 import { createAedSource } from '../../sources/aed.source';
 
 /**
- * Shows only the AEDs with one of the selected statuses right now (or always available, see
- * `ALWAYS_AVAILABLE`). They are a separate source
+ * Shows only the AEDs in one of the selected groups right now (the statuses, with the 24/7 ones
+ * split off, see `availabilityGroup`). They are a separate source
  * instead of a layer filter, so the clusters count only these AEDs as well.
  */
 export class AedStatusOverlayStrategy implements OverlayStrategy, RefreshableOverlayStrategy {

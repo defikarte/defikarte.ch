@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StatusRouteImport } from './routes/status'
 import { Route as SponsorsRouteImport } from './routes/sponsors'
 import { Route as ProjectRouteImport } from './routes/project'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -16,7 +17,13 @@ import { Route as MapRouteImport } from './routes/map'
 import { Route as KnowledgeRouteImport } from './routes/knowledge'
 import { Route as ImprintRouteImport } from './routes/imprint'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MapAedAedIdRouteImport } from './routes/map_.aed.$aedId'
 
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SponsorsRoute = SponsorsRouteImport.update({
   id: '/sponsors',
   path: '/sponsors',
@@ -52,6 +59,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MapAedAedIdRoute = MapAedAedIdRouteImport.update({
+  id: '/map_/aed/$aedId',
+  path: '/map/aed/$aedId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +73,8 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/project': typeof ProjectRoute
   '/sponsors': typeof SponsorsRoute
+  '/status': typeof StatusRoute
+  '/map/aed/$aedId': typeof MapAedAedIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +84,8 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/project': typeof ProjectRoute
   '/sponsors': typeof SponsorsRoute
+  '/status': typeof StatusRoute
+  '/map/aed/$aedId': typeof MapAedAedIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +96,8 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/project': typeof ProjectRoute
   '/sponsors': typeof SponsorsRoute
+  '/status': typeof StatusRoute
+  '/map_/aed/$aedId': typeof MapAedAedIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +109,8 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/project'
     | '/sponsors'
+    | '/status'
+    | '/map/aed/$aedId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +120,8 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/project'
     | '/sponsors'
+    | '/status'
+    | '/map/aed/$aedId'
   id:
     | '__root__'
     | '/'
@@ -109,6 +131,8 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/project'
     | '/sponsors'
+    | '/status'
+    | '/map_/aed/$aedId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,10 +143,19 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProjectRoute: typeof ProjectRoute
   SponsorsRoute: typeof SponsorsRoute
+  StatusRoute: typeof StatusRoute
+  MapAedAedIdRoute: typeof MapAedAedIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sponsors': {
       id: '/sponsors'
       path: '/sponsors'
@@ -172,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/map_/aed/$aedId': {
+      id: '/map_/aed/$aedId'
+      path: '/map/aed/$aedId'
+      fullPath: '/map/aed/$aedId'
+      preLoaderRoute: typeof MapAedAedIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,6 +223,8 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProjectRoute: ProjectRoute,
   SponsorsRoute: SponsorsRoute,
+  StatusRoute: StatusRoute,
+  MapAedAedIdRoute: MapAedAedIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -12,12 +12,6 @@ interface FilterControlProps {
   compact?: boolean;
 }
 
-// the 24h AEDs are a part of the available ones, so only one of the two is selected
-const exclusiveFilters: Partial<Record<FilterType, FilterType>> = {
-  [FilterType.available]: FilterType.alwaysAvailable,
-  [FilterType.alwaysAvailable]: FilterType.available,
-};
-
 export const FilterControl = ({
   ref,
   activeOverlays,
@@ -26,10 +20,11 @@ export const FilterControl = ({
 }: FilterControlProps & { ref?: React.RefObject<HTMLDivElement | null> }) => {
   const { t } = useTranslation();
 
-  // in the colours of the markers on the map, so the filters double as its legend
+  // in the colours of the markers on the map, so the filters double as its legend; the groups
+  // don't overlap, every AED is in exactly one of them
   const filters = [
-    { value: FilterType.available, label: t('availableNow'), icon: iconDefiGreen },
     { value: FilterType.alwaysAvailable, label: t('available24h'), icon: iconDefiGreen },
+    { value: FilterType.available, label: t('availableNowLimited'), icon: iconDefiGreen },
     { value: FilterType.notAvailable, label: t('notAvailable'), icon: iconDefiRed },
     { value: FilterType.unknown, label: t('availabilityUnknown'), icon: iconDefiOrange },
   ];
@@ -37,8 +32,7 @@ export const FilterControl = ({
   const onFilterChange = (e: React.ChangeEvent<HTMLInputElement>, value: FilterType) => {
     setActiveOverlays(active => {
       if (e.target.checked) {
-        const others = active.filter(x => x !== exclusiveFilters[value]);
-        return others.includes(value) ? others : [...others, value];
+        return active.includes(value) ? active : [...active, value];
       }
 
       // at least one status stays selected, so the map never shows no AEDs at all

@@ -5,6 +5,7 @@ import {
   type Map,
   type MapSourceDataEvent,
 } from 'maplibre-gl';
+import { setAedDataInfo } from '../../services/aed-data-info.service';
 import { OH_STATUS_STATE } from '../map-instance/configuration/constants';
 import { CachedCompiler, type ScheduleCompiler, WorkerCompiler } from './compiler';
 import { type AvailabilityFilter, matchesAvailabilityFilters } from './feature-status';
@@ -72,6 +73,8 @@ export class OpeningHoursController {
     DataListener,
     readonly AvailabilityFilter[]
   >();
+  // the AEDs each data listener got last, so an unchanged set is not set (and clustered) again
+  private readonly lastData = new globalThis.Map<DataListener, Feature[]>();
   private readonly statusListeners = new Set<StatusListener>();
 
   // a newer compilation supersedes older ones still running
@@ -137,6 +140,7 @@ export class OpeningHoursController {
 
     return () => {
       this.dataListeners.delete(listener);
+      this.lastData.delete(listener);
     };
   }
 
@@ -198,6 +202,7 @@ export class OpeningHoursController {
 
     this.client?.terminate();
     this.dataListeners.clear();
+    this.lastData.clear();
     this.statusListeners.clear();
   }
 
@@ -227,6 +232,9 @@ export class OpeningHoursController {
 
     // a filtered source only holds part of the AEDs
     const isFiltered = !!(source.serialize() as GeoJSONSourceSpecification).filter;
+    if (!isFiltered) {
+      setAedDataInfo(data);
+    }
     this.addData(data.features, !isFiltered);
   }
 
@@ -240,6 +248,7 @@ export class OpeningHoursController {
         const url = new URL(this.getDataUrl(), window.location.href).href;
         const data = await this.client!.request({ type: 'load', url, cache });
         if (!this.disposed) {
+          setAedDataInfo(data);
           this.addData(data.features, true);
         }
       } catch (error) {
@@ -371,9 +380,21 @@ export class OpeningHoursController {
     const listeners = listener ? [listener] : [...this.dataListeners.keys()];
     listeners.forEach(current => {
       const data = this.getData(this.dataListeners.get(current) ?? []);
-      if (data) {
-        current(data);
+      if (!data) {
+        return;
       }
+
+      // e.g. the 24h AEDs, or a status change of AEDs the listener does not show
+      const last = this.lastData.get(current);
+      if (
+        last?.length === data.features.length &&
+        last.every((feature, i) => feature === data.features[i])
+      ) {
+        return;
+      }
+
+      this.lastData.set(current, data.features);
+      current(data);
     });
   }
 }

@@ -20,6 +20,11 @@ export const getBackTarget = (pathname: string): string | null => {
     return '/settings';
   }
 
+  // the status page is opened from the version line on About
+  if (pathname === '/status') {
+    return '/about';
+  }
+
   return pathname === '/' ? null : '/';
 };
 
