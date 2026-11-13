@@ -116,22 +116,38 @@ cd DefikarteBackend
 func start                        # run the functions locally (http://localhost:7071/api)
 ```
 
-The backend reads its settings from `src/backend/DefikarteBackend/local.settings.json` (not committed).
-It needs `AzureWebJobsStorage` (Azure Storage connection string, or Azurite locally), the Overpass/OSM
-settings (`OVERPASS_URL`, `OVERPASS_SYNC_SCHEDULE` e.g. `0 */15 * * * *`, `OSM_API_URL`, `OSM_USER_NAME`, `OSM_API_TOKEN`), the blob names
-(`BLOB_STORAGE_CONTAINER_NAME`, `BLOB_STORAGE_BLOB_NAME`, `BLOB_STORAGE_BLOB_NAME_V2`,
-`BLOB_STORAGE_BLOB_NAME_LOCAL_V2`, `BLOB_STORAGE_SWISSBOUNDARIES`) and the address search
-(`ADDRESS_SEARCH_URL`, `MAPTILER_API_KEY`); see
+The backend reads its settings from `src/backend/DefikarteBackend/local.settings.json` (not committed). Copy
+[local.settings.template.json](src/backend/DefikarteBackend/local.settings.template.json) and fill in the empty
+values. On Azure the same names are app settings (one set per slot). All settings are read in
 [ServiceConfiguration.cs](src/backend/DefikarteBackend/Configuration/ServiceConfiguration.cs).
-Reporting an AED as gone and the rate limit use Table Storage in the same storage account, with a table per
-slot like the blob container: `AED_REMOVALS_TABLE_NAME` (default `aedremovals`) and `RATE_LIMIT_TABLE_NAME`
-(default `ratelimits`). `AED_REMOVAL_DELAY_HOURS` (default 24, 0 deletes at once) is the time between the
-report and the delete in OSM; the AED is hidden on the map right away. `RATE_LIMIT_HASH_KEY` is the secret for
-the HMAC of install ids and IPs, without it the rate limit is off. `ADMIN_API_KEY` protects the review
-endpoints `GET /api/v3/aed-removals` and `POST /api/v3/aed-removals/{id}/verify|cancel|restore`, which are
-called with the header `x-admin-key` (without a key they are disabled). The limits per endpoint are in
-[RateLimit.cs](src/backend/DefikarteBackend/Model/RateLimit.cs). The clients send `x-defikarte-install-id` with
-the calls that change data, so CORS has to allow that header.
+
+| Setting | Required | Default / example | Purpose |
+|---|---|---|---|
+| `AzureWebJobsStorage` | yes | `UseDevelopmentStorage=true` (Azurite) | Storage account connection string for blobs and tables |
+| `OVERPASS_URL` | yes | `https://overpass.osm.ch/api/interpreter` | Overpass API to load the AEDs from |
+| `OVERPASS_SYNC_SCHEDULE` | yes | `0 */15 * * * *` | NCRONTAB schedule of the sync, differs per slot |
+| `OSM_API_URL` | yes | `https://master.apis.dev.openstreetmap.org/api/` | OSM API for creating, changing and deleting AEDs (dev server here) |
+| `OSM_USER_NAME` | yes | empty | OSM account that writes the changes |
+| `OSM_API_TOKEN` | yes | empty | OAuth token of that account (secret) |
+| `BLOB_STORAGE_CONTAINER_NAME` | yes | `defikarte-cache-local` | Blob container, one per slot |
+| `BLOB_STORAGE_BLOB_NAME` | yes | `osm-cache-local` | AED cache, v1 |
+| `BLOB_STORAGE_BLOB_NAME_V2` | yes | `osm-cache-v2` | AED cache, v2 |
+| `BLOB_STORAGE_BLOB_NAME_LOCAL_V2` | yes | `local-cache-v2` | AED cache with the local data, v2 |
+| `BLOB_STORAGE_SWISSBOUNDARIES` | yes | `swissboundaries3d_2024-01_4326.geojson` | Swiss boundaries GeoJSON blob |
+| `BLOB_STORAGE_SYNC_STATUS_NAME` | no | `sync-status.json` | Blob next to the AED cache with the sync status |
+| `ADDRESS_SEARCH_URL` | yes | `https://api3.geo.admin.ch/rest/services/api/SearchServer` | Address search endpoint |
+| `MAPTILER_API_KEY` | yes | empty | MapTiler key for the address search (secret) |
+| `AED_REMOVAL_DELAY_HOURS` | no | `24` | Time between a removal report and the delete in OSM, `0` deletes at once. The AED is hidden on the map right away |
+| `AED_REMOVALS_TABLE_NAME` | no | `aedremovals` | Table of the removal requests, one per slot |
+| `ADMIN_API_KEY` | no | empty | Key for the review endpoints (header `x-admin-key`), without it they are disabled (secret) |
+| `RATE_LIMIT_HASH_KEY` | no | empty | Secret for the HMAC of install ids and IPs, without it the rate limit is off (secret) |
+| `RATE_LIMIT_TABLE_NAME` | no | `ratelimits` | Table of the rate limit counters, one per slot |
+| `HEALTH_MAX_DATA_AGE_MINUTES` | no | `60` | Health check: maximum age of the AED data, set it per slot to match the sync schedule |
+| `HEALTH_MIN_AED_COUNT` | no | `10000` | Health check: minimum number of AEDs |
+
+The review endpoints are `GET /api/v3/aed-removals` and `POST /api/v3/aed-removals/{id}/verify|cancel|restore`.
+The limits per endpoint are in [RateLimit.cs](src/backend/DefikarteBackend/Model/RateLimit.cs). The clients send
+`x-defikarte-install-id` with the calls that change data, so CORS (`Host.CORS`) has to allow that header.
 The current API is `v3` (`/api/v3/aed`, `/api/v3/search/{searchText}`), and the app and web point to
 it via `VITE_BACKEND_API` in their `.env`.
 

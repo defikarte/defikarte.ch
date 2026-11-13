@@ -341,26 +341,39 @@ export const AedForm = ({
               {...register('access')}
               disabled={isSubmitting}
             />
-          </div>
-          <div className="pt-4 pb-4 px-4 flex-shrink flex w-full gap-2 justify-end items-end self-end">
-            {/* only an existing AED can be reported as permanently gone */}
+            {/* only an existing AED can be reported as permanently gone; small screens and the compact panel: end of the scroll, otherwise next to Save */}
             {id && (
               <Button
                 type="button"
                 variant="secondary"
                 size="large"
-                className={cn('w-full', { 'md:w-fit': !compact })}
+                className={cn('w-full', { 'md:hidden': !compact })}
                 onClick={() => setIsRemoving(true)}
                 disabled={isSubmitting}
               >
                 {t('removeAed')}
               </Button>
             )}
+          </div>
+          <div className="pt-4 pb-4 px-4 flex-shrink flex w-full gap-2 items-center self-end">
+            {id && !compact && (
+              <span className="hidden md:block shrink-0">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="large"
+                  onClick={() => setIsRemoving(true)}
+                  disabled={isSubmitting}
+                >
+                  {t('removeAed')}
+                </Button>
+              </span>
+            )}
             <Button
               type="submit"
               variant="primary"
               size="large"
-              className={cn('w-full', { 'md:w-fit': !compact })}
+              className={cn('w-full ml-auto', { 'md:w-fit': !compact })}
               disabled={isSubmitting}
             >
               {t('submit')}

@@ -1,0 +1,31 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "FUNCTIONS_EXTENSION_VERSION": "~4",
+
+    "OVERPASS_URL": "https://overpass.osm.ch/api/interpreter",
+    "OVERPASS_SYNC_SCHEDULE": "0 */15 * * * *",
+    "OSM_API_URL": "https://master.apis.dev.openstreetmap.org/api/",
+    "OSM_USER_NAME": "",
+    "OSM_API_TOKEN": "",
+
+    "BLOB_STORAGE_CONTAINER_NAME": "defikarte-cache-local",
+    "BLOB_STORAGE_BLOB_NAME": "osm-cache-local",
+    "BLOB_STORAGE_BLOB_NAME_V2": "osm-cache-v2",
+    "BLOB_STORAGE_BLOB_NAME_LOCAL_V2": "local-cache-v2",
+    "BLOB_STORAGE_SWISSBOUNDARIES": "swissboundaries3d_2024-01_4326.geojson",
+
+    "ADDRESS_SEARCH_URL": "https://api3.geo.admin.ch/rest/services/api/SearchServer",
+    "MAPTILER_API_KEY": "",
+
+    "AED_REMOVAL_DELAY_HOURS": "24",
+    "ADMIN_API_KEY": "",
+    "RATE_LIMIT_HASH_KEY": ""
+  },
+  "Host": {
+    "CORS": "http://localhost:5173,http://localhost:5174",
+    "CORSCredentials": false
+  }
+}
