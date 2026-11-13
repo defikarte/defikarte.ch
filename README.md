@@ -123,6 +123,15 @@ settings (`OVERPASS_URL`, `OVERPASS_SYNC_SCHEDULE` e.g. `0 */15 * * * *`, `OSM_A
 `BLOB_STORAGE_BLOB_NAME_LOCAL_V2`, `BLOB_STORAGE_SWISSBOUNDARIES`) and the address search
 (`ADDRESS_SEARCH_URL`, `MAPTILER_API_KEY`); see
 [ServiceConfiguration.cs](src/backend/DefikarteBackend/Configuration/ServiceConfiguration.cs).
+Reporting an AED as gone and the rate limit use Table Storage in the same storage account, with a table per
+slot like the blob container: `AED_REMOVALS_TABLE_NAME` (default `aedremovals`) and `RATE_LIMIT_TABLE_NAME`
+(default `ratelimits`). `AED_REMOVAL_DELAY_HOURS` (default 24, 0 deletes at once) is the time between the
+report and the delete in OSM; the AED is hidden on the map right away. `RATE_LIMIT_HASH_KEY` is the secret for
+the HMAC of install ids and IPs, without it the rate limit is off. `ADMIN_API_KEY` protects the review
+endpoints `GET /api/v3/aed-removals` and `POST /api/v3/aed-removals/{id}/verify|cancel|restore`, which are
+called with the header `x-admin-key` (without a key they are disabled). The limits per endpoint are in
+[RateLimit.cs](src/backend/DefikarteBackend/Model/RateLimit.cs). The clients send `x-defikarte-install-id` with
+the calls that change data, so CORS has to allow that header.
 The current API is `v3` (`/api/v3/aed`, `/api/v3/search/{searchText}`), and the app and web point to
 it via `VITE_BACKEND_API` in their `.env`.
 

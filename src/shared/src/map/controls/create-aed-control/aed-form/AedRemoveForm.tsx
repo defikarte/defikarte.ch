@@ -1,18 +1,14 @@
-import axios from 'axios';
 import cn from 'classnames';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { type ApiClient } from '../../../../api/api-client';
+import { isRateLimitError } from '../../../../api/rate-limit';
 import iconWarningCircleOrangeM from '../../../../assets/icons/icon-warning-circle-orange-m.svg';
 import { Button } from '../../../../components/ui/button/Button';
 import { SelectField } from '../../../../components/ui/select-field/SelectField';
 import { TextField } from '../../../../components/ui/text-field/TextField';
 import { AED_REMOVAL_REASONS, type AedRemovalData } from '../../../../model/aed';
 import { type NotificationHandler } from '../../../../model/common';
-
-// The rate limit answers with 429, shown translated instead of the technical axios message.
-const isRateLimited = (error: unknown): boolean =>
-  axios.isAxiosError(error) && error.response?.status === 429;
 
 interface AedRemoveFormProps {
   id: string;
@@ -61,7 +57,7 @@ export const AedRemoveForm = ({
       onNotify({
         type: 'error',
         title: t('removeAedErrorTitle'),
-        message: isRateLimited(error)
+        message: isRateLimitError(error)
           ? t('tooManyRequests')
           : error instanceof Error
             ? error.message

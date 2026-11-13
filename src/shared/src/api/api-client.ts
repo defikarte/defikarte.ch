@@ -2,6 +2,13 @@ import axios, { type AxiosInstance } from 'axios';
 import type { FeatureCollection } from 'geojson';
 import type { AedRemovalData } from '../model/aed';
 import type { ApiConfiguration, HealthReport, RequestOptions } from '../model/common';
+import { getInstallId, INSTALL_ID_HEADER } from '../services/install-id.service';
+
+// only the calls that change data send it, the backend limits them per install
+const getInstallIdHeaders = () => {
+  const installId = getInstallId();
+  return installId ? { [INSTALL_ID_HEADER]: installId } : undefined;
+};
 
 export class ApiClient {
   private axiosInstance: AxiosInstance;
@@ -80,10 +87,11 @@ export class ApiClient {
   };
 
   public postAedData = async (data: FeatureCollection) => {
-    return await this.axiosInstance.post<FeatureCollection>('v3/aed', {
-      ...data,
-      source: 'local_knowledge, defikarte.ch',
-    });
+    return await this.axiosInstance.post<FeatureCollection>(
+      'v3/aed',
+      { ...data, source: 'local_knowledge, defikarte.ch' },
+      { headers: getInstallIdHeaders() }
+    );
   };
 
   public putAedData = async (data: FeatureCollection) => {
@@ -91,10 +99,11 @@ export class ApiClient {
       throw new Error('AED data must have an id to be updated');
     }
 
-    return await this.axiosInstance.put<FeatureCollection>(`v3/aed/${data.features[0].id}`, {
-      ...data,
-      source: 'local_knowledge, defikarte.ch',
-    });
+    return await this.axiosInstance.put<FeatureCollection>(
+      `v3/aed/${data.features[0].id}`,
+      { ...data, source: 'local_knowledge, defikarte.ch' },
+      { headers: getInstallIdHeaders() }
+    );
   };
 
   /**
@@ -102,6 +111,8 @@ export class ApiClient {
    * after a delay, unless an admin cancels the report.
    */
   public requestAedRemoval = async (id: string, data: AedRemovalData) => {
-    return await this.axiosInstance.post(`v3/aed/${id}/removal`, data);
+    return await this.axiosInstance.post(`v3/aed/${id}/removal`, data, {
+      headers: getInstallIdHeaders(),
+    });
   };
 }

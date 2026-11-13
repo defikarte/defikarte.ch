@@ -17,6 +17,7 @@ import {
   isPhoneNumberValid,
 } from '../../../../services/custom-validation.service';
 import { type MapInstance } from '../../../map-instance/map-instance';
+import { isRateLimitError } from '../../../../api/rate-limit';
 import { AedRemoveForm } from './AedRemoveForm';
 
 interface AedFormProps {
@@ -111,7 +112,11 @@ export const AedForm = ({
       onNotify({
         type: 'error',
         title: t('createAedErrorTitle'),
-        message: error instanceof Error ? error.message : t('createAedErrorMessage'),
+        message: isRateLimitError(error)
+          ? t('tooManyRequests')
+          : error instanceof Error
+            ? error.message
+            : t('createAedErrorMessage'),
       });
     }
   };

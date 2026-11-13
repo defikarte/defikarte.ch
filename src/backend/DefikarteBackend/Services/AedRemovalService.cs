@@ -41,7 +41,7 @@ namespace DefikarteBackend.Services
             _logger = logger;
         }
 
-        public async Task<AedRemovalResult> RequestAsync(long nodeId, AedRemovalRequest request, string clientId)
+        public async Task<AedRemovalResult> RequestAsync(long nodeId, AedRemovalRequest request, string clientId, string? installIdHash = null, string? ipHash = null)
         {
             var existing = await _repository.FindPendingByNodeAsync(nodeId).ConfigureAwait(false);
             if (existing != null)
@@ -75,6 +75,8 @@ namespace DefikarteBackend.Services
                 Comment = request.Comment,
                 Reporter = request.Reporter ?? string.Empty,
                 ClientId = clientId,
+                InstallIdHash = installIdHash,
+                IpHash = ipHash,
                 RequestedAt = now,
                 ApplyAfter = now.AddHours(_config.AedRemovalDelayHours),
                 Snapshot = SerializeSnapshot(node),

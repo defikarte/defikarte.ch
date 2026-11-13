@@ -39,5 +39,10 @@
 
         /// <summary>Secret for the admin endpoints. Empty disables them.</summary>
         string AdminApiKey { get; }
+
+        string RateLimitTableName { get; }
+
+        /// <summary>Secret for the HMAC of install ids and IPs in the rate limit. Empty disables the rate limit.</summary>
+        string RateLimitHashKey { get; }
     }
 }

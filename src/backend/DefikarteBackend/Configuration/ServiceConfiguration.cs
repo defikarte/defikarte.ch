@@ -41,6 +41,10 @@ namespace DefikarteBackend.Configuration
 
         public string AdminApiKey { get; private set; } = string.Empty;
 
+        public string RateLimitTableName { get; private set; } = "ratelimits";
+
+        public string RateLimitHashKey { get; private set; } = string.Empty;
+
         public static ServiceConfiguration Initialize(IConfigurationRoot configuration)
         {
             return new ServiceConfiguration
@@ -63,6 +67,8 @@ namespace DefikarteBackend.Configuration
                 AedRemovalDelayHours = int.TryParse(configuration["AED_REMOVAL_DELAY_HOURS"], out var delay) && delay >= 0 ? delay : 24,
                 AedRemovalsTableName = configuration.GetValue<string>("AED_REMOVALS_TABLE_NAME") ?? "aedremovals",
                 AdminApiKey = configuration.GetValue<string>("ADMIN_API_KEY") ?? string.Empty,
+                RateLimitTableName = configuration.GetValue<string>("RATE_LIMIT_TABLE_NAME") ?? "ratelimits",
+                RateLimitHashKey = configuration.GetValue<string>("RATE_LIMIT_HASH_KEY") ?? string.Empty,
             };
         }
 

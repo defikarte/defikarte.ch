@@ -66,6 +66,12 @@ namespace DefikarteBackend.Model
         /// <summary>The <c>x-functions-clientid</c> of the request.</summary>
         public string ClientId { get; set; } = string.Empty;
 
+        /// <summary>HMAC of the install id of the caller, null for old clients. Never the raw id.</summary>
+        public string? InstallIdHash { get; set; }
+
+        /// <summary>HMAC of the IP of the caller. Never the raw IP.</summary>
+        public string? IpHash { get; set; }
+
         public DateTimeOffset RequestedAt { get; set; }
 
         public DateTimeOffset ApplyAfter { get; set; }

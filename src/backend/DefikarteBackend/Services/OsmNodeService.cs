@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using OsmSharp;
 using OsmSharp.IO.API;
 using OsmSharp.Tags;
+using System.Net;
 
 namespace DefikarteBackend.Services
 {
@@ -22,7 +23,15 @@ namespace DefikarteBackend.Services
 
         public async Task<Node?> GetNodeAsync(long id)
         {
-            return await CreateClient().GetNode(id).ConfigureAwait(false);
+            try
+            {
+                return await CreateClient().GetNode(id).ConfigureAwait(false);
+            }
+            catch (OsmApiException ex) when (ex.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Gone)
+            {
+                // the client throws for a node that does not exist or is deleted
+                return null;
+            }
         }
 
         public async Task<(long ChangesetId, long Version)> DeleteNodeAsync(Node node, string comment)

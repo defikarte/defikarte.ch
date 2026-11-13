@@ -339,15 +339,6 @@ namespace DefikarteBackend.Tests
             Tags = new TagsCollection { new Tag("emergency", emergency), new Tag("defibrillator:location", "lobby") },
         };
 
-        private sealed class FakeTimeProvider(DateTimeOffset start) : TimeProvider
-        {
-            private DateTimeOffset _now = start;
-
-            public override DateTimeOffset GetUtcNow() => _now;
-
-            public void Advance(TimeSpan by) => _now += by;
-        }
-
         /// <summary>Behaves like Table Storage: rows are copies and an update needs the current ETag.</summary>
         private sealed class InMemoryAedRemovalRepository : IAedRemovalRepository
         {

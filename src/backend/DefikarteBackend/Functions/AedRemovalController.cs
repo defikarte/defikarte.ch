@@ -1,5 +1,6 @@
 using DefikarteBackend.Helpers;
 using DefikarteBackend.Interfaces;
+using DefikarteBackend.Middleware;
 using DefikarteBackend.Model;
 using DefikarteBackend.Validation;
 using Microsoft.AspNetCore.Http;
@@ -64,7 +65,9 @@ namespace DefikarteBackend.Functions
                 }
 
                 var clientId = req.Headers["x-functions-clientid"].ToString();
-                var result = await _service.RequestAsync(id, validationResult.Value, clientId).ConfigureAwait(false);
+                var installIdHash = req.HttpContext.Items[RateLimitMiddleware.InstallIdHashItem] as string;
+                var ipHash = req.HttpContext.Items[RateLimitMiddleware.IpHashItem] as string;
+                var result = await _service.RequestAsync(id, validationResult.Value, clientId, installIdHash, ipHash).ConfigureAwait(false);
                 return result.Outcome switch
                 {
                     AedRemovalOutcome.Done => new ObjectResult(new { applyAfter = result.Removal?.ApplyAfter }) { StatusCode = StatusCodes.Status202Accepted },
@@ -87,7 +90,7 @@ namespace DefikarteBackend.Functions
 
         [Function("AED_REMOVALS_ADMIN_LIST")]
         public async Task<IActionResult> List(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "admin/removals")] HttpRequest req)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v3/aed-removals")] HttpRequest req)
         {
             if (!IsAdmin(req))
             {
@@ -106,21 +109,21 @@ namespace DefikarteBackend.Functions
 
         [Function("AED_REMOVALS_ADMIN_VERIFY")]
         public Task<IActionResult> Verify(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "admin/removals/{id}/verify")] HttpRequest req, string id)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "v3/aed-removals/{id}/verify")] HttpRequest req, string id)
         {
             return RunAdminAsync(req, () => _service.VerifyAsync(id, req.Headers["x-admin-user"].ToString() is { Length: > 0 } user ? user : "admin"));
         }
 
         [Function("AED_REMOVALS_ADMIN_CANCEL")]
         public Task<IActionResult> Cancel(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "admin/removals/{id}/cancel")] HttpRequest req, string id)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "v3/aed-removals/{id}/cancel")] HttpRequest req, string id)
         {
             return RunAdminAsync(req, () => _service.CancelAsync(id));
         }
 
         [Function("AED_REMOVALS_ADMIN_RESTORE")]
         public Task<IActionResult> Restore(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "admin/removals/{id}/restore")] HttpRequest req, string id)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "v3/aed-removals/{id}/restore")] HttpRequest req, string id)
         {
             return RunAdminAsync(req, () => _service.RestoreAsync(id));
         }
@@ -150,7 +153,7 @@ namespace DefikarteBackend.Functions
             }
         }
 
-        // The admin endpoints answer 404 without a valid key, so they do not show up for others. No key configured: disabled.
+        // (The route cannot start with admin, that is reserved by the functions host.) without a valid key, so they do not show up for others. No key configured: disabled.
         private bool IsAdmin(HttpRequest req)
         {
             var expected = _config.AdminApiKey;

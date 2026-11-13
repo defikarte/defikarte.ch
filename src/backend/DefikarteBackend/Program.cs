@@ -38,6 +38,9 @@ internal class Program
         var removalsTable = new TableClient(serviceConfig.BlobStorageConnectionString, serviceConfig.AedRemovalsTableName);
         removalsTable.CreateIfNotExists();
 
+        var rateLimitTable = new TableClient(serviceConfig.BlobStorageConnectionString, serviceConfig.RateLimitTableName);
+        rateLimitTable.CreateIfNotExists();
+
         var host = new HostBuilder()
             .ConfigureFunctionsWebApplication(b =>
             {
@@ -49,6 +52,8 @@ internal class Program
                     }
                 });
                 b.UseMiddleware<RequestLoggingMiddleware>();
+                // after the logging, so a rejected call (429) is logged as well
+                b.UseWhen<RateLimitMiddleware>(RateLimitMiddleware.IsLimited);
             })
             .ConfigureServices(services =>
             {
@@ -93,6 +98,8 @@ internal class Program
 
                 services.AddSingleton(TimeProvider.System);
                 services.AddSingleton(removalsTable);
+                services.AddSingleton<IRateLimitRepository>(s => new TableStorageRateLimitRepository(rateLimitTable, s.GetRequiredService<TimeProvider>()));
+                services.AddSingleton<IRateLimitService, RateLimitService>();
                 services.AddSingleton<IAedRemovalRepository, TableStorageAedRemovalRepository>();
                 services.AddSingleton<IOsmNodeService, OsmNodeService>();
                 services.AddTransient<IAedRemovalService, AedRemovalService>();

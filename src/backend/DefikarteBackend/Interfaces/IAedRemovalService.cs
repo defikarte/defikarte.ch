@@ -19,7 +19,7 @@ namespace DefikarteBackend.Interfaces
         /// Stores the request and hides the AED on the map. The delete in OSM follows after the configured delay.
         /// Returns the existing request if the AED already has a pending one.
         /// </summary>
-        Task<AedRemovalResult> RequestAsync(long nodeId, AedRemovalRequest request, string clientId);
+        Task<AedRemovalResult> RequestAsync(long nodeId, AedRemovalRequest request, string clientId, string? installIdHash = null, string? ipHash = null);
 
         /// <summary>Deletes all pending removals whose delay is over in OSM. Returns how many were deleted.</summary>
         Task<int> ApplyDueAsync();

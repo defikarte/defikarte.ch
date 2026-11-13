@@ -52,6 +52,7 @@ export {
   type NearbyAed,
 } from './services/nearby-aed.service';
 export { isOpeningHourValid } from './services/opening-hours.service';
+export { getInstallId, INSTALL_ID_HEADER } from './services/install-id.service';
 export { isMobileAgent } from './services/user-agent.service';
 
 // Map instance & configuration
